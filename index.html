@@ -69,6 +69,19 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .soon .ss{font-size:12.5px;}
 
 .note{background:#fff;border:1px solid var(--warm);border-left:4px solid var(--tan);border-radius:6px;padding:10px 14px;font-size:11.5px;color:var(--stone);margin-bottom:20px;line-height:1.5;}
+
+/* Candado por área */
+.lockOverlay{display:none;position:fixed;inset:0;background:rgba(14,59,54,.55);z-index:999;align-items:center;justify-content:center;padding:20px;}
+.lockBox{background:#fff;border-radius:12px;padding:28px 26px;max-width:340px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.25);}
+.lockTitle{font-size:16px;font-weight:700;color:var(--sage-dark);margin-bottom:2px;}
+.lockSub{font-size:12.5px;color:var(--stone);margin-bottom:16px;}
+.lockInput{width:100%;font-family:inherit;font-size:15px;border:1.5px solid var(--warm);border-radius:6px;padding:10px 12px;margin-bottom:8px;}
+.lockInput:focus{outline:none;border-color:var(--sage);}
+.lockErr{display:none;color:var(--rose);font-size:12px;margin-bottom:8px;}
+.lockBtns{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}
+.lockCancel{background:#fff;border:1px solid var(--warm);color:var(--stone);font-family:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:6px;cursor:pointer;}
+.lockOk{background:var(--sage);border:none;color:#fff;font-family:inherit;font-size:13px;font-weight:700;padding:8px 18px;border-radius:6px;cursor:pointer;}
+.lockOk:hover{background:var(--sage-dark);}
 </style>
 </head>
 <body>
@@ -79,6 +92,19 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
   <div>
     <div class="htitle">LIVES Portal</div>
     <div class="hsub">Integración de IA · LIVES</div>
+  </div>
+</div>
+
+<div class="lockOverlay" id="lockOverlay">
+  <div class="lockBox">
+    <div class="lockTitle">Área protegida</div>
+    <div class="lockSub" id="lockAreaName"></div>
+    <input type="password" class="lockInput" id="lockInput" placeholder="Clave" autocomplete="off">
+    <div class="lockErr" id="lockErr">Clave incorrecta.</div>
+    <div class="lockBtns">
+      <button class="lockCancel" id="lockCancel">Cancelar</button>
+      <button class="lockOk" id="lockOk">Entrar</button>
+    </div>
   </div>
 </div>
 
@@ -382,15 +408,99 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 </div>
 
 <script>
+const AREA_PASSWORDS = {
+  calidad: 'CMN2026',
+  pcp: 'PC2026',
+  ingenieria: 'IN2026',
+  logistica: 'LOG2026',
+  sistemas: 'SI2026',
+  rrhh: 'RRHH2026',
+  textil: 'CTX2026',
+  sobremi: 'TPC2026'
+};
+const AREA_LABELS = {
+  calidad: 'Calidad Manufactura',
+  pcp: 'PCP / Planeamiento',
+  ingenieria: 'Ingeniería',
+  logistica: 'Logística',
+  sistemas: 'Sistemas',
+  rrhh: 'Recursos Humanos',
+  textil: 'Calidad Textil',
+  sobremi: 'Tablero de Proyectos'
+};
+
+function activateArea(btn){
+  document.querySelectorAll('.areatab').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.areapanel').forEach(function(p){p.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('area-' + btn.dataset.area).classList.add('active');
+}
+
+function isUnlocked(area){
+  return sessionStorage.getItem('unlocked_' + area) === '1';
+}
+
+var pendingArea = null, pendingBtn = null;
+
+function showLockModal(area, btn){
+  pendingArea = area;
+  pendingBtn = btn;
+  document.getElementById('lockAreaName').textContent = AREA_LABELS[area] || '';
+  document.getElementById('lockInput').value = '';
+  document.getElementById('lockErr').style.display = 'none';
+  document.getElementById('lockOverlay').style.display = 'flex';
+  document.getElementById('lockInput').focus();
+}
+
+function hideLockModal(){
+  document.getElementById('lockOverlay').style.display = 'none';
+  pendingArea = null;
+  pendingBtn = null;
+}
+
+function tryUnlock(){
+  if(!pendingArea) return;
+  var val = document.getElementById('lockInput').value;
+  if(val === AREA_PASSWORDS[pendingArea]){
+    sessionStorage.setItem('unlocked_' + pendingArea, '1');
+    var btn = pendingBtn;
+    hideLockModal();
+    activateArea(btn);
+  } else {
+    document.getElementById('lockErr').style.display = 'block';
+  }
+}
+
+document.getElementById('lockOk').addEventListener('click', tryUnlock);
+document.getElementById('lockCancel').addEventListener('click', hideLockModal);
+document.getElementById('lockInput').addEventListener('keydown', function(e){
+  if(e.key === 'Enter') tryUnlock();
+});
+
 document.querySelectorAll('.areatab').forEach(function(btn){
   btn.addEventListener('click', function(){
     if(btn.classList.contains('disabled')) return;
-    document.querySelectorAll('.areatab').forEach(function(b){b.classList.remove('active');});
-    document.querySelectorAll('.areapanel').forEach(function(p){p.classList.remove('active');});
-    btn.classList.add('active');
-    document.getElementById('area-' + btn.dataset.area).classList.add('active');
+    var area = btn.dataset.area;
+    if(AREA_PASSWORDS[area] && !isUnlocked(area)){
+      showLockModal(area, btn);
+      return;
+    }
+    activateArea(btn);
   });
 });
+
+// Si el área activa por defecto (Calidad Manufactura) tiene clave, pedirla también al cargar
+(function(){
+  var activeBtn = document.querySelector('.areatab.active');
+  if(activeBtn){
+    var area = activeBtn.dataset.area;
+    if(AREA_PASSWORDS[area] && !isUnlocked(area)){
+      activeBtn.classList.remove('active');
+      document.getElementById('area-' + area).classList.remove('active');
+      showLockModal(area, activeBtn);
+    }
+  }
+})();
 
 document.querySelectorAll('.subtab').forEach(function(btn){
   btn.addEventListener('click', function(){
