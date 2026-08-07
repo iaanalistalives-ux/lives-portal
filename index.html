@@ -29,7 +29,6 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 
 .wrap{max-width:1100px;margin:0 auto;padding:26px 24px 60px;}
 
-/* Tabs de área (nivel 1) */
 .areatabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;border-bottom:2px solid var(--warm);padding-bottom:0;}
 .areatab{background:none;border:none;font-family:inherit;font-size:14px;font-weight:700;color:var(--stone);padding:10px 16px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s;}
 .areatab:hover{color:var(--sage);}
@@ -40,7 +39,6 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .areapanel{display:none;}
 .areapanel.active{display:block;}
 
-/* Sub-tabs (nivel 2, dentro de Calidad Manufactura) */
 .subtabs{display:inline-flex;border:1.5px solid var(--sage);border-radius:6px;overflow:hidden;margin-bottom:22px;}
 .subtab{background:#fff;color:var(--sage);border:none;padding:8px 18px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
 .subtab.active{background:var(--sage);color:#fff;}
@@ -51,7 +49,6 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 
 .sectitle{font-size:16px;font-weight:700;color:var(--sage-dark);margin:4px 0 14px;}
 
-/* Grid de tarjetas de herramientas */
 .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 @media(max-width:900px){.tgrid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:620px){.tgrid{grid-template-columns:1fr;}}
@@ -63,14 +60,12 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .tcard .ta{font-size:12px;font-weight:700;color:var(--sage);display:flex;align-items:center;gap:4px;}
 .tcard:hover .ta{color:var(--sage-dark);}
 
-/* Panel "próximamente" */
 .soon{background:#fff;border:1.5px dashed var(--warm);border-radius:10px;padding:40px 24px;text-align:center;color:var(--stone);}
 .soon .st{font-size:15px;font-weight:700;color:var(--slate);margin-bottom:6px;}
 .soon .ss{font-size:12.5px;}
 
 .note{background:#fff;border:1px solid var(--warm);border-left:4px solid var(--tan);border-radius:6px;padding:10px 14px;font-size:11.5px;color:var(--stone);margin-bottom:20px;line-height:1.5;}
 
-/* Candado por área */
 .lockOverlay{display:none;position:fixed;inset:0;background:rgba(14,59,54,.55);z-index:999;align-items:center;justify-content:center;padding:20px;}
 .lockBox{background:#fff;border-radius:12px;padding:28px 26px;max-width:340px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.25);}
 .lockTitle{font-size:16px;font-weight:700;color:var(--sage-dark);margin-bottom:2px;}
@@ -83,7 +78,6 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .lockOk{background:var(--sage);border:none;color:#fff;font-family:inherit;font-size:13px;font-weight:700;padding:8px 18px;border-radius:6px;cursor:pointer;}
 .lockOk:hover{background:var(--sage-dark);}
 
-/* Pantalla de inicio */
 .hero{text-align:center;padding:18px 10px 34px;}
 .hero .hbig{font-size:24px;font-weight:800;color:var(--petrol);margin-bottom:6px;}
 .hero .hsm{font-size:13px;color:var(--stone);}
@@ -131,7 +125,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
   <div class="areatabs">
     <button class="areatab active" data-area="home">Inicio</button>
     <button class="areatab" data-area="calidad">Calidad Manufactura</button>
-    <button class="areatab disabled" title="Aún no iniciada">Producción</button>
+    <button class="areatab" data-area="produccion">Producción</button>
     <button class="areatab" data-area="pcp">PCP / Planeamiento</button>
     <button class="areatab" data-area="ingenieria">Ingeniería</button>
     <button class="areatab" data-area="logistica">Logística</button>
@@ -143,8 +137,6 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
     <button class="areatab" data-area="sobremi" style="margin-left:auto;">Tablero de Proyectos</button>
   </div>
 
-  <!-- ===== ÁREA: CALIDAD MANUFACTURA ===== -->
-  <!-- ===== INICIO ===== -->
   <div class="areapanel active" id="area-home">
     <div class="hero">
       <div class="hbig">¿A dónde quieres entrar?</div>
@@ -156,10 +148,10 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
         <div class="ht">Calidad Manufactura</div>
         <div class="hl">Entrar →</div>
       </div>
-      <div class="homecard disabled">
+      <div class="homecard" data-area="produccion">
         <span class="hi">🏭</span>
         <div class="ht">Producción</div>
-        <div class="hl">Próximamente</div>
+        <div class="hl">Entrar →</div>
       </div>
       <div class="homecard" data-area="pcp">
         <span class="hi">📅</span>
@@ -202,9 +194,8 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
         <div class="hl">Próximamente</div>
       </div>
     </div>
-    <div class="note">Las demás áreas (Producción, etc.) se irán activando conforme avance cada fase de integración de IA. La lista y el orden pueden cambiar.</div>
+    <div class="note">Las demás áreas se irán activando conforme avance cada fase de integración de IA. La lista y el orden pueden cambiar.</div>
   </div>
-  <!-- ===== FIN INICIO ===== -->
 
   <div class="areapanel" id="area-calidad">
 
@@ -213,7 +204,6 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <button class="subtab" data-target="sub-calidad-form">Formulario</button>
     </div>
 
-    <!-- Sub: Dashboards -->
     <div class="subpanel active" id="sub-calidad-dash">
       <div class="sectitle">Dashboards de auditoría y calidad</div>
       <div class="tgrid">
@@ -275,7 +265,6 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       </div>
     </div>
 
-    <!-- Sub: Formulario -->
     <div class="subpanel" id="sub-calidad-form">
       <div class="sectitle">Formulario de campo</div>
       <div class="tgrid">
@@ -296,13 +285,58 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
           <div class="ts">Formulario de campo.</div>
           <div class="ta">Abrir →</div>
         </a>
+
+        <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/" target="_blank" rel="noopener">
+          <div class="tt">Buscador de Fichas Técnicas</div>
+          <div class="ts">Formulario de campo.</div>
+          <div class="ta">Abrir →</div>
+        </a>
+
+        <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/historial.html" target="_blank" rel="noopener">
+          <div class="tt">Mediciones Realizadas</div>
+          <div class="ts">Formulario de campo.</div>
+          <div class="ta">Abrir →</div>
+        </a>
       </div>
     </div>
 
   </div>
-  <!-- ===== FIN ÁREA CALIDAD MANUFACTURA ===== -->
 
-  <!-- ===== ÁREA: INGENIERÍA ===== -->
+  <div class="areapanel" id="area-produccion">
+
+    <div class="subtabs">
+      <button class="subtab active" data-target="sub-produccion-dash">Dashboards</button>
+      <button class="subtab" data-target="sub-produccion-form">Formulario</button>
+    </div>
+
+    <div class="subpanel active" id="sub-produccion-dash">
+      <div class="sectitle">Check List de Orden y Limpieza</div>
+      <div class="tgrid">
+
+        <a class="tcard" href="https://iaanalistalives-ux.github.io/checklist-orden-limpieza/dashboard.html" target="_blank" rel="noopener">
+          <div class="tt">Check List de Orden y Limpieza — Semana en vivo</div>
+          <div class="ts">Panel operativo.</div>
+          <div class="ta">Abrir →</div>
+        </a>
+
+      </div>
+    </div>
+
+    <div class="subpanel" id="sub-produccion-form">
+      <div class="sectitle">Check List de Orden y Limpieza</div>
+      <div class="tgrid">
+
+        <a class="tcard" href="https://iaanalistalives-ux.github.io/checklist-orden-limpieza/" target="_blank" rel="noopener">
+          <div class="tt">Check List de Orden y Limpieza</div>
+          <div class="ts">Formulario de campo.</div>
+          <div class="ta">Abrir →</div>
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+
   <div class="areapanel" id="area-ingenieria">
     <div class="sectitle">Formularios de Ingeniería</div>
     <div class="tgrid">
@@ -315,9 +349,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 
     </div>
   </div>
-  <!-- ===== FIN ÁREA INGENIERÍA ===== -->
 
-  <!-- ===== ÁREA: LOGÍSTICA ===== -->
   <div class="areapanel" id="area-logistica">
     <div class="sectitle">Sistema de Movilidades</div>
     <div class="tgrid">
@@ -342,9 +374,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 
     </div>
   </div>
-  <!-- ===== FIN ÁREA LOGÍSTICA ===== -->
 
-  <!-- ===== ÁREA: PCP / PLANEAMIENTO ===== -->
   <div class="areapanel" id="area-pcp">
 
     <div class="subtabs">
@@ -436,9 +466,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
     </div>
 
   </div>
-  <!-- ===== FIN ÁREA PCP / PLANEAMIENTO ===== -->
 
-  <!-- ===== ÁREA: SISTEMAS ===== -->
   <div class="areapanel" id="area-sistemas">
     <div class="sectitle">Sistemas</div>
     <div class="tgrid">
@@ -451,9 +479,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 
     </div>
   </div>
-  <!-- ===== FIN ÁREA SISTEMAS ===== -->
 
-  <!-- ===== SOBRE MÍ (personal, solo funciona abriendo el portal localmente) ===== -->
   <div class="areapanel" id="area-sobremi">
     <div class="sectitle">Seguimiento personal</div>
     <div class="tgrid">
@@ -466,9 +492,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 
     </div>
   </div>
-  <!-- ===== FIN SOBRE MÍ ===== -->
 
-  <!-- ===== ÁREA: RECURSOS HUMANOS ===== -->
   <div class="areapanel" id="area-rrhh">
     <div class="sectitle">Recursos Humanos</div>
     <div class="tgrid">
@@ -487,9 +511,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 
     </div>
   </div>
-  <!-- ===== FIN ÁREA RECURSOS HUMANOS ===== -->
 
-  <!-- ===== ÁREA: CALIDAD TEXTIL ===== -->
   <div class="areapanel" id="area-textil">
     <div class="sectitle">Calidad Textil</div>
     <div class="tgrid">
@@ -502,24 +524,15 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 
     </div>
   </div>
-  <!-- ===== FIN ÁREA CALIDAD TEXTIL ===== -->
 
 </div>
 
 <script>
 const AREA_PASSWORDS = {
-  // Desactivado por ahora — para reactivar, rellena la clave de cada área.
-  // calidad: 'CMN2026',
-  // pcp: 'PC2026',
-  // ingenieria: 'IN2026',
-  // logistica: 'LOG2026',
-  // sistemas: 'SI2026',
-  // rrhh: 'RRHH2026',
-  // textil: 'CTX2026',
-  // sobremi: 'TPC2026'
 };
 const AREA_LABELS = {
   calidad: 'Calidad Manufactura',
+  produccion: 'Producción',
   pcp: 'PCP / Planeamiento',
   ingenieria: 'Ingeniería',
   logistica: 'Logística',
