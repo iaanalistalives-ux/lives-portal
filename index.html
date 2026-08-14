@@ -95,6 +95,25 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .homecard.disabled:hover{transform:none;box-shadow:0 1px 3px rgba(0,0,0,.03);border-color:var(--warm);}
 .homecard.disabled .hl{color:var(--stone);}
 </style>
+
+<!-- ===== PWA: app instalable ===== -->
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0E3B36">
+<link rel="icon" href="./icons/favicon-64.png" sizes="64x64" type="image/png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LIVES">
+<meta name="mobile-web-app-capable" content="yes">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./sw.js')
+        .catch(function (e) { console.warn('SW no registrado:', e); });
+    });
+  }
+</script>
+<!-- ===== fin PWA ===== -->
 </head>
 <body>
 
