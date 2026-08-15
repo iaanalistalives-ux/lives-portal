@@ -18,7 +18,7 @@
   --warm-light:#F1F6F4;
   --stone:#5F726C;
 }
-*{box-sizing:border-box;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,sans-serif;font-size:14px;line-height:1.4;}
 
 .header{background:var(--petrol);border-bottom:3px solid var(--emer);min-height:96px;display:flex;align-items:center;padding:0 24px;gap:20px;flex-wrap:wrap;}
@@ -27,20 +27,30 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .htitle{color:#fff;font-size:22px;font-weight:700;letter-spacing:.3px;}
 .hsub{color:#F1F6F4;font-size:13px;}
 
-.wrap{max-width:1100px;margin:0 auto;padding:26px 24px 60px;}
+.installBtn{margin-left:auto;background:var(--sage);color:#fff;border:none;border-radius:22px;padding:10px 16px;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:7px;box-shadow:0 2px 8px rgba(0,0,0,.2);white-space:nowrap;}
+.installBtn:active{background:var(--sage-dark);}
+.installBtn.hidden{display:none;}
+.installBtn svg{width:15px;height:15px;fill:#fff;flex:0 0 auto;}
 
-.areatabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;border-bottom:2px solid var(--warm);padding-bottom:0;}
-.areatab{background:none;border:none;font-family:inherit;font-size:14px;font-weight:700;color:var(--stone);padding:10px 16px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:.15s;}
-.areatab:hover{color:var(--sage);}
-.areatab.active{color:var(--sage);border-bottom-color:var(--sage);}
-.areatab.disabled{color:#B7C2BE;cursor:default;}
-.areatab.disabled:hover{color:#B7C2BE;}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 18px 60px;}
+
+/* ===== Nav de áreas: pastillas con scroll horizontal en mobile ===== */
+.areatabs{display:flex;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 2px 12px;margin-bottom:18px;scroll-snap-type:x proximity;}
+.areatabs::-webkit-scrollbar{display:none;}
+.areatab{flex:0 0 auto;scroll-snap-align:start;background:#fff;border:1.5px solid var(--warm);font-family:inherit;font-size:13.5px;font-weight:700;color:var(--stone);padding:9px 16px;cursor:pointer;border-radius:20px;transition:.15s;white-space:nowrap;}
+.areatab:active{transform:scale(.97);}
+.areatab.active{color:#fff;background:var(--sage);border-color:var(--sage);}
+.areatab.disabled{color:#B7C2BE;cursor:default;background:var(--warm-light);}
+@media(min-width:760px){
+  .areatabs{flex-wrap:wrap;overflow-x:visible;}
+  .areatab.pinned{margin-left:auto;}
+}
 
 .areapanel{display:none;}
 .areapanel.active{display:block;}
 
-.subtabs{display:inline-flex;border:1.5px solid var(--sage);border-radius:6px;overflow:hidden;margin-bottom:22px;}
-.subtab{background:#fff;color:var(--sage);border:none;padding:8px 18px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
+.subtabs{display:inline-flex;border:1.5px solid var(--sage);border-radius:20px;overflow:hidden;margin-bottom:20px;}
+.subtab{background:#fff;color:var(--sage);border:none;padding:9px 20px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;}
 .subtab.active{background:var(--sage);color:#fff;}
 .subtab:not(:last-child){border-right:1px solid var(--warm);}
 
@@ -53,46 +63,45 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 @media(max-width:900px){.tgrid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:620px){.tgrid{grid-template-columns:1fr;}}
 
-.tcard{background:#fff;border:1px solid var(--warm);border-top:3px solid var(--sage);border-radius:8px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;transition:.15s;}
-.tcard:hover{box-shadow:0 3px 10px rgba(14,59,54,.10);border-top-color:var(--emer);}
+.tcard{background:#fff;border:1px solid var(--warm);border-top:3px solid var(--sage);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit;transition:.15s;}
+.tcard:active{transform:scale(.98);}
+.tcard:hover{box-shadow:0 4px 14px rgba(14,59,54,.12);border-top-color:var(--emer);}
 .tcard .tt{font-size:14.5px;font-weight:700;color:#222;}
 .tcard .ts{font-size:12px;color:var(--stone);flex:1;}
 .tcard .ta{font-size:12px;font-weight:700;color:var(--sage);display:flex;align-items:center;gap:4px;}
 .tcard:hover .ta{color:var(--sage-dark);}
 
-.soon{background:#fff;border:1.5px dashed var(--warm);border-radius:10px;padding:40px 24px;text-align:center;color:var(--stone);}
-.soon .st{font-size:15px;font-weight:700;color:var(--slate);margin-bottom:6px;}
-.soon .ss{font-size:12.5px;}
-
-.note{background:#fff;border:1px solid var(--warm);border-left:4px solid var(--tan);border-radius:6px;padding:10px 14px;font-size:11.5px;color:var(--stone);margin-bottom:20px;line-height:1.5;}
+.note{background:#fff;border:1px solid var(--warm);border-left:4px solid var(--tan);border-radius:8px;padding:10px 14px;font-size:11.5px;color:var(--stone);margin-bottom:20px;line-height:1.5;}
 
 .lockOverlay{display:none;position:fixed;inset:0;background:rgba(14,59,54,.55);z-index:999;align-items:center;justify-content:center;padding:20px;}
-.lockBox{background:#fff;border-radius:12px;padding:28px 26px;max-width:340px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.25);}
+.lockBox{background:#fff;border-radius:14px;padding:28px 26px;max-width:340px;width:100%;box-shadow:0 8px 30px rgba(0,0,0,.25);}
 .lockTitle{font-size:16px;font-weight:700;color:var(--sage-dark);margin-bottom:2px;}
 .lockSub{font-size:12.5px;color:var(--stone);margin-bottom:16px;}
-.lockInput{width:100%;font-family:inherit;font-size:15px;border:1.5px solid var(--warm);border-radius:6px;padding:10px 12px;margin-bottom:8px;}
+.lockInput{width:100%;font-family:inherit;font-size:15px;border:1.5px solid var(--warm);border-radius:8px;padding:10px 12px;margin-bottom:8px;}
 .lockInput:focus{outline:none;border-color:var(--sage);}
 .lockErr{display:none;color:var(--rose);font-size:12px;margin-bottom:8px;}
 .lockBtns{display:flex;justify-content:flex-end;gap:8px;margin-top:10px;}
-.lockCancel{background:#fff;border:1px solid var(--warm);color:var(--stone);font-family:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:6px;cursor:pointer;}
-.lockOk{background:var(--sage);border:none;color:#fff;font-family:inherit;font-size:13px;font-weight:700;padding:8px 18px;border-radius:6px;cursor:pointer;}
+.lockCancel{background:#fff;border:1px solid var(--warm);color:var(--stone);font-family:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer;}
+.lockOk{background:var(--sage);border:none;color:#fff;font-family:inherit;font-size:13px;font-weight:700;padding:8px 18px;border-radius:20px;cursor:pointer;}
 .lockOk:hover{background:var(--sage-dark);}
 
-.hero{text-align:center;padding:18px 10px 34px;}
-.hero .hbig{font-size:24px;font-weight:800;color:var(--petrol);margin-bottom:6px;}
+.hero{text-align:center;padding:14px 10px 28px;}
+.hero .hbig{font-size:23px;font-weight:800;color:var(--petrol);margin-bottom:6px;}
 .hero .hsm{font-size:13px;color:var(--stone);}
 
-.homegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.homegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
 @media(max-width:900px){.homegrid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:560px){.homegrid{grid-template-columns:1fr;}}
+@media(max-width:480px){.homegrid{grid-template-columns:1fr 1fr;gap:10px;}}
 
-.homecard{background:#fff;border:1px solid var(--warm);border-radius:12px;padding:22px 16px;text-align:center;cursor:pointer;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.03);}
-.homecard:hover{transform:translateY(-3px);box-shadow:0 8px 18px rgba(14,59,54,.14);border-color:var(--sage);}
-.homecard .hi{font-size:34px;margin-bottom:10px;display:block;}
-.homecard .ht{font-size:14px;font-weight:700;color:#222;margin-bottom:3px;}
-.homecard .hl{font-size:11px;color:var(--sage);font-weight:700;display:inline-flex;align-items:center;gap:4px;}
-.homecard.disabled{cursor:default;opacity:.5;background:var(--warm-light);}
-.homecard.disabled:hover{transform:none;box-shadow:0 1px 3px rgba(0,0,0,.03);border-color:var(--warm);}
+.homecard{--accent:#0F7A5A;--accent-rgb:15,122,90;background:#fff;border:1px solid var(--warm);border-top:4px solid var(--accent);border-radius:14px;padding:20px 14px;text-align:center;cursor:pointer;transition:.15s;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.homecard:active{transform:scale(.97);}
+.homecard:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(14,59,54,.14);}
+.homecard .hi{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:rgba(var(--accent-rgb),.13);margin:0 auto 10px;font-size:24px;}
+.homecard .ht{font-size:13.5px;font-weight:700;color:#222;margin-bottom:3px;}
+.homecard .hl{font-size:11px;color:var(--accent);font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+.homecard.disabled{cursor:default;opacity:.55;background:var(--warm-light);border-top-color:var(--warm);}
+.homecard.disabled:hover{transform:none;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.homecard.disabled .hi{background:var(--warm);}
 .homecard.disabled .hl{color:var(--stone);}
 </style>
 
@@ -124,6 +133,10 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
     <div class="htitle">LIVES Portal</div>
     <div class="hsub">Integración de IA · LIVES</div>
   </div>
+  <button class="installBtn hidden" id="installBtn" type="button">
+    <svg viewBox="0 0 24 24"><path d="M12 3v10.6l3.3-3.3 1.4 1.4L12 17l-4.7-5.3 1.4-1.4 3.3 3.3V3h0zM5 19h14v2H5v-2z"/></svg>
+    Instalar app
+  </button>
 </div>
 
 <div class="lockOverlay" id="lockOverlay">
@@ -153,7 +166,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
     <button class="areatab" data-area="textil">Calidad Textil</button>
     <button class="areatab disabled" title="Aún no iniciada">Otras áreas</button>
     <button class="areatab disabled" title="Aún no iniciada">Desarrollo</button>
-    <button class="areatab" data-area="sobremi" style="margin-left:auto;">Tablero de Proyectos</button>
+    <button class="areatab pinned" data-area="sobremi">Tablero de Proyectos</button>
   </div>
 
   <div class="areapanel active" id="area-home">
@@ -162,42 +175,42 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="hsm">Elige un área para ver sus dashboards y formularios.</div>
     </div>
     <div class="homegrid">
-      <div class="homecard" data-area="calidad">
+      <div class="homecard" data-area="calidad" style="--accent:#0F7A5A;--accent-rgb:15,122,90;">
         <span class="hi">🧵</span>
         <div class="ht">Calidad Manufactura</div>
         <div class="hl">Entrar →</div>
       </div>
-      <div class="homecard" data-area="produccion">
+      <div class="homecard" data-area="produccion" style="--accent:#B45309;--accent-rgb:180,83,9;">
         <span class="hi">🏭</span>
         <div class="ht">Producción</div>
         <div class="hl">Entrar →</div>
       </div>
-      <div class="homecard" data-area="pcp">
+      <div class="homecard" data-area="pcp" style="--accent:#10B981;--accent-rgb:16,185,129;">
         <span class="hi">📅</span>
         <div class="ht">PCP / Planeamiento</div>
         <div class="hl">Entrar →</div>
       </div>
-      <div class="homecard" data-area="ingenieria">
+      <div class="homecard" data-area="ingenieria" style="--accent:#4E6B78;--accent-rgb:78,107,120;">
         <span class="hi">⚙️</span>
         <div class="ht">Ingeniería</div>
         <div class="hl">Entrar →</div>
       </div>
-      <div class="homecard" data-area="logistica">
+      <div class="homecard" data-area="logistica" style="--accent:#F59E0B;--accent-rgb:245,158,11;">
         <span class="hi">🚚</span>
         <div class="ht">Logística</div>
         <div class="hl">Entrar →</div>
       </div>
-      <div class="homecard" data-area="sistemas">
+      <div class="homecard" data-area="sistemas" style="--accent:#0E3B36;--accent-rgb:14,59,54;">
         <span class="hi">💻</span>
         <div class="ht">Sistemas</div>
         <div class="hl">Entrar →</div>
       </div>
-      <div class="homecard" data-area="rrhh">
+      <div class="homecard" data-area="rrhh" style="--accent:#DC2626;--accent-rgb:220,38,38;">
         <span class="hi">👥</span>
         <div class="ht">Recursos Humanos</div>
         <div class="hl">Entrar →</div>
       </div>
-      <div class="homecard" data-area="textil">
+      <div class="homecard" data-area="textil" style="--accent:#0B815E;--accent-rgb:11,129,94;">
         <span class="hi">🧶</span>
         <div class="ht">Calidad Textil</div>
         <div class="hl">Entrar →</div>
@@ -651,6 +664,39 @@ document.querySelectorAll('.subtab').forEach(function(btn){
     btn.classList.add('active');
     document.getElementById(btn.dataset.target).classList.add('active');
   });
+});
+
+/* ===== PWA: botón de instalar, con memoria de que ya se instaló ===== */
+function yaInstalada(){
+  return window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true
+      || localStorage.getItem('lives_pwa_installed') === '1';
+}
+var deferredPrompt = null;
+var installBtn = document.getElementById('installBtn');
+if(yaInstalada()){
+  installBtn.classList.add('hidden');
+}
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredPrompt = e;
+  if(!yaInstalada()) installBtn.classList.remove('hidden');
+});
+installBtn.addEventListener('click', async function(){
+  if(!deferredPrompt) return;
+  installBtn.classList.add('hidden');
+  deferredPrompt.prompt();
+  var choice = await deferredPrompt.userChoice;
+  if(choice.outcome === 'accepted'){
+    localStorage.setItem('lives_pwa_installed', '1');
+  } else {
+    installBtn.classList.remove('hidden');
+  }
+  deferredPrompt = null;
+});
+window.addEventListener('appinstalled', function(){
+  localStorage.setItem('lives_pwa_installed', '1');
+  installBtn.classList.add('hidden');
 });
 </script>
 
