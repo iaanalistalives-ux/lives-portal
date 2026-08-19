@@ -74,6 +74,19 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .typecard.dashT{border-top:5px solid var(--sage);}
 .typecard.formT{border-top:5px solid var(--taupe);}
 
+/* Tarjetas KPI: indicadores en vivo en la pantalla de inicio */
+.kpiSection{max-width:900px;margin:36px auto 0;}
+.kpiSectionTitle{font-size:11px;font-weight:800;color:var(--stone);text-transform:uppercase;letter-spacing:.6px;text-align:center;margin-bottom:12px;}
+.kpiRow{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+@media(max-width:560px){.kpiRow{grid-template-columns:1fr;}}
+.kpiCard{background:#fff;border:1px solid var(--warm);border-top:4px solid var(--sage);border-radius:14px;padding:18px 20px;cursor:pointer;transition:.15s;}
+.kpiCard:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(14,59,54,.12);}
+.kpiCard .kl{font-size:12px;font-weight:700;color:var(--stone);margin-bottom:6px;}
+.kpiCard .kv{font-size:30px;font-weight:800;color:var(--sage);line-height:1;}
+.kpiCard .kv.loading{font-size:14px;color:var(--stone);font-weight:600;}
+.kpiCard .ky{font-size:11.5px;color:var(--stone);margin-top:6px;}
+.kpiCard .klink{font-size:11px;font-weight:700;color:var(--sage);margin-top:8px;}
+
 .homegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
 @media(max-width:900px){.homegrid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:480px){.homegrid{grid-template-columns:1fr 1fr;gap:10px;}}
@@ -169,6 +182,24 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
         <div class="td">Captura de datos</div>
       </div>
     </div>
+
+    <div class="kpiSection">
+      <div class="kpiSectionTitle">Cómo vamos</div>
+      <div class="kpiRow">
+        <div class="kpiCard" id="kpiSegundas" data-url="https://iaanalistalives-ux.github.io/segundas/dashboard.html">
+          <div class="kl">Segundas — Textil</div>
+          <div class="kv loading" id="kpiSegundasVal">Cargando…</div>
+          <div class="ky" id="kpiSegundasYear"></div>
+          <div class="klink">Ver dashboard →</div>
+        </div>
+        <div class="kpiCard" id="kpiInspeccion" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/index.html#tablero">
+          <div class="kl">Inspección — Eficiencia</div>
+          <div class="kv loading" id="kpiInspeccionVal">Cargando…</div>
+          <div class="ky" id="kpiInspeccionYear"></div>
+          <div class="klink">Ver dashboard →</div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ===== PANTALLA 2: LISTA DE ÁREAS (se llena por JS) ===== -->
@@ -217,6 +248,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/" role="button" tabindex="0"><div class="tt">Buscador de Fichas Técnicas</div><div class="ts">Consulta de fichas técnicas por estilo.</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/historial.html" role="button" tabindex="0"><div class="tt">Mediciones Realizadas</div><div class="ts">Consulta de lo ya medido.</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/tablas.html" role="button" tabindex="0"><div class="tt">Tablas de Medidas</div><div class="ts">Consulta de tablas de referencia.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/index.html#tablero" role="button" tabindex="0"><div class="tt">Tablero de Inspección Final — Costura</div><div class="ts">Eficiencia de inspectoras por línea.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -680,6 +712,111 @@ window.addEventListener('appinstalled', function(){
   localStorage.setItem('lives_pwa_installed', '1');
   installBtn.classList.add('hidden');
 });
+
+/* ===== KPIs de Inicio: leen en vivo los mismos Apps Script que usan los dashboards ===== */
+document.querySelectorAll('.kpiCard').forEach(function(card){
+  card.addEventListener('click', function(){ window.open(card.dataset.url, '_blank'); });
+});
+
+var _jn = 0;
+function kpiJsonp(url, params){
+  return new Promise(function(resolve, reject){
+    var cb = 'kpiCb' + (++_jn);
+    var s = document.createElement('script');
+    var to = setTimeout(function(){ limpiar(); reject(new Error('timeout')); }, 20000);
+    function limpiar(){ clearTimeout(to); try{ delete window[cb]; }catch(e){ window[cb] = undefined; } if(s.parentNode) s.parentNode.removeChild(s); }
+    window[cb] = function(d){ limpiar(); resolve(d); };
+    s.onerror = function(){ limpiar(); reject(new Error('no se pudo conectar')); };
+    var qs = Object.keys(params).map(function(k){ return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]); }).join('&');
+    s.src = url + '?' + qs + '&callback=' + cb;
+    document.body.appendChild(s);
+  });
+}
+
+/* --- KPI 1: Segundas Textil --- */
+/* Misma fórmula que segundas/dashboard.html: % ponderado = suma(segundas) / suma(base), tipo PIEZA */
+function kpiSegundasWeighted(rows, anio, mes){
+  var f = rows.filter(function(r){
+    return r.tipo === 'PIEZA' && r.anio === anio && (mes == null || r.mesNum === mes) && r.base > 0;
+  });
+  if(!f.length) return null;
+  var seg = f.reduce(function(a,r){ return a + r.segundas; }, 0);
+  var base = f.reduce(function(a,r){ return a + r.base; }, 0);
+  return base > 0 ? seg / base : null;
+}
+function cargarKpiSegundas(){
+  var API_SEG = 'https://script.google.com/macros/s/AKfycbzZpAse_qhFJGCjlpWpBHNDiMdCcM9GfqQO1LcP16Kx4z6R1FMzbfqV6YDI9jYuM60v/exec';
+  var hoy = new Date();
+  var anio = hoy.getFullYear(), mes = hoy.getMonth() + 1;
+  kpiJsonp(API_SEG, {action:'read'}).then(function(res){
+    if(!res || !res.ok || !res.tot) throw new Error('sin datos');
+    var pMes = kpiSegundasWeighted(res.tot, anio, mes);
+    var pAnio = kpiSegundasWeighted(res.tot, anio, null);
+    var elV = document.getElementById('kpiSegundasVal');
+    var elY = document.getElementById('kpiSegundasYear');
+    if(pMes == null){
+      elV.textContent = 'Sin datos del mes'; elV.classList.add('loading');
+    } else {
+      elV.textContent = (pMes*100).toFixed(2) + '%'; elV.classList.remove('loading');
+    }
+    elY.textContent = pAnio != null ? 'Acumulado del año: ' + (pAnio*100).toFixed(2) + '%' : '';
+  }).catch(function(){
+    var elV = document.getElementById('kpiSegundasVal');
+    elV.textContent = 'No disponible'; elV.classList.add('loading');
+  });
+}
+
+/* --- KPI 2: Inspección Eficiencia --- */
+/* Misma fórmula que inspeccion-final-costura: pEfi = minutos de trabajo / (minutos productivos), donde
+   minutos productivos = horas turno - horas improductivas - 45min refrigerio (turnos >= 4h), dedupe por turno */
+var F_FEC=0, F_HI=9, F_HF=10, F_HIMP=13, F_HTOT=14, F_MIN=17;
+function kpiAgregarHoras(rows){
+  var vistos = {}, tot = 0, imp = 0, turnos = 0;
+  rows.forEach(function(f){
+    if(!f[F_HTOT] && !f[F_HIMP]) return;
+    var k = [f[F_FEC], f[1], f[F_HI], f[F_HF], f[F_HIMP]].join('|');
+    if(vistos[k]) return;
+    vistos[k] = 1;
+    tot += f[F_HTOT] || 0;
+    imp += f[F_HIMP] || 0;
+    if(f[F_HTOT] >= 4) turnos++;
+  });
+  var refr = Math.round(turnos * (45/60) * 100) / 100;
+  return {tot: Math.round(tot*100)/100, imp: Math.round(imp*100)/100, prod: Math.max(0, tot - imp - refr)};
+}
+function kpiEficiencia(rows){
+  var min = rows.reduce(function(a,f){ return a + (f[F_MIN] || 0); }, 0);
+  var H = kpiAgregarHoras(rows);
+  return H.prod > 0 ? (min / (H.prod*60)) * 100 : null;
+}
+function cargarKpiInspeccion(){
+  var API_INSP = 'https://script.google.com/macros/s/AKfycbydA9gutwDeFqHaZaERnDI6D6N0fDDlFhsL0S9M6HGltAtrWSec8KTbu50TgldK7aFmug/exec';
+  var hoy = new Date();
+  var y = hoy.getFullYear(), m = String(hoy.getMonth()+1).padStart(2,'0');
+  var mesPrefijo = y + '-' + m;
+  var anioPrefijo = String(y);
+  kpiJsonp(API_INSP, {accion:'datos'}).then(function(res){
+    if(!res || !res.ok || !res.filas) throw new Error('sin datos');
+    var filasMes = res.filas.filter(function(f){ return String(f[F_FEC]).indexOf(mesPrefijo) === 0; });
+    var filasAnio = res.filas.filter(function(f){ return String(f[F_FEC]).indexOf(anioPrefijo) === 0; });
+    var eMes = kpiEficiencia(filasMes);
+    var eAnio = kpiEficiencia(filasAnio);
+    var elV = document.getElementById('kpiInspeccionVal');
+    var elY = document.getElementById('kpiInspeccionYear');
+    if(eMes == null){
+      elV.textContent = 'Sin datos del mes'; elV.classList.add('loading');
+    } else {
+      elV.textContent = eMes.toFixed(1) + '%'; elV.classList.remove('loading');
+    }
+    elY.textContent = eAnio != null ? 'Acumulado del año: ' + eAnio.toFixed(1) + '%' : '';
+  }).catch(function(){
+    var elV = document.getElementById('kpiInspeccionVal');
+    elV.textContent = 'No disponible'; elV.classList.add('loading');
+  });
+}
+
+cargarKpiSegundas();
+cargarKpiInspeccion();
 </script>
 
 </body>
