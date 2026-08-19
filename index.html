@@ -36,16 +36,17 @@ body.embedOpen .openTabBtn{display:flex;}
 /* Con una herramienta abierta el aire de arriba sobra: el header ya dice dónde estamos */
 body.embedOpen .wrap{padding-top:0;}
 #screen-embed .toolsLayout{margin-top:12px;}
+
 /* En el embed, el botón Volver vive en la columna izquierda y el marco sube a su misma
    altura, en vez de empezar debajo de él. */
-#screen-embed .toolsLayout{display:grid;grid-template-columns:210px 1fr;
+.toolsLayout{display:grid;grid-template-columns:210px 1fr;
   grid-template-rows:auto 1fr;column-gap:22px;row-gap:12px;align-items:start;}
-#screen-embed .backbtn{grid-column:1;grid-row:1;margin-bottom:0;justify-self:stretch;justify-content:center;}
-#screen-embed .areaSidebar{grid-column:1;grid-row:2;flex:none;width:100%;}
-#screen-embed .toolsContent{grid-column:2;grid-row:1 / span 2;}
+.toolsLayout .backbtn{grid-column:1;grid-row:1;margin-bottom:0;justify-self:stretch;justify-content:center;}
+.toolsLayout .areaSidebar{grid-column:1;grid-row:2;flex:none;width:100%;}
+.toolsLayout .toolsContent{grid-column:2;grid-row:1 / span 2;}
 @media(max-width:760px){
-  #screen-embed .toolsLayout{display:flex;flex-direction:column;}
-  #screen-embed .backbtn{margin-bottom:10px;}
+  .toolsLayout{display:flex;flex-direction:column;}
+  .toolsLayout .backbtn{margin-bottom:10px;}
 }
 
 .headerActions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
@@ -157,7 +158,7 @@ body.embedOpen .wrap{padding-top:0;}
 .homecard .hl{font-size:11px;color:var(--accent);font-weight:700;display:inline-flex;align-items:center;gap:4px;}
 
 /* Layout de herramientas: panel lateral de áreas + contenido */
-.toolsLayout{display:flex;gap:22px;align-items:flex-start;}
+.toolsLayout{gap:22px;align-items:flex-start;}
 .areaSidebar{flex:0 0 210px;background:#fff;border:1px solid var(--warm);border-radius:14px;padding:14px;position:sticky;top:16px;}
 .areaSidebar .sbTitle{font-size:10.5px;font-weight:800;color:var(--stone);text-transform:uppercase;letter-spacing:.6px;margin:2px 4px 10px;}
 .areaSidebar .sbItem{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;color:#333;margin-bottom:3px;transition:.15s;}
@@ -311,8 +312,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Calidad Manufactura · Dashboards -->
   <div class="screen" id="tools-calidad-dash">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Dashboards de auditoría y calidad</div>
@@ -339,8 +340,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Calidad Manufactura · Formulario -->
   <div class="screen" id="tools-calidad-form">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Formulario de campo</div>
@@ -356,8 +357,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Producción · Dashboards -->
   <div class="screen" id="tools-produccion-dash">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Check List de Orden y Limpieza</div>
@@ -371,8 +372,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Producción · Formulario -->
   <div class="screen" id="tools-produccion-form">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Check List de Orden y Limpieza</div>
@@ -386,8 +387,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Ingeniería · Dashboards -->
   <div class="screen" id="tools-ingenieria-dash">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Inspección Final</div>
@@ -407,8 +408,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Ingeniería · Formulario -->
   <div class="screen" id="tools-ingenieria-form">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Inspección Final</div>
@@ -428,8 +429,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Logística · Dashboards -->
   <div class="screen" id="tools-logistica-dash">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Sistema de Movilidades</div>
@@ -443,8 +444,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Logística · Formulario -->
   <div class="screen" id="tools-logistica-form">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Sistema de Movilidades</div>
@@ -460,8 +461,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- PCP · Dashboards -->
   <div class="screen" id="tools-pcp-dash">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Flujo de Tela</div>
@@ -490,8 +491,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- PCP · Formulario -->
   <div class="screen" id="tools-pcp-form">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Seguimiento de Partidas</div>
@@ -510,8 +511,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Comercial · Dashboards (solo dashboards) -->
   <div class="screen" id="tools-comercial-dash">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Desempeño Comercial</div>
@@ -525,8 +526,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Tienda LIVES · Dashboards -->
   <div class="screen" id="tools-tienda-dash">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Tienda LIVES</div>
@@ -540,8 +541,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Tienda LIVES · Formulario -->
   <div class="screen" id="tools-tienda-form">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Tienda LIVES</div>
@@ -555,8 +556,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Mejoras · Dashboards -->
   <div class="screen" id="tools-mejoras-dash">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Círculo de Mejoras</div>
@@ -570,8 +571,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Mejoras · Formulario -->
   <div class="screen" id="tools-mejoras-form">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Círculo de Mejoras</div>
@@ -585,8 +586,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Sistemas · Dashboards (solo dashboards) -->
   <div class="screen" id="tools-sistemas-dash">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Sistemas</div>
@@ -600,8 +601,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Recursos Humanos · Dashboards (solo dashboards) -->
   <div class="screen" id="tools-rrhh-dash">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Recursos Humanos</div>
@@ -616,8 +617,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Calidad Textil · Dashboards -->
   <div class="screen" id="tools-textil-dash">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Calidad Textil</div>
@@ -635,8 +636,8 @@ body.embedOpen .wrap{padding-top:0;}
 
   <!-- Calidad Textil · Formulario -->
   <div class="screen" id="tools-textil-form">
-    <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
     <div class="sectitle">Calidad Textil</div>
