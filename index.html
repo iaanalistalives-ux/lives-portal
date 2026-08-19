@@ -930,6 +930,7 @@ function kpiPintar(id, d, ts, offline){
   elD.innerHTML = txt ? '<span class="kar">' + flecha + '</span>' + txt : '';
   elS.innerHTML = kpiSpark(d.serie, C[estado], meta);
 
+  if(d.base){ var elB = document.getElementById(id + 'Base'); if(elB) elB.textContent = d.base; }
   var acum = (d.anual != null) ? 'Acumulado del año: ' + d.anual.toFixed(d.dec) + '%' : '';
   var sello = offline ? 'Sin conexión · dato ' + kpiHace(ts) : 'Actualizado ' + kpiHace(ts);
   elF.className = 'kfresh' + (offline ? ' stale' : '');
@@ -959,15 +960,42 @@ function kpiTraer(fn){
 }
 
 /* --- KPI 1: Segundas Textil --- */
-/* Misma fórmula que segundas/segundas.html: % ponderado = suma(segundas) / suma(base), tipo PIEZA */
-function kpiSegundasWeighted(rows, anio, mes){
+/* Misma fórmula que segundas/segundas.html:
+   - % ponderado = suma(segundas) / suma(base) sobre las filas tipo PIEZA con base > 0
+   - si el mes no tiene denominador (viene del cuadro anterior de Calidad), se usa su % declarado
+   Los nombres de campo llegan del Apps Script en snake_case: mes_num, no mesNum. */
+function kpiSegNorm(res){
+  return (res.tot || []).map(function(r){
+    var mesTxt = String(r.mes == null ? '' : r.mes).trim().toUpperCase();
+    var mn = Number(r.mes_num);
+    if(!mn){ var k = MESES_KPI.indexOf(mesTxt); mn = (k >= 0) ? k + 1 : 0; }
+    return {
+      anio: Number(r.anio) || 0,
+      mesNum: mn,
+      mes: mesTxt,
+      tipo: String(r.tipo == null ? '' : r.tipo).trim().toUpperCase(),
+      origen: String(r.origen == null ? '' : r.origen).trim().toUpperCase() || 'SISTEMA',
+      base: Number(r.base) || 0,
+      segundas: Number(r.segundas) || 0,
+      pct: Number(r.pct) || 0
+    };
+  }).filter(function(r){ return r.anio > 0 && r.mesNum >= 1 && r.mesNum <= 12; });
+}
+/* % de un mes concreto (o del año entero si mes es null). Devuelve fracción, no porcentaje. */
+function kpiSegPct(rows, anio, mes){
   var f = rows.filter(function(r){
-    return r.tipo === 'PIEZA' && r.anio === anio && (mes == null || r.mesNum === mes) && r.base > 0;
+    return r.tipo === 'PIEZA' && r.anio === anio && (mes === null || r.mesNum === mes);
   });
   if(!f.length) return null;
-  var seg = f.reduce(function(a,r){ return a + r.segundas; }, 0);
-  var base = f.reduce(function(a,r){ return a + r.base; }, 0);
-  return base > 0 ? seg / base : null;
+  var conBase = f.filter(function(r){ return r.base > 0; });
+  if(conBase.length){
+    var seg = conBase.reduce(function(a,r){ return a + r.segundas; }, 0);
+    var base = conBase.reduce(function(a,r){ return a + r.base; }, 0);
+    return base > 0 ? seg / base : null;
+  }
+  /* mes sin denominador: se muestra el % declarado, igual que hace el dashboard */
+  if(mes !== null && f[0].pct > 0) return f[0].pct;
+  return null;
 }
 function cargarKpiSegundas(){
   var API_SEG = 'https://script.google.com/macros/s/AKfycbzZpAse_qhFJGCjlpWpBHNDiMdCcM9GfqQO1LcP16Kx4z6R1FMzbfqV6YDI9jYuM60v/exec';
@@ -976,36 +1004,46 @@ function cargarKpiSegundas(){
 
   return kpiTraer(function(){ return kpiJsonp(API_SEG, {action:'read'}); }).then(function(res){
     if(!res || !res.ok || !res.tot) throw new Error('sin datos');
-    var conDatos = res.tot.filter(function(r){ return r.tipo === 'PIEZA' && r.base > 0; });
-    if(!conDatos.length) throw new Error('sin datos con base');
+    var rows = kpiSegNorm(res);
 
-    /* meses con datos, en orden */
+    /* meses de tipo PIEZA que sí arrojan un valor, ordenados */
     var vistos = {}, periodos = [];
-    conDatos.forEach(function(r){
+    rows.forEach(function(r){
+      if(r.tipo !== 'PIEZA') return;
       var k = r.anio + '-' + r.mesNum;
-      if(!vistos[k]){ vistos[k] = 1; periodos.push({anio:r.anio, mes:r.mesNum}); }
+      if(vistos[k]) return;
+      vistos[k] = 1;
+      if(kpiSegPct(rows, r.anio, r.mesNum) != null) periodos.push({anio:r.anio, mes:r.mesNum});
     });
     periodos.sort(function(a,b){ return (a.anio - b.anio) || (a.mes - b.mes); });
+    if(!periodos.length) throw new Error('sin meses con valor');
 
     var ult = periodos[periodos.length - 1];
-    var pMes = kpiSegundasWeighted(res.tot, ult.anio, ult.mes);
-    if(pMes == null) throw new Error('sin valor del mes');
-
     var ant = periodos[periodos.length - 2] || null;
-    var pAnt = ant ? kpiSegundasWeighted(res.tot, ant.anio, ant.mes) : null;
+    var pMes = kpiSegPct(rows, ult.anio, ult.mes);
+    var pAnt = ant ? kpiSegPct(rows, ant.anio, ant.mes) : null;
 
     var serie = periodos.slice(-6).map(function(p){
-      return {lab: MESES_COR[p.mes-1], v: (kpiSegundasWeighted(res.tot, p.anio, p.mes) || 0) * 100};
+      return {lab: MESES_COR[p.mes-1], v: kpiSegPct(rows, p.anio, p.mes) * 100};
     });
 
+    /* ¿el mes mostrado tiene denominador comprobable o es un valor declarado? */
+    var delMes = rows.filter(function(r){ return r.tipo === 'PIEZA' && r.anio === ult.anio && r.mesNum === ult.mes; });
+    var conBase = delMes.filter(function(r){ return r.base > 0; });
+    var baseTxt = conBase.length
+      ? 'Piezas de segunda sobre el total de piezas producidas en el mes.'
+      : 'Valor declarado en el cuadro anterior de Calidad: ese mes no trae el total producido, así que el % no se puede comprobar.';
+
+    var pAnio = kpiSegPct(rows, ult.anio, null);
     var d = {
       val: pMes * 100, dec: 2,
       periodo: MESES_KPI[ult.mes-1] + ' ' + ult.anio,
       prev: pAnt != null ? pAnt * 100 : null,
       prevPeriodo: ant ? MESES_KPI[ant.mes-1].slice(0,3) : '',
       serie: serie,
-      anual: (function(){ var a = kpiSegundasWeighted(res.tot, ult.anio, null); return a != null ? a*100 : null; })(),
-      mejorEs: 'bajo'
+      anual: pAnio != null ? pAnio * 100 : null,
+      mejorEs: 'bajo',
+      base: baseTxt
     };
     kpiCacheSet('segundas', d);
     kpiPintar('kpiSegundas', d, Date.now(), false);
@@ -1073,6 +1111,7 @@ function cargarKpiInspeccion(){
     });
 
     var d = {
+      base: 'Minutos de prenda revisada sobre los minutos productivos del turno.',
       val: eMes, dec: 1,
       periodo: MESES_KPI[parseInt(kUlt.slice(5,7),10)-1] + ' ' + anioUlt,
       prev: eAnt,
