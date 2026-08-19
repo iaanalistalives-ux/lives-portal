@@ -538,7 +538,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 
   </div>
 
-  <!-- Mejoras · Dashboards (solo dashboards) -->
+  <!-- Mejoras · Dashboards -->
   <div class="screen" id="tools-mejoras-dash">
     <button class="backbtn" data-back="areas">← Volver a áreas</button>
     <div class="toolsLayout">
@@ -546,7 +546,22 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Círculo de Mejoras</div>
     <div class="tgrid">
-      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/mejoras/" role="button" tabindex="0"><div class="tt">Panel de Mejoras</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/mejoras/dashboard.html" role="button" tabindex="0"><div class="tt">Tablero Círculo de Mejoras</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+    </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Mejoras · Formulario -->
+  <div class="screen" id="tools-mejoras-form">
+    <button class="backbtn" data-back="areas">← Volver a áreas</button>
+    <div class="toolsLayout">
+      <aside class="areaSidebar"></aside>
+      <div class="toolsContent">
+    <div class="sectitle">Círculo de Mejoras</div>
+    <div class="tgrid">
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/mejoras/" role="button" tabindex="0"><div class="tt">Círculo de Mejoras</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -635,7 +650,7 @@ const AREAS = [
   {id:'logistica',  label:'Logística',              icon:'🚚', accent:'#F59E0B', rgb:'245,158,11', types:['dash','form']},
   {id:'comercial',  label:'Comercial',              icon:'📈', accent:'#B45309', rgb:'180,83,9',   types:['dash']},
   {id:'tienda',     label:'Tienda LIVES',           icon:'🛍️', accent:'#DC2626', rgb:'220,38,38',  types:['dash','form']},
-  {id:'mejoras',    label:'Mejoras',                icon:'💡', accent:'#4E6B78', rgb:'78,107,120', types:['dash']},
+  {id:'mejoras',    label:'Mejoras',                icon:'💡', accent:'#4E6B78', rgb:'78,107,120', types:['dash','form']},
   {id:'sistemas',   label:'Sistemas',               icon:'💻', accent:'#0E3B36', rgb:'14,59,54',   types:['dash']},
   {id:'rrhh',       label:'Recursos Humanos',       icon:'👥', accent:'#DC2626', rgb:'220,38,38',  types:['dash']},
   {id:'textil',     label:'Calidad Textil',         icon:'🧶', accent:'#0B815E', rgb:'11,129,94',  types:['dash','form']}
