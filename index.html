@@ -35,7 +35,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .installBtn.hidden{display:none;}
 .installBtn svg{width:15px;height:15px;fill:#fff;flex:0 0 auto;}
 
-.wrap{max-width:1100px;margin:0 auto;padding:20px 18px 60px;}
+.wrap{max-width:1320px;margin:0 auto;padding:20px 18px 60px;}
 
 .screen{display:none;}
 .screen.active{display:block;}
@@ -46,6 +46,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .sectitle{font-size:16px;font-weight:700;color:var(--sage-dark);margin:4px 0 14px;}
 
 .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(min-width:1220px){.toolsContent .tgrid{grid-template-columns:repeat(4,1fr);}}
 @media(max-width:900px){.tgrid{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:620px){.tgrid{grid-template-columns:1fr;}}
 
@@ -100,6 +101,15 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
   .areaSidebar .sbTitle{display:none;}
   .areaSidebar .sbItem{flex:0 0 auto;margin-bottom:0;white-space:nowrap;}
 }
+
+/* Pantalla embebida: la herramienta se abre dentro del portal, no en pestaña nueva */
+.tcard{cursor:pointer;}
+.embedBar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+.embedTitle{font-size:15px;font-weight:800;color:var(--petrol);flex:1;min-width:120px;}
+.embedExternal{font-size:12px;font-weight:700;color:var(--sage);text-decoration:none;white-space:nowrap;}
+.embedExternal:hover{color:var(--sage-dark);}
+.embedFrame{width:100%;height:78vh;border:none;border-radius:12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);display:block;}
+@media(max-width:760px){.embedFrame{height:70vh;}}
 </style>
 
 <!-- ===== PWA: app instalable ===== -->
@@ -168,6 +178,21 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
     <div class="homegrid" id="areasGrid"></div>
   </div>
 
+  <!-- ===== PANTALLA EMBEBIDA: la herramienta se abre aquí mismo ===== -->
+  <div class="screen" id="screen-embed">
+    <button class="backbtn" data-embed-back>← Volver a herramientas</button>
+    <div class="toolsLayout">
+      <aside class="areaSidebar" id="embedSidebar"></aside>
+      <div class="toolsContent">
+        <div class="embedBar">
+          <div class="embedTitle" id="embedTitle"></div>
+          <a class="embedExternal" id="embedExternalLink" href="#" target="_blank" rel="noopener">Abrir en pestaña nueva ↗</a>
+        </div>
+        <iframe class="embedFrame" id="embedFrame" src="" allow="camera; microphone"></iframe>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== PANTALLAS 3: HERRAMIENTAS POR ÁREA + TIPO ===== -->
 
   <!-- Calidad Manufactura · Dashboards -->
@@ -178,20 +203,20 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Dashboards de auditoría y calidad</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/lineas/" target="_blank" rel="noopener"><div class="tt">Líneas</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/inspeccion/" target="_blank" rel="noopener"><div class="tt">Inspección</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/cliente/" target="_blank" rel="noopener"><div class="tt">Cliente</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/talleres/" target="_blank" rel="noopener"><div class="tt">Talleres</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/segundas-gerencia/" target="_blank" rel="noopener"><div class="tt">Segundas — Gerencia</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/segundas-interno/" target="_blank" rel="noopener"><div class="tt">Segundas — Interno</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/defectos-derivados/" target="_blank" rel="noopener"><div class="tt">Defectos y Derivados por Taller</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-auditoria/dashboard_avances_auditoria.html" target="_blank" rel="noopener"><div class="tt">Avances de Auditoría</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-auditoria-final/Auditoria_Final_EnVivo.html" target="_blank" rel="noopener"><div class="tt">Auditoría Final en Vivo</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-auditoria-final/buscar.html" target="_blank" rel="noopener"><div class="tt">Buscar Auditorías</div><div class="ts">Consulta de auditorías ya enviadas.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-auditorias-visor/" target="_blank" rel="noopener"><div class="tt">Auditorías de Taller</div><div class="ts">Consulta de hojas escaneadas y prendas observadas.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/" target="_blank" rel="noopener"><div class="tt">Buscador de Fichas Técnicas</div><div class="ts">Consulta de fichas técnicas por estilo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/historial.html" target="_blank" rel="noopener"><div class="tt">Mediciones Realizadas</div><div class="ts">Consulta de lo ya medido.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/tablas.html" target="_blank" rel="noopener"><div class="tt">Tablas de Medidas</div><div class="ts">Consulta de tablas de referencia.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/lineas/" role="button" tabindex="0"><div class="tt">Líneas</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/inspeccion/" role="button" tabindex="0"><div class="tt">Inspección</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/cliente/" role="button" tabindex="0"><div class="tt">Cliente</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/talleres/" role="button" tabindex="0"><div class="tt">Talleres</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/segundas-gerencia/" role="button" tabindex="0"><div class="tt">Segundas — Gerencia</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/segundas-interno/" role="button" tabindex="0"><div class="tt">Segundas — Interno</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/defectos-derivados/" role="button" tabindex="0"><div class="tt">Defectos y Derivados por Taller</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria/dashboard_avances_auditoria.html" role="button" tabindex="0"><div class="tt">Avances de Auditoría</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria-final/Auditoria_Final_EnVivo.html" role="button" tabindex="0"><div class="tt">Auditoría Final en Vivo</div><div class="ts">Dashboard de calidad.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria-final/buscar.html" role="button" tabindex="0"><div class="tt">Buscar Auditorías</div><div class="ts">Consulta de auditorías ya enviadas.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditorias-visor/" role="button" tabindex="0"><div class="tt">Auditorías de Taller</div><div class="ts">Consulta de hojas escaneadas y prendas observadas.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/" role="button" tabindex="0"><div class="tt">Buscador de Fichas Técnicas</div><div class="ts">Consulta de fichas técnicas por estilo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/historial.html" role="button" tabindex="0"><div class="tt">Mediciones Realizadas</div><div class="ts">Consulta de lo ya medido.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/tablas.html" role="button" tabindex="0"><div class="tt">Tablas de Medidas</div><div class="ts">Consulta de tablas de referencia.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -206,10 +231,10 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Formulario de campo</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-auditoria/" target="_blank" rel="noopener"><div class="tt">Avances de Auditoría</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-auditoria-final/" target="_blank" rel="noopener"><div class="tt">Auditoría de Calidad (AC-009-25)</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-auditorias-taller/" target="_blank" rel="noopener"><div class="tt">Captura de Auditorías</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/inspeccion-final-costura/" target="_blank" rel="noopener"><div class="tt">Inspección Final Costura</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria/" role="button" tabindex="0"><div class="tt">Avances de Auditoría</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria-final/" role="button" tabindex="0"><div class="tt">Auditoría de Calidad (AC-009-25)</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditorias-taller/" role="button" tabindex="0"><div class="tt">Captura de Auditorías</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/" role="button" tabindex="0"><div class="tt">Inspección Final Costura</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -224,7 +249,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Check List de Orden y Limpieza</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/checklist-orden-limpieza/dashboard.html" target="_blank" rel="noopener"><div class="tt">Check List de Orden y Limpieza — Semana en vivo</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/checklist-orden-limpieza/dashboard.html" role="button" tabindex="0"><div class="tt">Check List de Orden y Limpieza — Semana en vivo</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -239,7 +264,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Check List de Orden y Limpieza</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/checklist-orden-limpieza/" target="_blank" rel="noopener"><div class="tt">Check List de Orden y Limpieza</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/checklist-orden-limpieza/" role="button" tabindex="0"><div class="tt">Check List de Orden y Limpieza</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -254,8 +279,8 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Acabados</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/formulario-acabados/dashboard_acabados_v2.html" target="_blank" rel="noopener"><div class="tt">Dashboard Acabados</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/formulario_corte/dashboard_corte.html" target="_blank" rel="noopener"><div class="tt">Dashboard de Corte</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario-acabados/dashboard_acabados_v2.html" role="button" tabindex="0"><div class="tt">Dashboard Acabados</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario_corte/dashboard_corte.html" role="button" tabindex="0"><div class="tt">Dashboard de Corte</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -270,8 +295,8 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Acabados</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/formulario-acabados/formulario_acabados.html" target="_blank" rel="noopener"><div class="tt">Eficiencia e incentivos</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/formulario_corte/" target="_blank" rel="noopener"><div class="tt">Corte — Registro Diario</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario-acabados/formulario_acabados.html" role="button" tabindex="0"><div class="tt">Eficiencia e incentivos</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario_corte/" role="button" tabindex="0"><div class="tt">Corte — Registro Diario</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -286,7 +311,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Sistema de Movilidades</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-movilidades/mov_dashboard.html" target="_blank" rel="noopener"><div class="tt">Dashboard de Movilidades</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-movilidades/mov_dashboard.html" role="button" tabindex="0"><div class="tt">Dashboard de Movilidades</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -301,9 +326,9 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Sistema de Movilidades</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-movilidades/solicitud_movilidad.html" target="_blank" rel="noopener"><div class="tt">Solicitud de Movilidad</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-movilidades/sara_programacion.html" target="_blank" rel="noopener"><div class="tt">Programación de Movilidades</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-movilidades/chofer_entregas.html" target="_blank" rel="noopener"><div class="tt">Mis Entregas</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-movilidades/solicitud_movilidad.html" role="button" tabindex="0"><div class="tt">Solicitud de Movilidad</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-movilidades/sara_programacion.html" role="button" tabindex="0"><div class="tt">Programación de Movilidades</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-movilidades/chofer_entregas.html" role="button" tabindex="0"><div class="tt">Mis Entregas</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -318,22 +343,22 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Flujo de Tela</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/pcp-flujo-tela/flujo-tela-cruda/" target="_blank" rel="noopener"><div class="tt">Flujo de Llegada de Tela Cruda</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/pcp-flujo-tela/flujo-tela-acabada/" target="_blank" rel="noopener"><div class="tt">Flujo de Llegada de Tela Acabada</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/pcp-flujo-tela/flujo-tela-cruda/" role="button" tabindex="0"><div class="tt">Flujo de Llegada de Tela Cruda</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/pcp-flujo-tela/flujo-tela-acabada/" role="button" tabindex="0"><div class="tt">Flujo de Llegada de Tela Acabada</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
     <div class="sectitle">Flujo de Costura y Móvil Acabados</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/pcp-flujo-tela/torre-control/" target="_blank" rel="noopener"><div class="tt">Torre de Control PCP</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/pcp-flujo-tela/flujo-costura/" target="_blank" rel="noopener"><div class="tt">Flujo Mínimo de Costura</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/pcp-flujo-tela/flujo-movil-acabados/" target="_blank" rel="noopener"><div class="tt">Flujo Móvil de Acabados</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/pcp-flujo-tela/torre-control/" role="button" tabindex="0"><div class="tt">Torre de Control PCP</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/pcp-flujo-tela/flujo-costura/" role="button" tabindex="0"><div class="tt">Flujo Mínimo de Costura</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/pcp-flujo-tela/flujo-movil-acabados/" role="button" tabindex="0"><div class="tt">Flujo Móvil de Acabados</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
     <div class="sectitle">Flujo de Corte</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/pcp-flujo-tela/flujo-corte/" target="_blank" rel="noopener"><div class="tt">Flujo de Corte — Mínimo y Ejecutado</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/pcp-flujo-tela/flujo-corte/" role="button" tabindex="0"><div class="tt">Flujo de Corte — Mínimo y Ejecutado</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
     <div class="sectitle">Seguimiento de Partidas</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/seguimiento-partidas/observadores.html" target="_blank" rel="noopener"><div class="tt">Vista Observadores</div><div class="ts">Consulta de solo lectura.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/seguimiento-partidas/observadores.html" role="button" tabindex="0"><div class="tt">Vista Observadores</div><div class="ts">Consulta de solo lectura.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -348,12 +373,12 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Seguimiento de Partidas</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/seguimiento-partidas/seguimiento.html" target="_blank" rel="noopener"><div class="tt">Seguimiento de Partidas</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/seguimiento-partidas/actualizar.html" target="_blank" rel="noopener"><div class="tt">Actualizar Partidas</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/seguimiento-partidas/seguimiento.html" role="button" tabindex="0"><div class="tt">Seguimiento de Partidas</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/seguimiento-partidas/actualizar.html" role="button" tabindex="0"><div class="tt">Actualizar Partidas</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
     </div>
     <div class="sectitle">Programa de Corte</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/programa-corte/" target="_blank" rel="noopener"><div class="tt">Programa de Corte</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/programa-corte/" role="button" tabindex="0"><div class="tt">Programa de Corte</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -368,7 +393,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Desempeño Comercial</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/comercial/VINCE.html" target="_blank" rel="noopener"><div class="tt">VINCE — Desempeño Comercial</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/comercial/VINCE.html" role="button" tabindex="0"><div class="tt">VINCE — Desempeño Comercial</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -383,7 +408,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Tienda LIVES</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/Tienda-lives/ventas.html" target="_blank" rel="noopener"><div class="tt">Dashboard de Gerencia</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/Tienda-lives/ventas.html" role="button" tabindex="0"><div class="tt">Dashboard de Gerencia</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -398,7 +423,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Tienda LIVES</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/Tienda-lives/" target="_blank" rel="noopener"><div class="tt">Vender (Punto de Venta)</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/Tienda-lives/" role="button" tabindex="0"><div class="tt">Vender (Punto de Venta)</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -413,7 +438,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Círculo de Mejoras</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/mejoras/" target="_blank" rel="noopener"><div class="tt">Panel de Mejoras</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/mejoras/" role="button" tabindex="0"><div class="tt">Panel de Mejoras</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -428,7 +453,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Sistemas</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/sistemas-contabilidad/gestion_solicitudes.html" target="_blank" rel="noopener"><div class="tt">Gestión de Solicitudes a Sistemas</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/sistemas-contabilidad/gestion_solicitudes.html" role="button" tabindex="0"><div class="tt">Gestión de Solicitudes a Sistemas</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -443,8 +468,8 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Recursos Humanos</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-recursos-humanos/asistencia/" target="_blank" rel="noopener"><div class="tt">Resumen Semanal de Asistencia</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-recursos-humanos/personal/" target="_blank" rel="noopener"><div class="tt">Gestión de Personal</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-recursos-humanos/asistencia/" role="button" tabindex="0"><div class="tt">Resumen Semanal de Asistencia</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-recursos-humanos/personal/" role="button" tabindex="0"><div class="tt">Gestión de Personal</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -459,8 +484,8 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Calidad Textil</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/lives-calidad-textil/aprobacion-tono/" target="_blank" rel="noopener"><div class="tt">Seguimiento Aprobación de Tono</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/segundas/dashboard.html" target="_blank" rel="noopener"><div class="tt">Indicadores de Calidad Textil</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-calidad-textil/aprobacion-tono/" role="button" tabindex="0"><div class="tt">Seguimiento Aprobación de Tono</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/dashboard.html" role="button" tabindex="0"><div class="tt">Indicadores de Calidad Textil</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -475,7 +500,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Calidad Textil</div>
     <div class="tgrid">
-      <a class="tcard" href="https://iaanalistalives-ux.github.io/segundas/" target="_blank" rel="noopener"><div class="tt">Registro y Carga de Calidad Textil</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></a>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/" role="button" tabindex="0"><div class="tt">Registro y Carga de Calidad Textil</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -508,6 +533,64 @@ function showScreen(id){
   if(el) el.classList.add('active');
   window.scrollTo(0,0);
 }
+
+var currentEmbedOrigin = null;
+
+function openEmbed(cardEl){
+  var url = cardEl.dataset.url;
+  var title = cardEl.querySelector('.tt') ? cardEl.querySelector('.tt').textContent : '';
+  var originScreen = cardEl.closest('.screen');
+  if(!originScreen) return;
+  currentEmbedOrigin = originScreen.id;
+
+  document.getElementById('embedFrame').src = url;
+  document.getElementById('embedTitle').textContent = title;
+  document.getElementById('embedExternalLink').href = url;
+
+  var sidebar = document.getElementById('embedSidebar');
+  sidebar.innerHTML = '';
+  var titleEl = document.createElement('div');
+  titleEl.className = 'sbTitle';
+  titleEl.textContent = 'Otras herramientas aquí';
+  sidebar.appendChild(titleEl);
+
+  var siblingCards = originScreen.querySelectorAll('.tcard[data-url]');
+  siblingCards.forEach(function(sib){
+    var sibTitle = sib.querySelector('.tt') ? sib.querySelector('.tt').textContent : sib.dataset.url;
+    var item = document.createElement('div');
+    item.className = 'sbItem' + (sib === cardEl ? ' active' : '');
+    item.innerHTML = '<span class="sbIcon">📄</span><span>' + sibTitle + '</span>';
+    item.addEventListener('click', function(){ openEmbed(sib); });
+    sidebar.appendChild(item);
+  });
+
+  var backLink = document.createElement('div');
+  backLink.className = 'sbItem';
+  backLink.style.marginTop = '10px';
+  backLink.style.borderTop = '1px solid var(--warm)';
+  backLink.style.paddingTop = '14px';
+  backLink.innerHTML = '<span class="sbIcon">🔙</span><span>Elegir otra área</span>';
+  backLink.addEventListener('click', function(){ renderAreaList(currentType); });
+  sidebar.appendChild(backLink);
+
+  showScreen('screen-embed');
+}
+
+document.querySelectorAll('.tcard[data-url]').forEach(function(card){
+  card.addEventListener('click', function(){ openEmbed(card); });
+  card.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openEmbed(card); }
+  });
+});
+
+document.querySelector('[data-embed-back]').addEventListener('click', function(){
+  document.getElementById('embedFrame').src = '';
+  if(currentEmbedOrigin){
+    showScreen(currentEmbedOrigin);
+  } else {
+    renderAreaList(currentType);
+  }
+});
 
 function goToTools(area, type){
   currentType = type;
