@@ -225,8 +225,14 @@ body.embedOpen .wrap{padding-top:0;}
   .homecard .hi{width:42px;height:42px;font-size:20px;margin-bottom:7px;}
   .sectitle{font-size:14.5px;margin:2px 0 10px;}
   .tcard{padding:13px 14px;}
-  .toolsLayout{row-gap:10px;}
+  /* En columna, align-items:start encoge los hijos a su contenido: por eso las tarjetas y
+     el marco no llegaban al borde derecho. En móvil todo ocupa el ancho completo. */
+  .toolsLayout{row-gap:10px;align-items:stretch;}
   .toolsLayout .backbtn{justify-self:auto;width:100%;}
+  .toolsLayout .toolsContent{width:100%;min-width:0;}
+  .toolsLayout .areaSidebar{width:100%;}
+  .tgrid{width:100%;}
+  .embedFrame{width:100%;}
 
   /* Herramienta embebida: que ocupe todo el alto que queda, no una fracción fija */
   .embedFrame{height:calc(100vh - 250px);min-height:380px;border-radius:10px;}
