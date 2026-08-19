@@ -178,6 +178,81 @@ body.embedOpen .wrap{padding-top:0;}
 .tcard{cursor:pointer;}
 .embedFrame{width:100%;height:86vh;border:none;border-radius:12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);display:block;}
 @media(max-width:760px){.embedFrame{height:70vh;}}
+
+/* ==================== CELULAR Y TABLET ====================
+   El portal se usa en planta desde el teléfono, así que en pantallas chicas todo se
+   reordena en una sola columna, el header se comprime para no comerse la pantalla y la
+   herramienta embebida ocupa el alto útil real (dvh, que descuenta la barra del navegador). */
+
+/* --- Tablet --- */
+@media(max-width:900px){
+  .wrap{padding:14px 12px 40px;}
+  .header{min-height:auto;padding:12px 16px;gap:14px;}
+  .header img{height:42px;}
+  .divider{height:36px;}
+  .htitle{font-size:19px;}
+  .hcrumb{font-size:14px;}
+  .toolsLayout{column-gap:16px;}
+}
+
+/* --- Celular --- */
+@media(max-width:760px){
+  .wrap{padding:12px 10px 36px;}
+
+  /* Header: dos líneas como máximo, y los botones en una fila deslizable */
+  .header{padding:10px 12px;gap:10px 12px;}
+  .header img{height:34px;}
+  .divider{display:none;}
+  .htitle{font-size:17px;}
+  .hsub{font-size:11.5px;}
+  .hcrumb{font-size:13px;max-width:78vw;}
+  .hcrumb #hcrumbName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .headerActions{width:100%;margin-left:0;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+  .headerActions::-webkit-scrollbar{display:none;}
+  .pinBtn,.installBtn{padding:7px 12px;font-size:11.5px;flex:0 0 auto;}
+
+  /* Inicio */
+  .hero{padding:10px 6px 18px;}
+  .hero .hbig{font-size:19px;}
+  .typecard{padding:24px 16px;}
+  .typecard .ti{font-size:36px;margin-bottom:10px;}
+  .typecard .tn{font-size:17px;}
+  .kpiSection{margin-top:26px;}
+  .kv{font-size:40px;}
+
+  /* Áreas y herramientas */
+  .homecard{padding:14px 10px;}
+  .homecard .hi{width:42px;height:42px;font-size:20px;margin-bottom:7px;}
+  .sectitle{font-size:14.5px;margin:2px 0 10px;}
+  .tcard{padding:13px 14px;}
+  .toolsLayout{row-gap:10px;}
+  .toolsLayout .backbtn{justify-self:auto;width:100%;}
+
+  /* Herramienta embebida: que ocupe todo el alto que queda, no una fracción fija */
+  .embedFrame{height:calc(100vh - 250px);min-height:380px;border-radius:10px;}
+}
+
+/* --- Celular chico --- */
+@media(max-width:480px){
+  .header img{height:30px;}
+  .htitle{font-size:15.5px;}
+  .hsub,.hcrumb{font-size:12px;}
+  .homegrid{gap:9px;}
+  .homecard .ht{font-size:12.5px;}
+  .kv{font-size:36px;}
+  .kspark{display:none;}
+  .embedFrame{height:calc(100vh - 230px);min-height:340px;}
+}
+
+/* Navegadores con soporte de dvh: descuenta de verdad la barra de direcciones */
+@supports (height: 100dvh){
+  @media(max-width:760px){
+    .embedFrame{height:calc(100dvh - 250px);}
+  }
+  @media(max-width:480px){
+    .embedFrame{height:calc(100dvh - 230px);}
+  }
+}
 </style>
 
 <!-- ===== PWA: app instalable ===== -->
