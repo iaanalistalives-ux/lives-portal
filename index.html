@@ -245,7 +245,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
           </div>
         </div>
 
-        <div class="kpiCard" id="kpiInspeccion" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/index.html#tablero">
+        <div class="kpiCard" id="kpiInspeccion" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/dashboard.html">
           <div class="kpiHead">
             <div class="kpiName"><span class="kico">🔍</span>Inspección — Eficiencia</div>
             <div class="kpiPill" id="kpiInspeccionPill">Cargando</div>
@@ -316,7 +316,6 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/" role="button" tabindex="0"><div class="tt">Buscador de Fichas Técnicas</div><div class="ts">Consulta de fichas técnicas por estilo.</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/historial.html" role="button" tabindex="0"><div class="tt">Mediciones Realizadas</div><div class="ts">Consulta de lo ya medido.</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/tablas.html" role="button" tabindex="0"><div class="tt">Tablas de Medidas</div><div class="ts">Consulta de tablas de referencia.</div><div class="ta">Abrir →</div></div>
-      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/index.html#tablero" role="button" tabindex="0"><div class="tt">Tablero de Inspección Final — Costura</div><div class="ts">Eficiencia de inspectoras por línea.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -334,7 +333,6 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria/" role="button" tabindex="0"><div class="tt">Avances de Auditoría</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria-final/" role="button" tabindex="0"><div class="tt">Auditoría de Calidad (AC-009-25)</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditorias-taller/" role="button" tabindex="0"><div class="tt">Captura de Auditorías</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
-      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/" role="button" tabindex="0"><div class="tt">Inspección Final Costura</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -377,6 +375,11 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
     <div class="toolsLayout">
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
+    <div class="sectitle">Inspección Final</div>
+    <div class="tgrid">
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/dashboard.html" role="button" tabindex="0"><div class="tt">Tablero de Inspección Final — Costura</div><div class="ts">Eficiencia de inspectoras por línea.</div><div class="ta">Abrir →</div></div>
+    </div>
+
     <div class="sectitle">Acabados</div>
     <div class="tgrid">
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario-acabados/dashboard_acabados_v2.html" role="button" tabindex="0"><div class="tt">Dashboard Acabados</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
@@ -393,6 +396,11 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
     <div class="toolsLayout">
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
+    <div class="sectitle">Inspección Final</div>
+    <div class="tgrid">
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/" role="button" tabindex="0"><div class="tt">Inspección Final Costura</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+    </div>
+
     <div class="sectitle">Acabados</div>
     <div class="tgrid">
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario-acabados/formulario_acabados.html" role="button" tabindex="0"><div class="tt">Eficiencia e incentivos</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
@@ -1055,7 +1063,7 @@ function cargarKpiSegundas(){
 }
 
 /* --- KPI 2: Inspección Eficiencia --- */
-/* Misma fórmula que inspeccion-final-costura: minutos de trabajo / minutos productivos, donde
+/* Misma fórmula que inspeccion-final-costura/dashboard.html: minutos de trabajo / minutos productivos, donde
    minutos productivos = horas turno - horas improductivas - 45min de refrigerio (turnos >= 4h), dedupe por turno */
 var F_FEC=0, F_HI=9, F_HF=10, F_HIMP=13, F_HTOT=14, F_MIN=17;
 function kpiAgregarHoras(rows){
@@ -1070,7 +1078,8 @@ function kpiAgregarHoras(rows){
     if(f[F_HTOT] >= 4) turnos++;
   });
   var refr = Math.round(turnos * (45/60) * 100) / 100;
-  return {tot: Math.round(tot*100)/100, imp: Math.round(imp*100)/100, prod: Math.max(0, tot - imp - refr)};
+  tot = Math.round(tot*100)/100; imp = Math.round(imp*100)/100;
+  return {tot: tot, imp: imp, prod: Math.round(Math.max(0, tot - imp - refr) * 100) / 100};
 }
 function kpiEficiencia(rows){
   var min = rows.reduce(function(a,f){ return a + (f[F_MIN] || 0); }, 0);
