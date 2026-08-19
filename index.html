@@ -746,20 +746,27 @@ function kpiSegundasWeighted(rows, anio, mes){
 }
 function cargarKpiSegundas(){
   var API_SEG = 'https://script.google.com/macros/s/AKfycbzZpAse_qhFJGCjlpWpBHNDiMdCcM9GfqQO1LcP16Kx4z6R1FMzbfqV6YDI9jYuM60v/exec';
-  var hoy = new Date();
-  var anio = hoy.getFullYear(), mes = hoy.getMonth() + 1;
   kpiJsonp(API_SEG, {action:'read'}).then(function(res){
     if(!res || !res.ok || !res.tot) throw new Error('sin datos');
+    /* Último (año, mes) que sí tiene datos de PIEZA con base > 0 — no el mes calendario actual */
+    var conDatos = res.tot.filter(function(r){ return r.tipo === 'PIEZA' && r.base > 0; });
+    if(!conDatos.length) throw new Error('sin datos con base');
+    conDatos.sort(function(a,b){ return (a.anio - b.anio) || (a.mesNum - b.mesNum); });
+    var ultimo = conDatos[conDatos.length - 1];
+    var anio = ultimo.anio, mes = ultimo.mesNum;
+    var MESES_KPI = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SETIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
     var pMes = kpiSegundasWeighted(res.tot, anio, mes);
     var pAnio = kpiSegundasWeighted(res.tot, anio, null);
     var elV = document.getElementById('kpiSegundasVal');
     var elY = document.getElementById('kpiSegundasYear');
     if(pMes == null){
-      elV.textContent = 'Sin datos del mes'; elV.classList.add('loading');
+      elV.textContent = 'Sin datos'; elV.classList.add('loading');
     } else {
       elV.textContent = (pMes*100).toFixed(2) + '%'; elV.classList.remove('loading');
     }
-    elY.textContent = pAnio != null ? 'Acumulado del año: ' + (pAnio*100).toFixed(2) + '%' : '';
+    var etiquetaMes = MESES_KPI[mes-1] + ' ' + anio;
+    elY.textContent = etiquetaMes + (pAnio != null ? ' · Acumulado del año: ' + (pAnio*100).toFixed(2) + '%' : '');
   }).catch(function(){
     var elV = document.getElementById('kpiSegundasVal');
     elV.textContent = 'No disponible'; elV.classList.add('loading');
