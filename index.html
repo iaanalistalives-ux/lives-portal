@@ -34,7 +34,8 @@ body.embedOpen .hsub{display:none;}
 .openTabBtn{display:none;}
 body.embedOpen .openTabBtn{display:flex;}
 /* Con una herramienta abierta el aire de arriba sobra: el header ya dice dónde estamos */
-body.embedOpen .wrap{padding-top:12px;}
+body.embedOpen .wrap{padding-top:0;}
+#screen-embed .toolsLayout{margin-top:12px;}
 /* En el embed, el botón Volver vive en la columna izquierda y el marco sube a su misma
    altura, en vez de empezar debajo de él. */
 #screen-embed .toolsLayout{display:grid;grid-template-columns:210px 1fr;
@@ -297,8 +298,8 @@ body.embedOpen .wrap{padding-top:12px;}
 
   <!-- ===== PANTALLA EMBEBIDA: la herramienta se abre aquí mismo ===== -->
   <div class="screen" id="screen-embed">
-    <button class="backbtn" data-embed-back>← Volver a herramientas</button>
     <div class="toolsLayout">
+      <button class="backbtn" data-embed-back>← Volver a herramientas</button>
       <aside class="areaSidebar" id="embedSidebar"></aside>
       <div class="toolsContent">
         <iframe class="embedFrame" id="embedFrame" src="" allow="camera; microphone"></iframe>
