@@ -26,6 +26,13 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .divider{width:1px;height:44px;background:rgba(255,255,255,.35);}
 .htitle{color:#fff;font-size:22px;font-weight:700;letter-spacing:.3px;}
 .hsub{color:#F1F6F4;font-size:13px;}
+/* Migaja: cuando hay una herramienta abierta, su nombre vive en el header, no en una barra aparte */
+.hcrumb{display:none;align-items:center;gap:8px;color:#fff;font-size:15px;font-weight:700;margin-top:3px;}
+.hcrumb .sep{color:rgba(255,255,255,.45);font-weight:400;}
+body.embedOpen .hcrumb{display:flex;}
+body.embedOpen .hsub{display:none;}
+.openTabBtn{display:none;}
+body.embedOpen .openTabBtn{display:flex;}
 
 .headerActions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 .pinBtn{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:22px;padding:9px 15px;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:6px;white-space:nowrap;}
@@ -154,11 +161,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 
 /* Pantalla embebida: la herramienta se abre dentro del portal, no en pestaña nueva */
 .tcard{cursor:pointer;}
-.embedBar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
-.embedTitle{font-size:15px;font-weight:800;color:var(--petrol);flex:1;min-width:120px;}
-.embedExternal{font-size:12px;font-weight:700;color:var(--sage);text-decoration:none;white-space:nowrap;}
-.embedExternal:hover{color:var(--sage-dark);}
-.embedFrame{width:100%;height:82vh;border:none;border-radius:12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);display:block;}
+.embedFrame{width:100%;height:86vh;border:none;border-radius:12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);display:block;}
 @media(max-width:760px){.embedFrame{height:70vh;}}
 </style>
 
@@ -189,8 +192,10 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
   <div>
     <div class="htitle">LIVES Portal</div>
     <div class="hsub">Integración de IA · LIVES</div>
+    <div class="hcrumb"><span class="sep">›</span><span id="hcrumbName"></span></div>
   </div>
   <div class="headerActions">
+    <a class="pinBtn openTabBtn" id="embedExternalLink" href="#" target="_blank" rel="noopener">↗ Abrir en pestaña</a>
     <a class="pinBtn" href="https://iaanalistalives-ux.github.io/tablero-proyectos/" target="_blank" rel="noopener">📊 Mi Tablero</a>
     <button class="installBtn hidden" id="installBtn" type="button">
       <svg viewBox="0 0 24 24"><path d="M12 3v10.6l3.3-3.3 1.4 1.4L12 17l-4.7-5.3 1.4-1.4 3.3 3.3V3h0zM5 19h14v2H5v-2z"/></svg>
@@ -283,10 +288,6 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
     <div class="toolsLayout">
       <aside class="areaSidebar" id="embedSidebar"></aside>
       <div class="toolsContent">
-        <div class="embedBar">
-          <div class="embedTitle" id="embedTitle"></div>
-          <a class="embedExternal" id="embedExternalLink" href="#" target="_blank" rel="noopener">Abrir en pestaña nueva ↗</a>
-        </div>
         <iframe class="embedFrame" id="embedFrame" src="" allow="camera; microphone"></iframe>
       </div>
     </div>
@@ -658,6 +659,14 @@ const AREAS = [
 
 var currentType = null;
 
+/* Las áreas se listan siempre en orden alfabético, tanto en la grilla como en el panel
+   lateral. Al agregar un área nueva al catálogo no hay que preocuparse por dónde ponerla. */
+function areasDe(type){
+  return AREAS.filter(function(a){ return a.types.indexOf(type) !== -1; })
+              .slice()
+              .sort(function(x, y){ return x.label.localeCompare(y.label, 'es', {sensitivity:'base'}); });
+}
+
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
   var el = document.getElementById(id);
@@ -675,8 +684,9 @@ function openEmbed(cardEl){
   currentEmbedOrigin = originScreen.id;
 
   document.getElementById('embedFrame').src = url;
-  document.getElementById('embedTitle').textContent = title;
+  document.getElementById('hcrumbName').textContent = title;
   document.getElementById('embedExternalLink').href = url;
+  document.body.classList.add('embedOpen');
 
   var sidebar = document.getElementById('embedSidebar');
   sidebar.innerHTML = '';
@@ -716,6 +726,7 @@ document.querySelectorAll('.tcard[data-url]').forEach(function(card){
 
 document.querySelector('[data-embed-back]').addEventListener('click', function(){
   document.getElementById('embedFrame').src = '';
+  document.body.classList.remove('embedOpen');
   if(currentEmbedOrigin){
     showScreen(currentEmbedOrigin);
   } else {
@@ -739,7 +750,7 @@ function renderSidebar(activeArea, type){
   titleEl.className = 'sbTitle';
   titleEl.textContent = (type === 'dash') ? 'Otras áreas · Dashboards' : 'Otras áreas · Formularios';
   aside.appendChild(titleEl);
-  AREAS.filter(function(a){ return a.types.indexOf(type) !== -1; }).forEach(function(a){
+  areasDe(type).forEach(function(a){
     var item = document.createElement('div');
     item.className = 'sbItem' + (a.id === activeArea ? ' active' : '');
     item.innerHTML = '<span class="sbIcon">' + a.icon + '</span><span>' + a.label + '</span>';
@@ -755,7 +766,7 @@ function renderAreaList(type){
   document.getElementById('areasTitle').textContent = (type === 'dash') ? 'Dashboards — elige un área' : 'Formularios — elige un área';
   var grid = document.getElementById('areasGrid');
   grid.innerHTML = '';
-  AREAS.filter(function(a){ return a.types.indexOf(type) !== -1; }).forEach(function(a){
+  areasDe(type).forEach(function(a){
     var div = document.createElement('div');
     div.className = 'homecard';
     div.style.setProperty('--accent', a.accent);
