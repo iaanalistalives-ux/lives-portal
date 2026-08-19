@@ -39,12 +39,12 @@ body.embedOpen .wrap{padding-top:12px;}
    altura, en vez de empezar debajo de él. */
 #screen-embed .toolsLayout{display:grid;grid-template-columns:210px 1fr;
   grid-template-rows:auto 1fr;column-gap:22px;row-gap:12px;align-items:start;}
-#screen-embed .backbtn{grid-column:1;grid-row:1;margin-bottom:0;width:100%;justify-content:center;}
+#screen-embed .backbtn{grid-column:1;grid-row:1;margin-bottom:0;justify-self:start;}
 #screen-embed .areaSidebar{grid-column:1;grid-row:2;flex:none;width:100%;}
 #screen-embed .toolsContent{grid-column:2;grid-row:1 / span 2;}
 @media(max-width:760px){
   #screen-embed .toolsLayout{display:flex;flex-direction:column;}
-  #screen-embed .backbtn{width:auto;margin-bottom:10px;}
+  #screen-embed .backbtn{margin-bottom:10px;}
 }
 
 .headerActions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
