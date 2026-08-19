@@ -186,7 +186,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
     <div class="kpiSection">
       <div class="kpiSectionTitle">Cómo vamos</div>
       <div class="kpiRow">
-        <div class="kpiCard" id="kpiSegundas" data-url="https://iaanalistalives-ux.github.io/segundas/dashboard.html">
+        <div class="kpiCard" id="kpiSegundas" data-url="https://iaanalistalives-ux.github.io/segundas/segundas.html">
           <div class="kl">Segundas — Textil</div>
           <div class="kv loading" id="kpiSegundasVal">Cargando…</div>
           <div class="ky" id="kpiSegundasYear"></div>
@@ -517,7 +517,10 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
     <div class="sectitle">Calidad Textil</div>
     <div class="tgrid">
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-calidad-textil/aprobacion-tono/" role="button" tabindex="0"><div class="tt">Seguimiento Aprobación de Tono</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
-      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/dashboard.html" role="button" tabindex="0"><div class="tt">Indicadores de Calidad Textil</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/segundas.html" role="button" tabindex="0"><div class="tt">Segundas Piezas-Prendas</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/corte.html" role="button" tabindex="0"><div class="tt">Rechazos de Corte</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/defectos.html" role="button" tabindex="0"><div class="tt">Seguimiento Defectos Textiles</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/tintoreria.html" role="button" tabindex="0"><div class="tt">Reporte Diario Tintorería</div><div class="ts">Panel operativo.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -532,7 +535,12 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
       <div class="toolsContent">
     <div class="sectitle">Calidad Textil</div>
     <div class="tgrid">
-      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/" role="button" tabindex="0"><div class="tt">Registro y Carga de Calidad Textil</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/form-corte.html" role="button" tabindex="0"><div class="tt">Auditoría de Corte</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/form-defectos.html" role="button" tabindex="0"><div class="tt">Defectos Textiles</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/form-tintoreria.html" role="button" tabindex="0"><div class="tt">Reporte Diario Tintorería</div><div class="ts">Formulario de campo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/carga-segundas.html" role="button" tabindex="0"><div class="tt">Subir Segundas del Mes</div><div class="ts">Carga de archivo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/carga-corte.html" role="button" tabindex="0"><div class="tt">Subir Rechazos de Corte</div><div class="ts">Carga de archivo.</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/segundas/partidas-revisadas.html" role="button" tabindex="0"><div class="tt">Partidas Revisadas</div><div class="ts">Consulta de registros.</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -734,7 +742,7 @@ function kpiJsonp(url, params){
 }
 
 /* --- KPI 1: Segundas Textil --- */
-/* Misma fórmula que segundas/dashboard.html: % ponderado = suma(segundas) / suma(base), tipo PIEZA */
+/* Misma fórmula que segundas/segundas.html: % ponderado = suma(segundas) / suma(base), tipo PIEZA */
 function kpiSegundasWeighted(rows, anio, mes){
   var f = rows.filter(function(r){
     return r.tipo === 'PIEZA' && r.anio === anio && (mes == null || r.mesNum === mes) && r.base > 0;
