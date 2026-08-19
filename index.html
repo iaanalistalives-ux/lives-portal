@@ -76,9 +76,10 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .typecard.formT{border-top:5px solid var(--taupe);}
 
 /* Tarjetas KPI: indicadores en vivo en la pantalla de inicio (estilo alerta) */
-.kpiSection{max-width:1180px;margin:40px auto 0;}
+.kpiSection{max-width:1400px;margin:40px auto 0;}
 .kpiSectionTitle{font-size:11px;font-weight:800;color:var(--stone);text-transform:uppercase;letter-spacing:.8px;text-align:center;margin-bottom:14px;}
-.kpiRow{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+/* auto-fit: las tarjetas se reacomodan solas al agregar KPIs (2, 3, 4 por fila segun quepan) */
+.kpiRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;}
 @media(max-width:620px){.kpiRow{grid-template-columns:1fr;}}
 
 .kpiCard{--st:#5B6B66;--stSoft:rgba(91,107,102,.10);
@@ -91,7 +92,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .kpiCard.bad{--st:#B42318;--stSoft:rgba(180,35,24,.11);}
 .kpiCard.flat{--st:#0E3B36;--stSoft:rgba(14,59,54,.09);}
 
-.kpiHead{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative;z-index:1;}
+.kpiHead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;position:relative;z-index:1;}
 .kpiName{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:var(--petrol);letter-spacing:.2px;}
 .kpiName .kico{font-size:16px;}
 .kpiPill{display:inline-flex;align-items:center;gap:5px;background:var(--st);color:#fff;font-size:10.5px;font-weight:800;
@@ -99,16 +100,18 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .kpiCard.bad .kpiPill{animation:kpulse 2.2s ease-in-out infinite;}
 @keyframes kpulse{0%,100%{box-shadow:0 0 0 0 rgba(180,35,24,.45);}50%{box-shadow:0 0 0 7px rgba(180,35,24,0);}}
 
-.kpiBody{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-top:12px;position:relative;z-index:1;}
+.kpiBody{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:12px;position:relative;z-index:1;}
 .kpiNums{min-width:0;}
-.kv{font-size:54px;font-weight:800;color:var(--st);line-height:.95;letter-spacing:-1.5px;}
-.kv .ku{font-size:26px;letter-spacing:0;margin-left:1px;}
+.kv{font-size:clamp(38px,4.4vw,54px);font-weight:800;color:var(--st);line-height:.95;letter-spacing:-1.5px;}
+.kv .ku{font-size:.48em;letter-spacing:0;margin-left:1px;}
 .kv.loading{font-size:17px;font-weight:700;color:var(--stone);letter-spacing:0;}
 .kperiodo{font-size:12px;font-weight:800;color:var(--stone);text-transform:uppercase;letter-spacing:.5px;margin-top:7px;}
 .kdelta{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:var(--st);margin-top:8px;}
 .kdelta .kar{font-size:15px;line-height:1;}
 .kdelta small{font-weight:700;color:var(--stone);font-size:11.5px;}
-.kspark{flex:0 0 auto;opacity:.95;}
+.kmeta{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:800;color:var(--stone);margin-top:7px;}
+.kmeta b{color:var(--st);}
+.kspark{flex:0 0 auto;opacity:.95;margin-left:auto;}
 
 .kpiFoot{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
   margin-top:14px;padding-top:10px;border-top:1px dashed var(--warm);position:relative;z-index:1;}
@@ -231,6 +234,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
               <div class="kv loading" id="kpiSegundasVal"><span class="kskel"></span></div>
               <div class="kperiodo" id="kpiSegundasPeriodo"></div>
               <div class="kdelta" id="kpiSegundasDelta"></div>
+              <div class="kmeta" id="kpiSegundasMeta"></div>
             </div>
             <div class="kspark" id="kpiSegundasSpark"></div>
           </div>
@@ -251,6 +255,7 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
               <div class="kv loading" id="kpiInspeccionVal"><span class="kskel"></span></div>
               <div class="kperiodo" id="kpiInspeccionPeriodo"></div>
               <div class="kdelta" id="kpiInspeccionDelta"></div>
+              <div class="kmeta" id="kpiInspeccionMeta"></div>
             </div>
             <div class="kspark" id="kpiInspeccionSpark"></div>
           </div>
@@ -833,10 +838,11 @@ function kpiHace(ts){
 }
 
 /* --- Mini gráfico de tendencia (SVG, sin librerías) --- */
-function kpiSpark(serie, color){
+function kpiSpark(serie, color, meta){
   if(!serie || serie.length < 2) return '';
   var W = 132, H = 46, P = 4;
   var vals = serie.map(function(p){ return p.v; });
+  if(meta != null) vals = vals.concat([meta]);
   var mx = Math.max.apply(null, vals), mn = Math.min.apply(null, vals);
   var rango = (mx - mn) || 1;
   var px = serie.map(function(p, i){
@@ -847,14 +853,26 @@ function kpiSpark(serie, color){
   var linea = px.map(function(c, i){ return (i ? 'L' : 'M') + c[0].toFixed(1) + ' ' + c[1].toFixed(1); }).join(' ');
   var area = linea + ' L' + px[px.length-1][0].toFixed(1) + ' ' + H + ' L' + px[0][0].toFixed(1) + ' ' + H + ' Z';
   var ult = px[px.length-1];
+  var lmeta = '';
+  if(meta != null){
+    var ym = H - P - ((meta - mn) / rango) * (H - P*2);
+    lmeta = '<line x1="0" y1="' + ym.toFixed(1) + '" x2="' + W + '" y2="' + ym.toFixed(1) +
+            '" stroke="#5B6B66" stroke-width="1.3" stroke-dasharray="3 3" opacity=".75"></line>';
+  }
   return '<svg width="' + W + '" height="' + (H + 13) + '" viewBox="0 0 ' + W + ' ' + (H + 13) + '" aria-hidden="true">' +
-    '<path d="' + area + '" fill="' + color + '" opacity=".12"></path>' +
+    '<path d="' + area + '" fill="' + color + '" opacity=".12"></path>' + lmeta +
     '<path d="' + linea + '" fill="none" stroke="' + color + '" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"></path>' +
     '<circle cx="' + ult[0].toFixed(1) + '" cy="' + ult[1].toFixed(1) + '" r="3.6" fill="' + color + '"></circle>' +
     '<text x="0" y="' + (H + 11) + '" font-size="9" fill="#5B6B66" font-weight="700">' + serie[0].lab + '</text>' +
     '<text x="' + W + '" y="' + (H + 11) + '" font-size="9" fill="#5B6B66" font-weight="700" text-anchor="end">' + serie[serie.length-1].lab + '</text>' +
     '</svg>';
 }
+
+/* --- Metas acordadas. Sin meta, la tarjeta compara solo contra el mes anterior. --- */
+var KPI_METAS = {
+  kpiSegundas:   2.5,   /* Segundas Textil: maximo 2.5% */
+  kpiInspeccion: null   /* Eficiencia de Inspeccion: meta pendiente de definir */
+};
 
 /* --- Pintado de una tarjeta --- */
 /* d = {val, dec, periodo, prev, prevPeriodo, serie, anual, mejorEs} — mejorEs: 'bajo' o 'alto' */
@@ -868,29 +886,49 @@ function kpiPintar(id, d, ts, offline){
   var elF = document.getElementById(id + 'Fresh');
   var elPill = document.getElementById(id + 'Pill');
 
+  var elM = document.getElementById(id + 'Meta');
+  var meta = KPI_METAS[id];
+
   card.classList.remove('ok','bad','flat');
   elV.classList.remove('loading');
   elV.innerHTML = d.val.toFixed(d.dec) + '<span class="ku">%</span>';
   elP.textContent = d.periodo;
 
-  var estado = 'flat', etiqueta = 'Sin comparativo', flecha = '', txt = '';
+  /* Movimiento contra el mes anterior: siempre se muestra como dato de apoyo */
+  var flecha = '', txt = '', mejoro = null;
   if(d.prev != null){
     var dif = d.val - d.prev;
-    var mejor = (d.mejorEs === 'bajo') ? (dif < 0) : (dif > 0);
     if(Math.abs(dif) < 0.005){
-      estado = 'flat'; etiqueta = 'Igual que antes'; flecha = '='; 
-      txt = 'sin cambio <small>vs ' + d.prevPeriodo + '</small>';
+      flecha = '='; txt = 'sin cambio <small>vs ' + d.prevPeriodo + '</small>';
     } else {
-      estado = mejor ? 'ok' : 'bad';
-      etiqueta = mejor ? 'Vamos mejor' : 'Atención';
+      mejoro = (d.mejorEs === 'bajo') ? (dif < 0) : (dif > 0);
       flecha = (dif < 0) ? '▼' : '▲';
       txt = Math.abs(dif).toFixed(d.dec) + ' pts <small>vs ' + d.prevPeriodo + ' (' + d.prev.toFixed(d.dec) + '%)</small>';
     }
   }
+
+  /* El color y el veredicto salen de la meta cuando existe; si no, del movimiento del mes */
+  var estado, etiqueta;
+  if(meta != null){
+    var cumple = (d.mejorEs === 'bajo') ? (d.val <= meta) : (d.val >= meta);
+    estado = cumple ? 'ok' : 'bad';
+    etiqueta = cumple ? 'Meta cumplida' : 'Fuera de meta';
+    var brechaN = Math.abs(d.val - meta);
+    var lado = cumple
+      ? (d.mejorEs === 'bajo' ? 'por debajo del máximo' : 'por encima del mínimo')
+      : (d.mejorEs === 'bajo' ? 'por encima del máximo' : 'por debajo del mínimo');
+    var detalle = (brechaN < 0.005) ? 'justo en la meta' : (brechaN.toFixed(d.dec) + ' pts ' + lado);
+    elM.innerHTML = 'Meta ' + meta.toFixed(d.dec) + '% · <b>' + detalle + '</b>';
+  } else {
+    if(mejoro == null){ estado = 'flat'; etiqueta = d.prev != null ? 'Igual que antes' : 'Sin comparativo'; }
+    else { estado = mejoro ? 'ok' : 'bad'; etiqueta = mejoro ? 'Vamos mejor' : 'Atención'; }
+    elM.innerHTML = 'Sin meta definida · el color compara contra el mes anterior';
+  }
+
   card.classList.add(estado);
   elPill.textContent = etiqueta;
   elD.innerHTML = txt ? '<span class="kar">' + flecha + '</span>' + txt : '';
-  elS.innerHTML = kpiSpark(d.serie, C[estado]);
+  elS.innerHTML = kpiSpark(d.serie, C[estado], meta);
 
   var acum = (d.anual != null) ? 'Acumulado del año: ' + d.anual.toFixed(d.dec) + '%' : '';
   var sello = offline ? 'Sin conexión · dato ' + kpiHace(ts) : 'Actualizado ' + kpiHace(ts);
