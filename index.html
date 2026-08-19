@@ -34,9 +34,18 @@ body.embedOpen .hsub{display:none;}
 .openTabBtn{display:none;}
 body.embedOpen .openTabBtn{display:flex;}
 /* Con una herramienta abierta el aire de arriba sobra: el header ya dice dónde estamos */
-body.embedOpen .wrap{padding-top:10px;}
-body.embedOpen #screen-embed .backbtn{margin-bottom:10px;}
-body.embedOpen .header{min-height:78px;}
+body.embedOpen .wrap{padding-top:12px;}
+/* En el embed, el botón Volver vive en la columna izquierda y el marco sube a su misma
+   altura, en vez de empezar debajo de él. */
+#screen-embed .toolsLayout{display:grid;grid-template-columns:210px 1fr;
+  grid-template-rows:auto 1fr;column-gap:22px;row-gap:12px;align-items:start;}
+#screen-embed .backbtn{grid-column:1;grid-row:1;margin-bottom:0;width:100%;justify-content:center;}
+#screen-embed .areaSidebar{grid-column:1;grid-row:2;flex:none;width:100%;}
+#screen-embed .toolsContent{grid-column:2;grid-row:1 / span 2;}
+@media(max-width:760px){
+  #screen-embed .toolsLayout{display:flex;flex-direction:column;}
+  #screen-embed .backbtn{width:auto;margin-bottom:10px;}
+}
 
 .headerActions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 .pinBtn{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:22px;padding:9px 15px;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:6px;white-space:nowrap;}
@@ -199,7 +208,7 @@ body.embedOpen .header{min-height:78px;}
     <div class="hcrumb"><span class="sep">›</span><span id="hcrumbName"></span></div>
   </div>
   <div class="headerActions">
-    <a class="pinBtn openTabBtn" id="embedExternalLink" href="#" target="_blank" rel="noopener">↗ Abrir en pestaña</a>
+    <a class="pinBtn openTabBtn" id="embedExternalLink" href="#" target="_blank" rel="noopener">↗ Abrir en otra pestaña</a>
     <a class="pinBtn" href="https://iaanalistalives-ux.github.io/tablero-proyectos/" target="_blank" rel="noopener">📊 Mi Tablero</a>
     <button class="installBtn hidden" id="installBtn" type="button">
       <svg viewBox="0 0 24 24"><path d="M12 3v10.6l3.3-3.3 1.4 1.4L12 17l-4.7-5.3 1.4-1.4 3.3 3.3V3h0zM5 19h14v2H5v-2z"/></svg>
@@ -680,49 +689,18 @@ function showScreen(id){
 
 var currentEmbedOrigin = null;
 
-/* Dentro del portal, la herramienta no necesita repetir su propio encabezado: el header de
-   arriba ya dice qué está abierto. Como portal y herramientas viven en el mismo dominio, el
-   portal puede ocultarlo sin tocar cada repo.
-   Regla de seguridad: si ese encabezado lleva controles (botones, selectores, filtros), NO se
-   oculta — solo se le quita el logo y se comprime, porque esconderlo dejaría la herramienta
-   inutilizable. Esto es una capa de compatibilidad: lo definitivo es que cada herramienta
-   detecte que está embebida, como ya hacen los dashboards de segundas. */
+/* Cada herramienta conserva su propio panel verde. Lo único que se le quita es el margen
+   superior, para que ese panel arranque pegado al borde y no quede una franja vacía.
+   Portal y herramientas comparten dominio, así que el portal puede hacerlo sin tocar cada repo. */
 function compactarEmbebido(frame){
   try{
     var doc = frame.contentDocument;
     if(!doc || !doc.body) return;
 
     var st = doc.createElement('style');
-    st.textContent = 'body{padding-top:0 !important;margin-top:0 !important;}';
+    st.textContent = 'body{padding-top:0 !important;margin-top:0 !important;}' +
+                     'body > :first-child{margin-top:0 !important;}';
     doc.head.appendChild(st);
-
-    var hijos = doc.body.children, cab = null;
-    for(var i = 0; i < hijos.length && i < 4; i++){
-      var e = hijos[i];
-      var esCab = (e.tagName === 'HEADER') ||
-                  (e.classList && (e.classList.contains('header') || e.classList.contains('topbar')));
-      if(esCab){ cab = e; break; }
-    }
-    if(!cab) return;
-
-    /* solo cuentan los controles que de verdad se ven: varias herramientas dejan botones
-       ocultos en su encabezado y no deben impedir que se esconda */
-    var controles = cab.querySelectorAll('button, select, input, a[href]:not([href="#"])');
-    var tieneControles = false;
-    for(var c = 0; c < controles.length; c++){
-      var ct = controles[c];
-      if(ct.offsetWidth > 0 || ct.offsetHeight > 0){ tieneControles = true; break; }
-    }
-    if(!tieneControles){
-      cab.style.display = 'none';
-      return;
-    }
-    /* conserva los controles, pero sin el logo repetido y con menos alto */
-    var logo = cab.querySelector('img, svg');
-    if(logo) logo.style.display = 'none';
-    cab.style.paddingTop = '8px';
-    cab.style.paddingBottom = '8px';
-    cab.style.minHeight = '0';
   }catch(e){ /* si algún día una herramienta vive en otro dominio, se deja tal cual */ }
 }
 
