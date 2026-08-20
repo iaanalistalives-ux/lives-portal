@@ -767,9 +767,14 @@ function showScreen(id){
 
 var currentEmbedOrigin = null;
 
-/* Cada herramienta conserva su propio panel verde. Lo único que se le quita es el margen
-   superior, para que ese panel arranque pegado al borde y no quede una franja vacía.
-   Portal y herramientas comparten dominio, así que el portal puede hacerlo sin tocar cada repo. */
+/* Dentro del portal, el nombre de la herramienta ya se ve en el header de arriba, así que su
+   propia banda de título sobra y roba altura útil.
+   Regla: se oculta solo si esa banda NO contiene controles visibles (botones, selectores,
+   enlaces de navegación). Si los tiene, se deja intacta — ocultarla dejaría la herramienta
+   sin sus mandos. Portal y herramientas comparten dominio, por eso el portal puede hacerlo
+   sin modificar cada repo. */
+var CLASES_CABECERA = ['header','lives-header','top-header','app-header','main-header','hdr','top','topbar','head'];
+
 function compactarEmbebido(frame){
   try{
     var doc = frame.contentDocument;
@@ -779,7 +784,58 @@ function compactarEmbebido(frame){
     st.textContent = 'body{padding-top:0 !important;margin-top:0 !important;}' +
                      'body > :first-child{margin-top:0 !important;}';
     doc.head.appendChild(st);
+
+    ocultarPanelesPropios(doc);
+
+    /* buscar la banda de título entre los primeros bloques del documento */
+    var hijos = doc.body.children, cab = null;
+    for(var i = 0; i < hijos.length && i < 6; i++){
+      var e = hijos[i];
+      if(e.tagName === 'SCRIPT' || e.tagName === 'STYLE') continue;
+      var esCab = (e.tagName === 'HEADER');
+      if(!esCab && e.classList){
+        for(var k = 0; k < CLASES_CABECERA.length; k++){
+          if(e.classList.contains(CLASES_CABECERA[k])){ esCab = true; break; }
+        }
+      }
+      if(esCab){ cab = e; break; }
+    }
+    if(!cab) return;
+
+    /* ¿tiene mandos que la persona necesita? solo cuentan los que de verdad se ven */
+    var ctrl = cab.querySelectorAll('button, select, input, textarea, a[href]:not([href="#"])');
+    for(var c = 0; c < ctrl.length; c++){
+      if(ctrl[c].offsetWidth > 0 || ctrl[c].offsetHeight > 0) return;  /* se deja tal cual */
+    }
+    cab.style.display = 'none';
   }catch(e){ /* si algún día una herramienta vive en otro dominio, se deja tal cual */ }
+}
+
+/* Algunas herramientas no traen banda de título sino un panel lateral propio (patrón
+   .shell > nav.side, usado por los formularios de segundas). Dentro del portal ese panel
+   duplica al del portal, y como cada tarjeta ya abre su vista fija, se puede ocultar.
+   En las que llevan una barra superior con título (.topbar) se ocultan solo los textos,
+   nunca la barra entera: ahí vive el botón de menú y sin él la herramienta queda sin
+   navegación. */
+function ocultarPanelesPropios(doc){
+  try{
+    /* solo el patrón de segundas (nav.side): en Tienda LIVES el lateral es aside.side y es
+       navegación real entre secciones, así que no se toca */
+    var nav = doc.querySelector('body > .shell > nav.side');
+    if(nav){
+      nav.style.display = 'none';
+      var shell = nav.parentElement;
+      shell.style.display = 'block';
+      shell.style.gridTemplateColumns = 'none';
+    }
+    var barra = doc.querySelector('.topbar');
+    if(barra){
+      ['.htitle', '.hsub'].forEach(function(sel){
+        var el = barra.querySelector(sel);
+        if(el) el.style.display = 'none';
+      });
+    }
+  }catch(e){}
 }
 
 function openEmbed(cardEl){
