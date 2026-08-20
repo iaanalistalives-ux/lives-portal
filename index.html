@@ -157,9 +157,12 @@ body.embedOpen .wrap{padding-top:0;}
 .homecard .hl{font-size:11px;color:var(--accent);font-weight:700;display:inline-flex;align-items:center;gap:4px;}
 /* Tarjetas de la pantalla propia: mismo aire que las de área, con el color del área a la que
    pertenece cada herramienta y una etiqueta que dice si es panel o registro. */
-.miaGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:6px;}
-@media(max-width:900px){.miaGrid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:420px){.miaGrid{grid-template-columns:1fr;}}
+/* Centradas: crecen hacia los lados y saltan de fila al llenarse, conservando su tamaño */
+#screen-mias .sectitle{text-align:center;}
+.miaGrid{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-bottom:6px;}
+.miaGrid .miacard{flex:0 0 210px;}
+@media(max-width:760px){.miaGrid .miacard{flex:0 0 calc(50% - 7px);}}
+@media(max-width:420px){.miaGrid .miacard{flex:0 0 100%;}}
 .miacard{--accent:#0F7A5A;--accent-rgb:15,122,90;background:#fff;border:1px solid var(--warm);
   border-top:4px solid var(--accent);border-radius:14px;padding:20px 16px;text-align:center;cursor:pointer;
   transition:transform .15s, box-shadow .15s;box-shadow:0 1px 4px rgba(0,0,0,.05);}
@@ -369,7 +372,7 @@ body.conSesion .quienBtn{display:inline-flex;}
   <div class="headerActions">
     <button class="quienBtn" id="quienBtn" type="button" title="Cerrar sesión"><span id="quienNombre"></span> · Salir</button>
     <a class="pinBtn openTabBtn" id="embedExternalLink" href="#" target="_blank" rel="noopener">↗ Abrir en otra pestaña</a>
-    <a class="pinBtn" href="https://iaanalistalives-ux.github.io/tablero-proyectos/" target="_blank" rel="noopener">📊 Mi Tablero</a>
+    <a class="pinBtn" id="miTableroBtn" style="display:none" href="https://iaanalistalives-ux.github.io/tablero-proyectos/" target="_blank" rel="noopener">📊 Mi Tablero</a>
     <button class="installBtn hidden" id="installBtn" type="button">
       <svg viewBox="0 0 24 24"><path d="M12 3v10.6l3.3-3.3 1.4 1.4L12 17l-4.7-5.3 1.4-1.4 3.3 3.3V3h0zM5 19h14v2H5v-2z"/></svg>
       Instalar app
@@ -414,10 +417,10 @@ body.conSesion .quienBtn{display:inline-flex;}
       <div class="hbig" id="miasSaludo">Tus herramientas</div>
       <div class="hsm" id="miasSub">Todo lo que tienes asignado, en un solo lugar.</div>
     </div>
-    <div class="sectitle" id="miasTitDash">📊 Dashboards · para consultar</div>
-    <div class="miaGrid" id="miasDash"></div>
     <div class="sectitle" id="miasTitForm">📝 Formularios · para registrar</div>
     <div class="miaGrid" id="miasForm"></div>
+    <div class="sectitle" id="miasTitDash">📊 Dashboards · para consultar</div>
+    <div class="miaGrid" id="miasDash"></div>
   </div>
 
   <!-- ===== PANTALLA 1: RAÍZ ===== -->
@@ -1055,14 +1058,14 @@ function openEmbed(cardEl){
   var grupos;
   if(originScreen.id === 'screen-mias'){
     grupos = [
-      ['dash', '📊 Dashboards', tarjetasDe(document.getElementById('miasDash'))],
-      ['form', '📝 Formularios', tarjetasDe(document.getElementById('miasForm'))]
+      ['form', '📝 Formularios', tarjetasDe(document.getElementById('miasForm'))],
+      ['dash', '📊 Dashboards', tarjetasDe(document.getElementById('miasDash'))]
     ];
   } else {
     var areaId = originScreen.id.split('-')[1];
     grupos = [
-      ['dash', '📊 Dashboards', tarjetasDe(document.getElementById('tools-' + areaId + '-dash'))],
-      ['form', '📝 Formularios', tarjetasDe(document.getElementById('tools-' + areaId + '-form'))]
+      ['form', '📝 Formularios', tarjetasDe(document.getElementById('tools-' + areaId + '-form'))],
+      ['dash', '📊 Dashboards', tarjetasDe(document.getElementById('tools-' + areaId + '-dash'))]
     ];
   }
 
@@ -1753,9 +1756,28 @@ function pintarMias(lista){
 
 /* ---------- Arranque ---------- */
 
+/* "Mi Tablero" no forma parte del portal: es una herramienta aparte. Solo la ve quien tenga
+   su dirección escrita explícitamente en Permisos. Un permiso TODO no basta, así que el
+   acceso completo al portal no la arrastra. */
+function mostrarMiTablero(){
+  var btn = document.getElementById('miTableroBtn');
+  if(!btn) return;
+  var suyo = false;
+  var destino = btn.href.split('#')[0].replace(/\/$/, '');
+  if(SESION && SESION.permisos){
+    SESION.permisos.forEach(function(p){
+      var v = String(p).trim();
+      if(!v || /^AREA:/i.test(v) || v.toUpperCase() === 'TODO' || v === '*') return;
+      if(v.split('#')[0].replace(/\/$/, '') === destino) suyo = true;
+    });
+  }
+  btn.style.display = suyo ? '' : 'none';
+}
+
 function entrarAlPortal(){
   var lista = aplicarPermisos();
   iniciarKpis();
+  mostrarMiTablero();
   document.body.classList.remove('sinSesion');
   document.body.classList.add('conSesion');
   document.getElementById('quienNombre').textContent = SESION.nombre || SESION.usuario;
