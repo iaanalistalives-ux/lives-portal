@@ -158,6 +158,16 @@ body.embedOpen .wrap{padding-top:0;}
 /* Tarjetas de la pantalla propia: mismo aire que las de área, con el color del área a la que
    pertenece cada herramienta y una etiqueta que dice si es panel o registro. */
 /* Centradas: crecen hacia los lados y saltan de fila al llenarse, conservando su tamaño */
+/* Conmutador para saltar entre paneles y formularios sin volver al inicio */
+.tipoSwitch{display:flex;justify-content:center;gap:8px;margin:0 0 18px;}
+.tipoSwitch button{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1.5px solid var(--warm);
+  color:var(--stone);font-family:inherit;font-size:13px;font-weight:700;padding:9px 18px;border-radius:22px;
+  cursor:pointer;transition:.15s;}
+.tipoSwitch button:hover{border-color:var(--sage);color:var(--sage);}
+.tipoSwitch button.on{background:var(--sage);border-color:var(--sage);color:#fff;}
+@media(max-width:480px){
+  .tipoSwitch button{padding:8px 13px;font-size:12px;}
+}
 #screen-mias .sectitle{text-align:center;}
 .miaGrid{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-bottom:6px;}
 .miaGrid .miacard{flex:0 0 210px;}
@@ -496,6 +506,10 @@ body.conSesion .quienBtn{display:inline-flex;}
   <div class="screen" id="screen-areas">
     <button class="backbtn" data-back="root">← Volver</button>
     <div class="hero"><div class="hbig" id="areasTitle"></div></div>
+    <div class="tipoSwitch" id="areasSwitch">
+      <button type="button" data-sw="form">📝 Formularios</button>
+      <button type="button" data-sw="dash">📊 Dashboards</button>
+    </div>
     <div class="homegrid" id="areasGrid"></div>
   </div>
 
@@ -1134,6 +1148,37 @@ function goToTools(area, type){
   currentType = type;
   showScreen('tools-' + area + '-' + type);
   renderSidebar(area, type);
+  switchDeArea(area, type);
+}
+
+/* Dentro de un área, el mismo par de botones permite pasar de sus paneles a sus formularios
+   sin volver atrás. Solo aparece si esa área tiene los dos tipos para esa persona. */
+function switchDeArea(area, type){
+  var pant = document.getElementById('tools-' + area + '-' + type);
+  if(!pant) return;
+  var cont = pant.querySelector('.toolsContent');
+  if(!cont) return;
+
+  var viejo = cont.querySelector('.tipoSwitch');
+  if(viejo) viejo.parentNode.removeChild(viejo);
+
+  var ar = AREAS.filter(function(a){ return a.id === area; })[0];
+  if(!ar || ar.types.length < 2) return;
+
+  var sw = document.createElement('div');
+  sw.className = 'tipoSwitch';
+  sw.style.justifyContent = 'flex-start';
+  sw.style.marginBottom = '16px';
+  [['form','📝 Formularios'], ['dash','📊 Dashboards']].forEach(function(g){
+    if(ar.types.indexOf(g[0]) === -1) return;
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = g[1];
+    if(g[0] === type) b.className = 'on';
+    b.addEventListener('click', function(){ if(g[0] !== type) goToTools(area, g[0]); });
+    sw.appendChild(b);
+  });
+  cont.insertBefore(sw, cont.firstChild);
 }
 
 function renderSidebar(activeArea, type){
@@ -1160,6 +1205,16 @@ function renderSidebar(activeArea, type){
 function renderAreaList(type){
   currentType = type;
   document.getElementById('areasTitle').textContent = (type === 'dash') ? 'Dashboards — elige un área' : 'Formularios — elige un área';
+
+  /* El conmutador solo aparece si la persona tiene áreas de los dos tipos: para quien solo
+     tenga dashboards sería un botón que no lleva a ninguna parte. */
+  var sw = document.getElementById('areasSwitch');
+  var hayDash = areasDe('dash').length > 0;
+  var hayForm = areasDe('form').length > 0;
+  sw.style.display = (hayDash && hayForm) ? 'flex' : 'none';
+  sw.querySelectorAll('button').forEach(function(b){
+    b.classList.toggle('on', b.dataset.sw === type);
+  });
   var grid = document.getElementById('areasGrid');
   grid.innerHTML = '';
   areasDe(type).forEach(function(a){
@@ -1173,6 +1228,10 @@ function renderAreaList(type){
   });
   showScreen('screen-areas');
 }
+
+document.querySelectorAll('#areasSwitch button').forEach(function(b){
+  b.addEventListener('click', function(){ renderAreaList(b.dataset.sw); });
+});
 
 document.querySelectorAll('.typecard').forEach(function(c){
   c.addEventListener('click', function(){ renderAreaList(c.dataset.type); });
