@@ -176,6 +176,17 @@ body.embedOpen .wrap{padding-top:0;}
 /* Pantalla embebida: la herramienta se abre dentro del portal, no en pestaña nueva */
 .tcard{cursor:pointer;}
 .embedFrame{width:100%;height:86vh;border:none;border-radius:12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.06);display:block;}
+/* El marco no se muestra hasta que su panel de título ya está oculto: así no hay parpadeo,
+   sin depender de ganarle por milisegundos al pintado del navegador. */
+.embedBox{position:relative;}
+.embedFrame{opacity:0;transition:opacity .12s ease;}
+.embedBox.listo .embedFrame{opacity:1;}
+.embedLoader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.embedBox.listo .embedLoader{display:none;}
+.embedLoader .sp{width:34px;height:34px;border-radius:50%;border:3px solid #E4EAE7;border-top-color:var(--sage);animation:spin .8s linear infinite;}
+.embedLoader .tx{font-size:12.5px;font-weight:700;color:var(--stone);}
+@keyframes spin{to{transform:rotate(360deg);}}
 @media(max-width:760px){.embedFrame{height:70vh;}}
 
 /* ==================== CELULAR Y TABLET ====================
@@ -383,7 +394,10 @@ body.embedOpen .wrap{padding-top:0;}
       <button class="backbtn" data-embed-back>← Volver a herramientas</button>
       <aside class="areaSidebar" id="embedSidebar"></aside>
       <div class="toolsContent">
-        <iframe class="embedFrame" id="embedFrame" src="" allow="camera; microphone"></iframe>
+        <div class="embedBox" id="embedBox">
+          <iframe class="embedFrame" id="embedFrame" src="" allow="camera; microphone"></iframe>
+          <div class="embedLoader"><div class="sp"></div><div class="tx" id="embedLoaderTxt">Abriendo…</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -812,21 +826,39 @@ function inyectarEstiloEmbed(frame){
   }catch(e){ return false; }
 }
 
-/* Se vigila desde que se pide la página hasta que termina de cargar: si el documento se
-   reemplaza a mitad de camino, el estilo se vuelve a poner antes del primer pintado. */
+/* El marco arranca invisible. Se vigila la carga y en cuanto el documento real existe se le
+   pone el estilo y se muestra: el usuario ve el indicador del portal y después la herramienta
+   ya limpia, nunca el paso intermedio. Mientras tanto el estilo se reinyecta por si el
+   documento se reemplaza a mitad de camino. */
+function mostrarEmbed(){
+  var box = document.getElementById('embedBox');
+  if(box) box.classList.add('listo');
+}
+
 function vigilarEmbed(frame){
   if(_pollEmbed) clearInterval(_pollEmbed);
+  var box = document.getElementById('embedBox');
+  if(box) box.classList.remove('listo');
   var intentos = 0;
   _pollEmbed = setInterval(function(){
     intentos++;
-    inyectarEstiloEmbed(frame);
-    var listo = false;
-    try{
-      var d = frame.contentDocument;
-      listo = !!(d && d.URL && d.URL !== 'about:blank' &&
-                 d.readyState === 'complete' && d.getElementById(CSS_EMBED_ID));
-    }catch(e){}
-    if(listo || intentos > 1500){ clearInterval(_pollEmbed); _pollEmbed = null; }
+    var puesto = inyectarEstiloEmbed(frame);
+    var d = null;
+    try{ d = frame.contentDocument; }catch(e){}
+    var estado = (d && d.readyState) ? d.readyState : '';
+
+    /* con el cuerpo ya disponible y el estilo aplicado, se puede mostrar sin riesgo */
+    if(puesto && d && d.body && (estado === 'interactive' || estado === 'complete')){
+      compactarEmbebido(frame);
+      mostrarEmbed();
+      if(estado === 'complete'){ clearInterval(_pollEmbed); _pollEmbed = null; }
+      return;
+    }
+    /* red de seguridad: si algo impide comprobarlo, se muestra igual a los ~8 segundos */
+    if(intentos > 1000){
+      mostrarEmbed();
+      clearInterval(_pollEmbed); _pollEmbed = null;
+    }
   }, 8);
 }
 
@@ -871,10 +903,12 @@ function openEmbed(cardEl){
   currentEmbedOrigin = originScreen.id;
 
   var frame = document.getElementById('embedFrame');
-  frame.onload = function(){ compactarEmbebido(frame); };
+  frame.onload = function(){ compactarEmbebido(frame); mostrarEmbed(); };
   frame.src = url;
   vigilarEmbed(frame);
   document.getElementById('hcrumbName').textContent = title;
+  var lt = document.getElementById('embedLoaderTxt');
+  if(lt) lt.textContent = 'Abriendo ' + title + '…';
   document.getElementById('embedExternalLink').href = url;
   document.body.classList.add('embedOpen');
 
@@ -916,6 +950,7 @@ document.querySelectorAll('.tcard[data-url]').forEach(function(card){
 
 document.querySelector('[data-embed-back]').addEventListener('click', function(){
   if(_pollEmbed){ clearInterval(_pollEmbed); _pollEmbed = null; }
+  document.getElementById('embedBox').classList.remove('listo');
   document.getElementById('embedFrame').src = '';
   document.body.classList.remove('embedOpen');
   if(currentEmbedOrigin){
