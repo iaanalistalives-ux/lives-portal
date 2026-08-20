@@ -937,7 +937,7 @@ var CSS_EMBED = [
   /* panel lateral propio del patrón de segundas */
   '.shell > nav.side{display:none !important;}',
   /* barra superior con título: solo los textos, nunca la barra */
-  '.topbar .htitle, .topbar .hsub{display:none !important;}'
+  '.topbar{display:none !important;}'
 ].join('');
 
 var _pollEmbed = null;
@@ -1019,7 +1019,7 @@ function compactarEmbebido(frame){
 
     var candidatos = doc.querySelectorAll(
       'body > header, body > .header, body > .top-header, body > .lives-header,' +
-      'body > .app-header, body > .main-header, body > .hdr, body > .top, body > .head');
+      'body > .app-header, body > .main-header, body > .hdr, body > .top, body > .head, .topbar');
 
     for(var i = 0; i < candidatos.length; i++){
       var cab = candidatos[i];
@@ -1930,10 +1930,16 @@ document.getElementById('refrescarBtn').addEventListener('click', function(){
       btn.classList.add('girando');
       btn.textContent = '↻ Actualizando…';
       document.getElementById('embedBox').classList.remove('listo');
+      /* GitHub guarda una copia de cada página unos minutos. Al pulsar Actualizar se le añade
+         una marca de tiempo para forzar que traiga la versión recién publicada. La navegación
+         normal no la lleva, para no perder la ventaja de la copia guardada. */
+      var limpia = url.split('#')[0];
+      var hash = url.indexOf('#') !== -1 ? url.slice(url.indexOf('#')) : '';
+      var fresca = limpia + (limpia.indexOf('?') !== -1 ? '&' : '?') + '_r=' + Date.now() + hash;
       frame.src = 'about:blank';
       setTimeout(function(){
-        frame.src = url;
-        vigilarEmbed(frame, url);
+        frame.src = fresca;
+        vigilarEmbed(frame, fresca);
         setTimeout(function(){ btn.classList.remove('girando'); btn.textContent = '↻ Actualizar'; }, 900);
       }, 60);
       return;
