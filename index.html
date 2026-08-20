@@ -787,17 +787,22 @@ var CSS_EMBED = [
   'body > .app-header, body > .main-header, body > .hdr, body > .top, body > .head',
   '{display:none !important;}',
   /* panel lateral propio del patrón de segundas */
-  'body > .shell > nav.side{display:none !important;}',
+  '.shell > nav.side{display:none !important;}',
   /* barra superior con título: solo los textos, nunca la barra */
   '.topbar .htitle, .topbar .hsub{display:none !important;}'
 ].join('');
 
 var _pollEmbed = null;
 
+/* Devuelve true solo si el estilo quedó puesto en el documento de la herramienta.
+   Ojo: al asignar la dirección, el marco todavía contiene el documento anterior durante unos
+   milisegundos; inyectar ahí no sirve de nada y el panel alcanza a verse. Por eso se descarta
+   cualquier documento en blanco y se vuelve a inyectar cada vez que el documento cambia. */
 function inyectarEstiloEmbed(frame){
   try{
     var doc = frame.contentDocument;
     if(!doc || !doc.head) return false;
+    if(!doc.URL || doc.URL === 'about:blank') return false;
     if(doc.getElementById(CSS_EMBED_ID)) return true;
     var st = doc.createElement('style');
     st.id = CSS_EMBED_ID;
@@ -807,13 +812,21 @@ function inyectarEstiloEmbed(frame){
   }catch(e){ return false; }
 }
 
-/* Se intenta desde el instante en que se asigna la dirección, sin esperar a que cargue */
+/* Se vigila desde que se pide la página hasta que termina de cargar: si el documento se
+   reemplaza a mitad de camino, el estilo se vuelve a poner antes del primer pintado. */
 function vigilarEmbed(frame){
   if(_pollEmbed) clearInterval(_pollEmbed);
   var intentos = 0;
   _pollEmbed = setInterval(function(){
     intentos++;
-    if(inyectarEstiloEmbed(frame) || intentos > 400){ clearInterval(_pollEmbed); _pollEmbed = null; }
+    inyectarEstiloEmbed(frame);
+    var listo = false;
+    try{
+      var d = frame.contentDocument;
+      listo = !!(d && d.URL && d.URL !== 'about:blank' &&
+                 d.readyState === 'complete' && d.getElementById(CSS_EMBED_ID));
+    }catch(e){}
+    if(listo || intentos > 1500){ clearInterval(_pollEmbed); _pollEmbed = null; }
   }, 8);
 }
 
@@ -841,7 +854,7 @@ function compactarEmbebido(frame){
     }
 
     /* el contenido ocupa el ancho completo cuando se le quitó el panel lateral propio */
-    var nav = doc.querySelector('body > .shell > nav.side');
+    var nav = doc.querySelector('.shell > nav.side');
     if(nav && frame.contentWindow.getComputedStyle(nav).display === 'none'){
       var shell = nav.parentElement;
       shell.style.display = 'block';
