@@ -812,11 +812,21 @@ var _pollEmbed = null;
    Ojo: al asignar la dirección, el marco todavía contiene el documento anterior durante unos
    milisegundos; inyectar ahí no sirve de nada y el panel alcanza a verse. Por eso se descarta
    cualquier documento en blanco y se vuelve a inyectar cada vez que el documento cambia. */
-function inyectarEstiloEmbed(frame){
+/* Sin el hash y sin barra final, para poder comparar direcciones */
+function urlBase(u){
+  return String(u || '').split('#')[0].replace(/\/$/, '');
+}
+
+/* Solo cuenta si el estilo quedó puesto en el documento QUE SE PIDIÓ. Al saltar de una
+   herramienta a otra, el marco conserva la anterior durante unos milisegundos: ese documento
+   ya trae el estilo y está completo, así que sin esta comprobación el portal daba por buena
+   la carga, mostraba el marco y la herramienta nueva entraba a la vista del usuario. */
+function inyectarEstiloEmbed(frame, url){
   try{
     var doc = frame.contentDocument;
     if(!doc || !doc.head) return false;
     if(!doc.URL || doc.URL === 'about:blank') return false;
+    if(url && urlBase(doc.URL) !== urlBase(url)) return false;
     if(doc.getElementById(CSS_EMBED_ID)) return true;
     var st = doc.createElement('style');
     st.id = CSS_EMBED_ID;
@@ -835,20 +845,21 @@ function mostrarEmbed(){
   if(box) box.classList.add('listo');
 }
 
-function vigilarEmbed(frame){
+function vigilarEmbed(frame, url){
   if(_pollEmbed) clearInterval(_pollEmbed);
   var box = document.getElementById('embedBox');
   if(box) box.classList.remove('listo');
   var intentos = 0;
   _pollEmbed = setInterval(function(){
     intentos++;
-    var puesto = inyectarEstiloEmbed(frame);
+    var puesto = inyectarEstiloEmbed(frame, url);
     var d = null;
     try{ d = frame.contentDocument; }catch(e){}
+    var esLaPedida = !!(d && d.URL && urlBase(d.URL) === urlBase(url));
     var estado = (d && d.readyState) ? d.readyState : '';
 
-    /* con el cuerpo ya disponible y el estilo aplicado, se puede mostrar sin riesgo */
-    if(puesto && d && d.body && (estado === 'interactive' || estado === 'complete')){
+    /* se muestra solo cuando el documento pedido ya tiene su cuerpo y el estilo aplicado */
+    if(puesto && esLaPedida && d.body && (estado === 'interactive' || estado === 'complete')){
       compactarEmbebido(frame);
       mostrarEmbed();
       if(estado === 'complete'){ clearInterval(_pollEmbed); _pollEmbed = null; }
@@ -868,7 +879,7 @@ function compactarEmbebido(frame){
   try{
     var doc = frame.contentDocument;
     if(!doc || !doc.body) return;
-    inyectarEstiloEmbed(frame);
+    inyectarEstiloEmbed(frame, doc.URL);
 
     var candidatos = doc.querySelectorAll(
       'body > header, body > .header, body > .top-header, body > .lives-header,' +
@@ -905,7 +916,7 @@ function openEmbed(cardEl){
   var frame = document.getElementById('embedFrame');
   frame.onload = function(){ compactarEmbebido(frame); mostrarEmbed(); };
   frame.src = url;
-  vigilarEmbed(frame);
+  vigilarEmbed(frame, url);
   document.getElementById('hcrumbName').textContent = title;
   var lt = document.getElementById('embedLoaderTxt');
   if(lt) lt.textContent = 'Abriendo ' + title + '…';
