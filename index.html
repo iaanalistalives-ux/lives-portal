@@ -769,73 +769,85 @@ var currentEmbedOrigin = null;
 
 /* Dentro del portal, el nombre de la herramienta ya se ve en el header de arriba, así que su
    propia banda de título sobra y roba altura útil.
-   Regla: se oculta solo si esa banda NO contiene controles visibles (botones, selectores,
-   enlaces de navegación). Si los tiene, se deja intacta — ocultarla dejaría la herramienta
-   sin sus mandos. Portal y herramientas comparten dominio, por eso el portal puede hacerlo
-   sin modificar cada repo. */
-var CLASES_CABECERA = ['header','lives-header','top-header','app-header','main-header','hdr','top','topbar','head'];
 
+   Para que no se vea el parpadeo de la banda antes de esconderse, el estilo se inyecta lo
+   antes posible — en cuanto el documento del marco tiene <head>, mucho antes de que termine
+   de cargar. Luego, al completarse la carga, se revisa: si esa banda tenía controles
+   visibles (botones, selectores, enlaces de navegación), se devuelve a su sitio, porque
+   esconderla dejaría la herramienta sin sus mandos.
+   Portal y herramientas comparten dominio, por eso el portal puede hacerlo sin tocar cada repo. */
+
+var CSS_EMBED_ID = 'lives-portal-embed';
+var CSS_EMBED = [
+  'body{padding-top:0 !important;margin-top:0 !important;}',
+  'body > :first-child{margin-top:0 !important;}',
+  /* bandas de título conocidas */
+  'body > header:first-of-type,',
+  'body > .header, body > .top-header, body > .lives-header,',
+  'body > .app-header, body > .main-header, body > .hdr, body > .top, body > .head',
+  '{display:none !important;}',
+  /* panel lateral propio del patrón de segundas */
+  'body > .shell > nav.side{display:none !important;}',
+  /* barra superior con título: solo los textos, nunca la barra */
+  '.topbar .htitle, .topbar .hsub{display:none !important;}'
+].join('');
+
+var _pollEmbed = null;
+
+function inyectarEstiloEmbed(frame){
+  try{
+    var doc = frame.contentDocument;
+    if(!doc || !doc.head) return false;
+    if(doc.getElementById(CSS_EMBED_ID)) return true;
+    var st = doc.createElement('style');
+    st.id = CSS_EMBED_ID;
+    st.textContent = CSS_EMBED;
+    doc.head.appendChild(st);
+    return true;
+  }catch(e){ return false; }
+}
+
+/* Se intenta desde el instante en que se asigna la dirección, sin esperar a que cargue */
+function vigilarEmbed(frame){
+  if(_pollEmbed) clearInterval(_pollEmbed);
+  var intentos = 0;
+  _pollEmbed = setInterval(function(){
+    intentos++;
+    if(inyectarEstiloEmbed(frame) || intentos > 400){ clearInterval(_pollEmbed); _pollEmbed = null; }
+  }, 8);
+}
+
+/* Ya cargada: si la banda escondida llevaba mandos, se devuelve. getComputedStyle sirve
+   aunque el padre esté oculto, porque informa del display propio de cada control. */
 function compactarEmbebido(frame){
   try{
     var doc = frame.contentDocument;
     if(!doc || !doc.body) return;
+    inyectarEstiloEmbed(frame);
 
-    var st = doc.createElement('style');
-    st.textContent = 'body{padding-top:0 !important;margin-top:0 !important;}' +
-                     'body > :first-child{margin-top:0 !important;}';
-    doc.head.appendChild(st);
+    var candidatos = doc.querySelectorAll(
+      'body > header, body > .header, body > .top-header, body > .lives-header,' +
+      'body > .app-header, body > .main-header, body > .hdr, body > .top, body > .head');
 
-    ocultarPanelesPropios(doc);
-
-    /* buscar la banda de título entre los primeros bloques del documento */
-    var hijos = doc.body.children, cab = null;
-    for(var i = 0; i < hijos.length && i < 6; i++){
-      var e = hijos[i];
-      if(e.tagName === 'SCRIPT' || e.tagName === 'STYLE') continue;
-      var esCab = (e.tagName === 'HEADER');
-      if(!esCab && e.classList){
-        for(var k = 0; k < CLASES_CABECERA.length; k++){
-          if(e.classList.contains(CLASES_CABECERA[k])){ esCab = true; break; }
-        }
+    for(var i = 0; i < candidatos.length; i++){
+      var cab = candidatos[i];
+      var ctrl = cab.querySelectorAll('button, select, input, textarea, a[href]:not([href="#"])');
+      var conMandos = false;
+      for(var c = 0; c < ctrl.length; c++){
+        var st = frame.contentWindow.getComputedStyle(ctrl[c]);
+        if(st && st.display !== 'none' && st.visibility !== 'hidden'){ conMandos = true; break; }
       }
-      if(esCab){ cab = e; break; }
+      if(conMandos) cab.style.setProperty('display', '', 'important');
     }
-    if(!cab) return;
 
-    /* ¿tiene mandos que la persona necesita? solo cuentan los que de verdad se ven */
-    var ctrl = cab.querySelectorAll('button, select, input, textarea, a[href]:not([href="#"])');
-    for(var c = 0; c < ctrl.length; c++){
-      if(ctrl[c].offsetWidth > 0 || ctrl[c].offsetHeight > 0) return;  /* se deja tal cual */
-    }
-    cab.style.display = 'none';
-  }catch(e){ /* si algún día una herramienta vive en otro dominio, se deja tal cual */ }
-}
-
-/* Algunas herramientas no traen banda de título sino un panel lateral propio (patrón
-   .shell > nav.side, usado por los formularios de segundas). Dentro del portal ese panel
-   duplica al del portal, y como cada tarjeta ya abre su vista fija, se puede ocultar.
-   En las que llevan una barra superior con título (.topbar) se ocultan solo los textos,
-   nunca la barra entera: ahí vive el botón de menú y sin él la herramienta queda sin
-   navegación. */
-function ocultarPanelesPropios(doc){
-  try{
-    /* solo el patrón de segundas (nav.side): en Tienda LIVES el lateral es aside.side y es
-       navegación real entre secciones, así que no se toca */
+    /* el contenido ocupa el ancho completo cuando se le quitó el panel lateral propio */
     var nav = doc.querySelector('body > .shell > nav.side');
-    if(nav){
-      nav.style.display = 'none';
+    if(nav && frame.contentWindow.getComputedStyle(nav).display === 'none'){
       var shell = nav.parentElement;
       shell.style.display = 'block';
       shell.style.gridTemplateColumns = 'none';
     }
-    var barra = doc.querySelector('.topbar');
-    if(barra){
-      ['.htitle', '.hsub'].forEach(function(sel){
-        var el = barra.querySelector(sel);
-        if(el) el.style.display = 'none';
-      });
-    }
-  }catch(e){}
+  }catch(e){ /* si algún día una herramienta vive en otro dominio, se deja tal cual */ }
 }
 
 function openEmbed(cardEl){
@@ -848,6 +860,7 @@ function openEmbed(cardEl){
   var frame = document.getElementById('embedFrame');
   frame.onload = function(){ compactarEmbebido(frame); };
   frame.src = url;
+  vigilarEmbed(frame);
   document.getElementById('hcrumbName').textContent = title;
   document.getElementById('embedExternalLink').href = url;
   document.body.classList.add('embedOpen');
@@ -889,6 +902,7 @@ document.querySelectorAll('.tcard[data-url]').forEach(function(card){
 });
 
 document.querySelector('[data-embed-back]').addEventListener('click', function(){
+  if(_pollEmbed){ clearInterval(_pollEmbed); _pollEmbed = null; }
   document.getElementById('embedFrame').src = '';
   document.body.classList.remove('embedOpen');
   if(currentEmbedOrigin){
