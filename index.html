@@ -969,8 +969,10 @@ function vigilarEmbed(frame, url){
     var esLaPedida = !!(d && d.URL && urlBase(d.URL) === urlBase(url));
     var estado = (d && d.readyState) ? d.readyState : '';
 
-    /* se muestra solo cuando el documento pedido ya tiene su cuerpo y el estilo aplicado */
-    if(puesto && esLaPedida && d.body && (estado === 'interactive' || estado === 'complete')){
+    /* Se muestra en cuanto el documento pedido tiene cuerpo y el estilo ya está aplicado.
+       No se espera a 'interactive': con el estilo puesto no hay riesgo de ver la banda, y
+       adelantar esto ahorra medio segundo de espera en blanco. */
+    if(puesto && esLaPedida && d.body){
       compactarEmbebido(frame);
       mostrarEmbed();
       if(estado === 'complete'){ clearInterval(_pollEmbed); _pollEmbed = null; }
