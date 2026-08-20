@@ -190,6 +190,8 @@ body.embedOpen .wrap{padding-top:0;}
 .areaSidebar .sbGroup{font-size:10px;font-weight:800;color:var(--stone);text-transform:uppercase;
   letter-spacing:.7px;margin:12px 4px 6px;display:flex;align-items:center;gap:6px;}
 .areaSidebar .sbGroup:first-of-type{margin-top:2px;}
+.areaSidebar .sbItem.sbArea{font-weight:600;color:#4b5f5b;}
+.areaSidebar .sbItem.sbArea:hover{color:var(--sage);}
 @media(max-width:760px){
   .areaSidebar .sbGroup{margin:0 6px 0 2px;align-self:center;white-space:nowrap;}
 }
@@ -1167,11 +1169,33 @@ function openEmbed(cardEl){
   if(currentEmbedOrigin === 'screen-mias'){
     backLink.innerHTML = '<span class="sbIcon">🔙</span><span>Volver al inicio</span>';
     backLink.addEventListener('click', function(){ showScreen('screen-mias'); });
+    sidebar.appendChild(backLink);
   } else {
-    backLink.innerHTML = '<span class="sbIcon">🔙</span><span>Elegir otra área</span>';
+    /* Salto directo a otra área sin pasar por la lista: se entra a sus herramientas del
+       mismo tipo que se está viendo. Solo aparece si la persona tiene más de un área. */
+    var areaActual = originScreen.id.split('-')[1];
+    var otras = areasDe(currentType).filter(function(a){ return a.id !== areaActual; });
+
+    if(otras.length){
+      var enc2 = document.createElement('div');
+      enc2.className = 'sbGroup';
+      enc2.textContent = (currentType === 'dash') ? '🗂️ Ir a otra área · Dashboards'
+                                                  : '🗂️ Ir a otra área · Formularios';
+      sidebar.appendChild(enc2);
+
+      otras.forEach(function(a){
+        var it = document.createElement('div');
+        it.className = 'sbItem sbArea';
+        it.innerHTML = '<span class="sbIcon">' + a.icon + '</span><span>' + a.label + '</span>';
+        it.addEventListener('click', function(){ goToTools(a.id, currentType); });
+        sidebar.appendChild(it);
+      });
+    }
+
+    backLink.innerHTML = '<span class="sbIcon">🔙</span><span>Ver todas las áreas</span>';
     backLink.addEventListener('click', function(){ renderAreaList(currentType); });
+    sidebar.appendChild(backLink);
   }
-  sidebar.appendChild(backLink);
 
   showScreen('screen-embed');
 }
