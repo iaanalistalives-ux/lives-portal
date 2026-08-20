@@ -339,6 +339,11 @@ body.sinSesion #pantallaAcceso{display:flex;}
 .accesoPie{margin-top:16px;padding-top:14px;border-top:1px dashed var(--warm);
   font-size:11px;color:var(--sage);line-height:1.6;text-align:center;}
 /* Identidad de quien entró, en el header */
+.refreshBtn{display:none;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;
+  font-family:inherit;cursor:pointer;}
+.refreshBtn:hover{background:rgba(255,255,255,.2);}
+.refreshBtn.girando{pointer-events:none;opacity:.65;}
+body.conSesion .refreshBtn{display:inline-flex;}
 .quienBtn{display:none;align-items:center;gap:7px;background:rgba(255,255,255,.12);color:#fff;
   border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:7px 14px;
   font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
@@ -380,6 +385,7 @@ body.conSesion .quienBtn{display:inline-flex;}
     <div class="hcrumb"><span class="sep">›</span><span id="hcrumbName"></span></div>
   </div>
   <div class="headerActions">
+    <button class="pinBtn refreshBtn" id="refrescarBtn" type="button" title="Volver a cargar">↻ Actualizar</button>
     <button class="quienBtn" id="quienBtn" type="button" title="Cerrar sesión"><span id="quienNombre"></span> · Salir</button>
     <a class="pinBtn openTabBtn" id="embedExternalLink" href="#" target="_blank" rel="noopener">↗ Abrir en otra pestaña</a>
     <a class="pinBtn" id="miTableroBtn" style="display:none" href="https://iaanalistalives-ux.github.io/tablero-proyectos/" target="_blank" rel="noopener">📊 Mi Tablero</a>
@@ -1910,6 +1916,29 @@ document.getElementById('accBtn').addEventListener('click', intentarEntrar);
     if(e.key === 'Enter') intentarEntrar();
   });
 });
+/* Actualizar: dentro de una herramienta vuelve a cargarla sin perder dónde estabas;
+   fuera de ella recarga el portal completo. La sesión se mantiene en ambos casos. */
+document.getElementById('refrescarBtn').addEventListener('click', function(){
+  var btn = this;
+  if(document.body.classList.contains('embedOpen')){
+    var frame = document.getElementById('embedFrame');
+    var url = frame.src;
+    if(url){
+      btn.classList.add('girando');
+      btn.textContent = '↻ Actualizando…';
+      document.getElementById('embedBox').classList.remove('listo');
+      frame.src = 'about:blank';
+      setTimeout(function(){
+        frame.src = url;
+        vigilarEmbed(frame, url);
+        setTimeout(function(){ btn.classList.remove('girando'); btn.textContent = '↻ Actualizar'; }, 900);
+      }, 60);
+      return;
+    }
+  }
+  location.reload();
+});
+
 document.getElementById('quienBtn').addEventListener('click', function(){
   if(confirm('¿Cerrar sesión en este equipo?')) cerrarSesion();
 });
