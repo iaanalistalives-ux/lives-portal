@@ -155,6 +155,26 @@ body.embedOpen .wrap{padding-top:0;}
 .homecard .hi{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:rgba(var(--accent-rgb),.13);margin:0 auto 10px;font-size:24px;}
 .homecard .ht{font-size:13.5px;font-weight:700;color:#222;margin-bottom:3px;}
 .homecard .hl{font-size:11px;color:var(--accent);font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+/* Tarjetas de la pantalla propia: mismo aire que las de área, con el color del área a la que
+   pertenece cada herramienta y una etiqueta que dice si es panel o registro. */
+.miaGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:6px;}
+.miacard{--accent:#0F7A5A;--accent-rgb:15,122,90;background:#fff;border:1px solid var(--warm);
+  border-top:4px solid var(--accent);border-radius:14px;padding:20px 16px;text-align:center;cursor:pointer;
+  transition:transform .15s, box-shadow .15s;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.miacard:hover{transform:translateY(-3px);box-shadow:0 10px 20px rgba(14,59,54,.14);}
+.miacard:active{transform:scale(.97);}
+.miacard .mi{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;
+  background:rgba(var(--accent-rgb),.13);margin:0 auto 10px;font-size:24px;}
+.miacard .mt{font-size:13.5px;font-weight:700;color:#222;margin-bottom:5px;line-height:1.35;}
+.miacard .ma{font-size:10.5px;font-weight:800;color:var(--stone);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px;}
+.miacard .ml{font-size:11px;color:var(--accent);font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+/* Separadores por tipo dentro del panel lateral */
+.areaSidebar .sbGroup{font-size:10px;font-weight:800;color:var(--stone);text-transform:uppercase;
+  letter-spacing:.7px;margin:12px 4px 6px;display:flex;align-items:center;gap:6px;}
+.areaSidebar .sbGroup:first-of-type{margin-top:2px;}
+@media(max-width:760px){
+  .areaSidebar .sbGroup{margin:0 6px 0 2px;align-self:center;white-space:nowrap;}
+}
 
 /* Layout de herramientas: panel lateral de áreas + contenido */
 .toolsLayout{gap:22px;align-items:flex-start;}
@@ -388,10 +408,10 @@ body.conSesion .quienBtn{display:inline-flex;}
       <div class="hbig" id="miasSaludo">Tus herramientas</div>
       <div class="hsm" id="miasSub">Todo lo que tienes asignado, en un solo lugar.</div>
     </div>
-    <div class="sectitle" id="miasTitDash">Dashboards</div>
-    <div class="tgrid" id="miasDash"></div>
-    <div class="sectitle" id="miasTitForm">Formularios</div>
-    <div class="tgrid" id="miasForm"></div>
+    <div class="sectitle" id="miasTitDash">📊 Dashboards · para consultar</div>
+    <div class="miaGrid" id="miasDash"></div>
+    <div class="sectitle" id="miasTitForm">📝 Formularios · para registrar</div>
+    <div class="miaGrid" id="miasForm"></div>
   </div>
 
   <!-- ===== PANTALLA 1: RAÍZ ===== -->
@@ -990,7 +1010,8 @@ function compactarEmbebido(frame){
 
 function openEmbed(cardEl){
   var url = cardEl.dataset.url;
-  var title = cardEl.querySelector('.tt') ? cardEl.querySelector('.tt').textContent : '';
+  var et = cardEl.querySelector('.tt') || cardEl.querySelector('.mt');
+  var title = et ? et.textContent : '';
   var originScreen = cardEl.closest('.screen');
   if(!originScreen) return;
   currentEmbedOrigin = originScreen.id;
@@ -1013,14 +1034,35 @@ function openEmbed(cardEl){
   titleEl.textContent = 'Otras herramientas aquí';
   sidebar.appendChild(titleEl);
 
-  var siblingCards = originScreen.querySelectorAll('.tcard[data-url]');
-  siblingCards.forEach(function(sib){
-    var sibTitle = sib.querySelector('.tt') ? sib.querySelector('.tt').textContent : sib.dataset.url;
-    var item = document.createElement('div');
-    item.className = 'sbItem' + (sib === cardEl ? ' active' : '');
-    item.innerHTML = '<span class="sbIcon">📄</span><span>' + sibTitle + '</span>';
-    item.addEventListener('click', function(){ openEmbed(sib); });
-    sidebar.appendChild(item);
+  /* Las herramientas se agrupan por lo que son: consultar o registrar. Así nadie confunde
+     un panel con un formulario cuando aparecen seguidos en la misma lista. */
+  var hermanas = [].slice.call(originScreen.querySelectorAll('[data-url]'))
+                   .filter(function(n){ return n.classList.contains('tcard') || n.classList.contains('miacard'); });
+
+  function tipoDe(nodo){
+    if(originScreen.id.indexOf('-dash') !== -1) return 'dash';
+    if(originScreen.id.indexOf('-form') !== -1) return 'form';
+    return nodo.closest('#miasForm') ? 'form' : 'dash';   /* pantalla propia */
+  }
+
+  [['dash','📊 Dashboards'], ['form','📝 Formularios']].forEach(function(g){
+    var delGrupo = hermanas.filter(function(n){ return tipoDe(n) === g[0]; });
+    if(!delGrupo.length) return;
+    if(hermanas.length !== delGrupo.length){        /* solo si hay de los dos tipos */
+      var enc = document.createElement('div');
+      enc.className = 'sbGroup';
+      enc.textContent = g[1];
+      sidebar.appendChild(enc);
+    }
+    delGrupo.forEach(function(sib){
+      var et = sib.querySelector('.tt') || sib.querySelector('.mt');
+      var sibTitle = et ? et.textContent : sib.dataset.url;
+      var item = document.createElement('div');
+      item.className = 'sbItem' + (sib === cardEl ? ' active' : '');
+      item.innerHTML = '<span class="sbIcon">' + (g[0] === 'dash' ? '📊' : '📝') + '</span><span>' + sibTitle + '</span>';
+      item.addEventListener('click', function(){ openEmbed(sib); });
+      sidebar.appendChild(item);
+    });
   });
 
   var backLink = document.createElement('div');
@@ -1028,8 +1070,13 @@ function openEmbed(cardEl){
   backLink.style.marginTop = '10px';
   backLink.style.borderTop = '1px solid var(--warm)';
   backLink.style.paddingTop = '14px';
-  backLink.innerHTML = '<span class="sbIcon">🔙</span><span>Elegir otra área</span>';
-  backLink.addEventListener('click', function(){ renderAreaList(currentType); });
+  if(currentEmbedOrigin === 'screen-mias'){
+    backLink.innerHTML = '<span class="sbIcon">🔙</span><span>Volver al inicio</span>';
+    backLink.addEventListener('click', function(){ showScreen('screen-mias'); });
+  } else {
+    backLink.innerHTML = '<span class="sbIcon">🔙</span><span>Elegir otra área</span>';
+    backLink.addEventListener('click', function(){ renderAreaList(currentType); });
+  }
   sidebar.appendChild(backLink);
 
   showScreen('screen-embed');
@@ -1648,12 +1695,26 @@ function pintarMias(lista){
     cont.style.display = hay ? '' : 'none';
     tit.style.display  = hay ? '' : 'none';
     par[2].forEach(function(h){
+      var ar = AREAS.filter(function(a){ return a.id === h.area; })[0] || {};
       var d = document.createElement('div');
-      d.className = 'tcard';
+      d.className = 'miacard';
       d.dataset.url = h.url;
       d.setAttribute('role','button');
       d.setAttribute('tabindex','0');
-      d.innerHTML = '<div class="tt">' + h.nombre + '</div><div class="ta">Abrir →</div>';
+      if(ar.accent){
+        d.style.setProperty('--accent', ar.accent);
+        d.style.setProperty('--accent-rgb', ar.rgb);
+      }
+      d.innerHTML = '<div class="mi">' + (ar.icon || '📄') + '</div>' +
+                    '<div class="mt">' + h.nombre + '</div>' +
+                    '<div class="ma">' + (ar.label || '') + '</div>' +
+                    '<div class="ml">Abrir →</div>';
+      /* la tarjeta guarda el nombre donde openEmbed lo busca */
+      var oculto = document.createElement('span');
+      oculto.className = 'tt';
+      oculto.style.display = 'none';
+      oculto.textContent = h.nombre;
+      d.appendChild(oculto);
       d.addEventListener('click', function(){ openEmbed(d); });
       cont.appendChild(d);
     });
