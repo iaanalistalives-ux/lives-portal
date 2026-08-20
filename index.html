@@ -36,6 +36,9 @@ body.embedOpen .openTabBtn{display:flex;}
 /* Con una herramienta abierta el aire de arriba sobra: el header ya dice dónde estamos */
 body.embedOpen .wrap{padding-top:0;}
 #screen-embed .toolsLayout{margin-top:12px;}
+/* Mismo aire arriba en todas las pantallas de área, con o sin los botones de tipo:
+   antes el botón Volver quedaba pegado al borde cuando no había conmutador. */
+.screen[id^="tools-"] .toolsLayout{margin-top:14px;}
 
 /* En el embed, el botón Volver vive en la columna izquierda y el marco sube a su misma
    altura, en vez de empezar debajo de él. */
@@ -67,8 +70,10 @@ body.embedOpen .wrap{padding-top:0;}
 
 .sectitle{font-size:16px;font-weight:700;color:var(--sage-dark);margin:4px 0 14px;}
 
-/* Centradas y de tamaño fijo: crecen hacia los lados y saltan de fila al llenarse */
-.tgrid{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;}
+/* Tamaño fijo: crecen hacia los lados y saltan de fila al llenarse. En las pantallas de
+   área se alinean a la izquierda, debajo del título de su sección; centrarlas dejaba un
+   hueco raro entre el título y las tarjetas. */
+.tgrid{display:flex;flex-wrap:wrap;justify-content:flex-start;gap:14px;}
 .tgrid .tcard{flex:0 0 210px;}
 @media(max-width:760px){.tgrid .tcard{flex:0 0 calc(50% - 7px);}}
 @media(max-width:420px){.tgrid .tcard{flex:0 0 100%;}}
@@ -927,6 +932,18 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
   var el = document.getElementById(id);
   if(el) el.classList.add('active');
+
+  /* Si se sale de la herramienta (por ejemplo saltando a otra área desde el panel), hay que
+     dejar el modo "herramienta abierta": si no, el header sigue mostrando su nombre y el
+     contenido se queda pegado al borde superior. */
+  if(id !== 'screen-embed'){
+    document.body.classList.remove('embedOpen');
+    var cr = document.getElementById('hcrumbName');
+    if(cr) cr.textContent = '';
+    var fr = document.getElementById('embedFrame');
+    if(fr && fr.src && fr.src !== 'about:blank') fr.src = '';
+    if(_pollEmbed){ clearInterval(_pollEmbed); _pollEmbed = null; }
+  }
   window.scrollTo(0,0);
 }
 
