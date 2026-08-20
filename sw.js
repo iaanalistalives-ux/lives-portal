@@ -1,17 +1,21 @@
 /* ============================================================
    Portal LIVES — Service Worker
    Estrategia:
-     - Navegación (el HTML del portal): RED PRIMERO.
-       Si hay internet, siempre se ve la última version subida a GitHub.
+     - Navegación (el HTML del portal): RED PRIMERO, SALTANDO LA CACHE DEL NAVEGADOR.
+       Antes se pedía a la red con fetch normal, y el navegador respondía con su copia
+       guardada (GitHub marca las paginas como validas por varios minutos). En Chrome eso
+       se arregla con Ctrl+Shift+R, pero en la app instalada no existe ese atajo: por eso
+       la app se quedaba con la version vieja. Con cache:'reload' la peticion ignora esa
+       copia y va de verdad al servidor.
        Si no hay internet, se sirve la copia guardada.
      - Iconos y manifest: CACHE PRIMERO (no cambian casi nunca).
-     - Todo lo demas (Apps Script, Sheets, dashboards de otros repos,
-       CDNs): NO se intercepta. Pasa directo a la red.
-   Para forzar que todos los celulares tomen una version nueva,
-   cambia el numero de VERSION de abajo (v1 -> v2) y vuelve a subir.
+     - Todo lo demas (Apps Script, Sheets, dashboards de otros repos, CDNs): NO se
+       intercepta. Pasa directo a la red.
+   Para forzar que todos los celulares tomen una version nueva, cambia el numero de
+   VERSION de abajo (v2 -> v3) y vuelve a subir.
    ============================================================ */
 
-const VERSION    = 'lives-portal-v1';
+const VERSION    = 'lives-portal-v2';
 const CACHE_HTML = VERSION + '-html';
 const CACHE_EST  = VERSION + '-estaticos';
 
@@ -22,7 +26,9 @@ const SHELL = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './icons/favicon-64.png',
+  './icons/favicon-64-dark.png'
 ];
 
 /* ---------- INSTALACION ---------- */
@@ -67,13 +73,16 @@ self.addEventListener('fetch', (event) => {
                   url.pathname.startsWith(new URL('./', self.location).pathname);
   if (!enScope) return; // dashboards de otros repos, Sheets, CDNs: directo a la red.
 
-  // 1) El HTML del portal -> red primero, cache de respaldo.
+  // 1) El HTML del portal -> red de verdad (sin copia del navegador), cache de respaldo.
   if (req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html')) {
     event.respondWith((async () => {
       try {
-        const fresca = await fetch(req);
-        const cache = await caches.open(CACHE_HTML);
-        cache.put(req, fresca.clone());
+        // cache:'reload' obliga a ir al servidor e ignora la copia guardada del navegador.
+        const fresca = await fetch(req, { cache: 'reload' });
+        if (fresca && fresca.ok) {
+          const cache = await caches.open(CACHE_HTML);
+          cache.put(req, fresca.clone());
+        }
         return fresca;
       } catch (e) {
         const cache = await caches.open(CACHE_HTML);
