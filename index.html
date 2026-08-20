@@ -370,8 +370,20 @@ body.conSesion .quienBtn{display:inline-flex;}
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js')
-        .catch(function (e) { console.warn('SW no registrado:', e); });
+      navigator.serviceWorker.register('./sw.js').then(function (reg) {
+        /* Se pregunta por una version nueva al abrir y cada media hora, para que la app
+           instalada no se quede con una copia vieja: ahi no existe Ctrl+Shift+R. */
+        reg.update();
+        setInterval(function () { reg.update(); }, 30 * 60 * 1000);
+      }).catch(function (e) { console.warn('SW no registrado:', e); });
+
+      /* Cuando entra en servicio una version nueva, la app se recarga sola una vez. */
+      var yaRecargo = false;
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (yaRecargo) return;
+        yaRecargo = true;
+        location.reload();
+      });
     });
   }
 </script>
@@ -1967,6 +1979,11 @@ document.getElementById('refrescarBtn').addEventListener('click', function(){
       }, 60);
       return;
     }
+  }
+  if(navigator.serviceWorker && navigator.serviceWorker.getRegistration){
+    navigator.serviceWorker.getRegistration().then(function(reg){
+      if(reg) reg.update();
+    }).catch(function(){});
   }
   location.reload();
 });
