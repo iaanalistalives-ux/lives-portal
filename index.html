@@ -956,7 +956,11 @@ var CSS_EMBED = [
   'body > .wrap:first-child{padding-top:0 !important;margin-top:0 !important;}',
   /* Los bloques fijos (position:sticky) suelen llevar un desplazamiento igual al alto de la
      barra de título. Sin esa barra, ese hueco sobra y desalinea la columna. */
-  '.cart, .sticky, [style*="position:sticky"]{top:8px !important;}'
+  '.cart, .sticky, [style*="position:sticky"]{top:8px !important;}',
+  /* Patrón de los formularios de segundas: el título de la vista repite el nombre que ya
+     se ve en el header del portal, y el contenido arranca con mucho aire encima. */
+  '.shell > .main{padding-top:10px !important;}',
+  '.shell > .main > .vista > h1{display:none !important;}'
 ].join('');
 
 var _pollEmbed = null;
