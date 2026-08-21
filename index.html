@@ -194,6 +194,11 @@ body.embedOpen .wrap{padding-top:0;}
   letter-spacing:.7px;margin:12px 4px 6px;display:flex;align-items:center;gap:6px;}
 .areaSidebar .sbGroup:first-of-type{margin-top:2px;}
 .areaSidebar .sbItem.sbArea{font-weight:600;color:#4b5f5b;}
+.areaSidebar .sbVolver{margin-top:10px;border-top:1px solid var(--warm);padding-top:14px;}
+@media(max-width:760px){
+  /* en la franja horizontal el separador de arriba descuadra: se quita */
+  .areaSidebar .sbVolver{margin-top:0;border-top:none;padding-top:9px;}
+}
 .areaSidebar .sbItem.sbArea:hover{color:var(--sage);}
 @media(max-width:760px){
   .areaSidebar .sbGroup{margin:0 6px 0 2px;align-self:center;white-space:nowrap;}
@@ -1297,15 +1302,11 @@ function openEmbed(cardEl){
   });
 
   var backLink = document.createElement('div');
-  backLink.className = 'sbItem';
-  backLink.style.marginTop = '10px';
-  backLink.style.borderTop = '1px solid var(--warm)';
-  backLink.style.paddingTop = '14px';
-  if(currentEmbedOrigin === 'screen-mias'){
-    backLink.innerHTML = '<span class="sbIcon">🔙</span><span>Volver al inicio</span>';
-    backLink.addEventListener('click', function(){ showScreen('screen-mias'); });
-    sidebar.appendChild(backLink);
-  } else {
+  backLink.className = 'sbItem sbArea sbVolver';
+  /* Con inicio directo a las herramientas no hace falta un enlace de vuelta: la flecha de la
+     izquierda ya regresa a la pantalla anterior, y en el celular ese enlace descuadraba la
+     franja de navegación. */
+  if(currentEmbedOrigin !== 'screen-mias'){
     /* Salto directo a otra área sin pasar por la lista: se entra a sus herramientas del
        mismo tipo que se está viendo. Solo aparece si la persona tiene más de un área. */
     var areaActual = originScreen.id.split('-')[1];
