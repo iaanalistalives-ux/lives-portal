@@ -195,6 +195,18 @@ body.embedOpen .wrap{padding-top:0;}
 .areaSidebar .sbGroup:first-of-type{margin-top:2px;}
 .areaSidebar .sbItem.sbArea{font-weight:600;color:#4b5f5b;}
 .areaSidebar .sbVolver{margin-top:10px;border-top:1px solid var(--warm);padding-top:14px;}
+/* Grupos que se pliegan: útil cuando un área tiene muchas herramientas o cuando la lista
+   de áreas es larga. Cada encabezado funciona como interruptor. */
+.areaSidebar .sbGroup{cursor:pointer;user-select:none;justify-content:space-between;}
+.areaSidebar .sbGroup .sbChev{font-size:10px;color:var(--stone);transition:transform .15s;}
+.areaSidebar .sbGroup.plegado .sbChev{transform:rotate(-90deg);}
+.areaSidebar .sbGroup:hover{color:var(--sage);}
+.areaSidebar .sbBody.plegado{display:none;}
+.areaSidebar .sbTitle{display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+@media(max-width:760px){
+  .areaSidebar .sbBody.plegado{display:contents;}   /* en la franja horizontal no se pliega */
+  .areaSidebar .sbGroup{cursor:default;}
+}
 @media(max-width:760px){
   /* en la franja horizontal el separador de arriba descuadra: se quita */
   .areaSidebar .sbVolver{margin-top:0;border-top:none;padding-top:9px;}
@@ -1368,11 +1380,9 @@ function openEmbed(cardEl){
   var conContenido = grupos.filter(function(g){ return g[2].length; });
 
   conContenido.forEach(function(g){
+    var destino = sidebar;
     if(conContenido.length > 1){          /* el encabezado solo si hay de los dos tipos */
-      var enc = document.createElement('div');
-      enc.className = 'sbGroup';
-      enc.textContent = g[1];
-      sidebar.appendChild(enc);
+      destino = grupoPlegable(sidebar, g[1], 'tipo_' + g[0]);
     }
     g[2].forEach(function(sib){
       var et = sib.querySelector('.tt') || sib.querySelector('.mt');
@@ -1385,7 +1395,7 @@ function openEmbed(cardEl){
         currentType = g[0];
         openEmbed(sib);
       });
-      sidebar.appendChild(item);
+      destino.appendChild(item);
     });
   });
 
@@ -1401,11 +1411,9 @@ function openEmbed(cardEl){
     var otras = areasDe(currentType).filter(function(a){ return a.id !== areaActual; });
 
     if(otras.length){
-      var enc2 = document.createElement('div');
-      enc2.className = 'sbGroup';
-      enc2.textContent = (currentType === 'dash') ? '🗂️ Ir a otra área · Dashboards'
-                                                  : '🗂️ Ir a otra área · Formularios';
-      sidebar.appendChild(enc2);
+      var etq = (currentType === 'dash') ? '🗂️ Ir a otra área · Dashboards'
+                                         : '🗂️ Ir a otra área · Formularios';
+      var cuerpoOtras = grupoPlegable(sidebar, etq, 'otras_areas');
 
       otras.forEach(function(a){
         var it = document.createElement('div');
@@ -1413,7 +1421,7 @@ function openEmbed(cardEl){
         it.innerHTML = '<span class="sbIcon">' + a.icon + '</span><span>' + a.label + '</span>';
         it.title = 'Ir a ' + a.label;
         it.addEventListener('click', function(){ goToTools(a.id, currentType); });
-        sidebar.appendChild(it);
+        cuerpoOtras.appendChild(it);
       });
     }
 
@@ -1437,6 +1445,15 @@ document.querySelector('[data-embed-back]').addEventListener('click', function()
   if(_pollEmbed){ clearInterval(_pollEmbed); _pollEmbed = null; }
   document.body.classList.remove('embedOpen');
   if(currentEmbedOrigin){
+    /* Al volver hay que repintar el panel de esa pantalla: si se saltó de área en área
+       desde la herramienta, el panel de la pantalla de origen quedó desactualizado y podía
+       verse como una tarjeta blanca vacía. */
+    var partes = currentEmbedOrigin.split('-');   /* tools-{area}-{tipo} */
+    if(partes[0] === 'tools' && partes.length === 3){
+      currentType = partes[2];
+      decorarTarjetas(partes[1]);
+      renderSidebar(partes[1], partes[2]);
+    }
     showScreen(currentEmbedOrigin);
   } else {
     renderAreaList(currentType);
@@ -1531,6 +1548,31 @@ function ponerToggle(sidebar){
   sidebar.insertBefore(b, sidebar.firstChild);
 }
 
+/* Crea un encabezado que pliega y despliega su bloque. Recuerda la elección por grupo. */
+function grupoPlegable(contenedor, etiqueta, id){
+  var enc = document.createElement('div');
+  enc.className = 'sbGroup';
+  enc.innerHTML = '<span>' + etiqueta + '</span><span class="sbChev">▼</span>';
+
+  var cuerpo = document.createElement('div');
+  cuerpo.className = 'sbBody';
+
+  var cerrado = false;
+  try{ cerrado = localStorage.getItem('lives_grupo_' + id) === '1'; }catch(e){}
+  if(cerrado){ enc.classList.add('plegado'); cuerpo.classList.add('plegado'); }
+
+  enc.addEventListener('click', function(){
+    var ahora = !cuerpo.classList.contains('plegado');
+    cuerpo.classList.toggle('plegado', ahora);
+    enc.classList.toggle('plegado', ahora);
+    try{ localStorage.setItem('lives_grupo_' + id, ahora ? '1' : '0'); }catch(e){}
+  });
+
+  contenedor.appendChild(enc);
+  contenedor.appendChild(cuerpo);
+  return cuerpo;
+}
+
 function renderSidebar(activeArea, type){
   var screen = document.getElementById('tools-' + activeArea + '-' + type);
   if(!screen) return;
@@ -1540,8 +1582,22 @@ function renderSidebar(activeArea, type){
   ponerToggle(aside);
   var titleEl = document.createElement('div');
   titleEl.className = 'sbTitle';
-  titleEl.textContent = (type === 'dash') ? 'Otras áreas · Dashboards' : 'Otras áreas · Formularios';
+  titleEl.innerHTML = '<span>' + ((type === 'dash') ? 'Otras áreas · Dashboards' : 'Otras áreas · Formularios') +
+                      '</span><span class="sbChev">▼</span>';
   aside.appendChild(titleEl);
+
+  var cuerpoAreas = document.createElement('div');
+  cuerpoAreas.className = 'sbBody';
+  var cerradoA = false;
+  try{ cerradoA = localStorage.getItem('lives_grupo_areas') === '1'; }catch(e){}
+  if(cerradoA){ titleEl.classList.add('plegado'); cuerpoAreas.classList.add('plegado'); }
+  titleEl.addEventListener('click', function(){
+    var ahora = !cuerpoAreas.classList.contains('plegado');
+    cuerpoAreas.classList.toggle('plegado', ahora);
+    titleEl.classList.toggle('plegado', ahora);
+    try{ localStorage.setItem('lives_grupo_areas', ahora ? '1' : '0'); }catch(e){}
+  });
+  aside.appendChild(cuerpoAreas);
   areasDe(type).forEach(function(a){
     var item = document.createElement('div');
     item.className = 'sbItem' + (a.id === activeArea ? ' active' : '');
@@ -1550,8 +1606,11 @@ function renderSidebar(activeArea, type){
     item.addEventListener('click', function(){
       if(a.id !== activeArea) goToTools(a.id, type);
     });
-    aside.appendChild(item);
+    cuerpoAreas.appendChild(item);
   });
+  aside.style.display = aside.querySelector('.sbItem') ? '' : 'none';
+  /* con un solo grupo y ninguna otra área, el título sobra */
+  if(!cuerpoAreas.querySelector('.sbItem')) aside.style.display = 'none';
   aplicarPanel();
 }
 
