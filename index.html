@@ -1095,6 +1095,75 @@ function inyectarEstiloEmbed(frame, url){
    pone el estilo y se muestra: el usuario ve el indicador del portal y después la herramienta
    ya limpia, nunca el paso intermedio. Mientras tanto el estilo se reinyecta por si el
    documento se reemplaza a mitad de camino. */
+/* Dentro del portal no se nombra la herramienta con la que está construido el backend:
+   para quien usa el portal, los datos vienen "del sistema". Se cambian los textos que se ven
+   en pantalla, incluidos los que aparecen después (mensajes de carga y de error). */
+var CAMBIOS_TEXTO = [
+  /* Primero las frases completas; las reglas sueltas van al final, si no se comen a estas. */
+  [/No\s+se\s+pudo\s+actualizar\s+desde\s+(?:el\s+)?Sheet\.?/g, 'No se pudo actualizar.'],
+  [/El\s+Sheet\s+respondió/g, 'El sistema respondió'],
+  [/Cargando\s+(?:el\s+)?listado\s+desde\s+(?:el\s+)?Google\s+Sheets?…?\.*/gi, 'Cargando el listado…'],
+  [/Cargando\s+datos(\s+en\s+vivo)?\s+(?:del|desde\s+el)\s+(?:Google\s+)?Sheets?…?\.*/gi, 'Cargando datos…'],
+  [/Datos\s+en\s+vivo\s+desde\s+Google\s+Sheets?/gi, 'Datos en vivo'],
+  [/No\s+se\s+pudo\s+(?:leer|conectar\s+con)\s+(?:el\s+)?Sheet\.?/gi, 'No se pudo conectar con el sistema.'],
+  [/Error\s+leyendo\s+(?:el\s+)?Sheet\.?/gi, 'Error al leer los datos.'],
+  [/Tiempo\s+de\s+espera\s+agotado\s+leyendo\s+(?:el\s+)?Sheet/gi, 'Tiempo de espera agotado'],
+  [/Actualizar\s+desde\s+(?:el\s+)?Sheet/gi, 'Actualizar'],
+  [/Fuente:\s*Google\s+Sheet\s+/gi, 'Fuente: '],
+  [/que\s+el\s+Google\s+Sheet\s+esté\s+compartido/gi, 'que el permiso de lectura esté activo'],
+  /* generales, al final */
+  [/El\s+Google\s+Sheets?/g, 'El sistema'],
+  [/el\s+Google\s+Sheets?/g, 'el sistema'],
+  [/Google\s+Sheets?/g, 'sistema'],
+  [/hoja\s+de\s+cálculo/gi, 'base de datos'],
+  [/\bdel\s+Sheet\b/g, 'del sistema'],
+  [/\bEl\s+Sheet\b/g, 'El sistema'],
+  [/\bel\s+Sheet\b/g, 'el sistema'],
+  [/\bSheet\b/g, 'sistema']
+];
+
+function limpiarFrase(txt){
+  var nuevo = txt;
+  for(var i = 0; i < CAMBIOS_TEXTO.length; i++){
+    nuevo = nuevo.replace(CAMBIOS_TEXTO[i][0], CAMBIOS_TEXTO[i][1]);
+  }
+  return nuevo;
+}
+
+function neutralizarNodo(nodo){
+  if(!nodo) return;
+  if(nodo.nodeType === 3){
+    var v = nodo.nodeValue;
+    if(v && v.indexOf('Sheet') !== -1){
+      var n = limpiarFrase(v);
+      if(n !== v) nodo.nodeValue = n;
+    }
+    return;
+  }
+  if(nodo.nodeType !== 1) return;
+  var tag = nodo.tagName;
+  if(tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA') return;
+  for(var i = 0; i < nodo.childNodes.length; i++) neutralizarNodo(nodo.childNodes[i]);
+}
+
+function neutralizarTextos(doc, win){
+  try{
+    neutralizarNodo(doc.body);
+    /* los mensajes de carga y de error aparecen después, así que se vigilan los cambios */
+    if(win && win.MutationObserver && !doc._vigilaTextos){
+      doc._vigilaTextos = true;
+      var obs = new win.MutationObserver(function(cambios){
+        for(var i = 0; i < cambios.length; i++){
+          var c = cambios[i];
+          if(c.type === 'characterData'){ neutralizarNodo(c.target); }
+          else { for(var j = 0; j < c.addedNodes.length; j++) neutralizarNodo(c.addedNodes[j]); }
+        }
+      });
+      obs.observe(doc.body, {childList:true, subtree:true, characterData:true});
+    }
+  }catch(e){}
+}
+
 /* Cuántas herramientas se mantienen abiertas a la vez. Cada una ocupa memoria del equipo,
    así que al pasar de este número se cierra la más antigua que no se esté usando. */
 var MAX_MARCOS = 4;
@@ -1234,6 +1303,8 @@ function compactarEmbebido(frame){
         if(!isNaN(top) && top >= 30) el.style.setProperty('top', '8px', 'important');
       }
     }catch(e){}
+
+    neutralizarTextos(doc, frame.contentWindow);
 
     /* el contenido ocupa el ancho completo cuando se le quitó el panel lateral propio */
     var nav = doc.querySelector('.shell > nav.side');
