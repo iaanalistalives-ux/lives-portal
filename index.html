@@ -671,6 +671,7 @@ body.conSesion .quienBtn{display:inline-flex;}
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria/" role="button" tabindex="0"><div class="tt">Actualizar Status de Auditorías Finales y Clientes</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria-final/" role="button" tabindex="0"><div class="tt">Ingreso de Auditorías Acabados/Costura</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditorias-taller/" role="button" tabindex="0"><div class="tt">Escanear Auditorías Acabados/Costura</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-registro-auditorias/registro.html" role="button" tabindex="0"><div class="tt">Digitación en Planta de Auditorías</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -1104,7 +1105,22 @@ function marcoActivo(){
 
 /* Devuelve el marco de esa herramienta: si ya estaba abierta lo reutiliza tal como quedó,
    con lo escrito y lo buscado intacto; si es la primera vez, lo crea y lo carga. */
-function marcoDe(url, title){
+/* Varias herramientas aceptan que se les diga quién está entrando (?usuario=). Si no lo
+   reciben, ponen un nombre por defecto y los registros quedan a nombre de otra persona.
+   El portal ya sabe quién inició sesión, así que se lo pasa. Las que no lo leen lo ignoran. */
+function urlConUsuario(url){
+  if(!SESION || !SESION.nombre) return url;
+  var hash = '';
+  var base = url;
+  var h = url.indexOf('#');
+  if(h !== -1){ hash = url.slice(h); base = url.slice(0, h); }
+  if(/[?&]usuario=/.test(base)) return url;
+  base += (base.indexOf('?') !== -1 ? '&' : '?') + 'usuario=' + encodeURIComponent(SESION.nombre);
+  return base + hash;
+}
+
+function marcoDe(url, title, urlLimpia){
+  urlLimpia = urlLimpia || url;
   var caja = document.getElementById('embedBox');
   var previos = caja.querySelectorAll('.embedFrame');
   previos.forEach(function(f){ f.classList.remove('activo'); });
@@ -1120,7 +1136,7 @@ function marcoDe(url, title){
     frame.dataset.usada = Date.now();
     if(_pollEmbed){ clearInterval(_pollEmbed); _pollEmbed = null; }
     mostrarEmbed();
-    registrarApertura(title, url);
+    registrarApertura(title, urlLimpia);
     return frame;
   }
 
@@ -1141,7 +1157,7 @@ function marcoDe(url, title){
   caja.appendChild(frame);
   frame.src = url;
   vigilarEmbed(frame, url);
-  registrarApertura(title, url);
+  registrarApertura(title, urlLimpia);
   return frame;
 }
 
@@ -1237,7 +1253,7 @@ function openEmbed(cardEl){
   if(!originScreen) return;
   currentEmbedOrigin = originScreen.id;
 
-  var frame = marcoDe(url, title);
+  var frame = marcoDe(urlConUsuario(url), title, url);
   document.getElementById('hcrumbName').textContent = title;
   var lt = document.getElementById('embedLoaderTxt');
   if(lt) lt.textContent = 'Abriendo ' + title + '…';
