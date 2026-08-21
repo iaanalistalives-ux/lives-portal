@@ -259,6 +259,10 @@ body.panelChico .toolsLayout .backbtn::before{content:'←';font-size:15px;}
 .embedLoader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
   background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
 .embedBox.listo .embedLoader{display:none;}
+/* Cada herramienta abierta conserva su propio marco: al cambiar de una a otra se oculta,
+   no se cierra, así lo que estaba escrito o buscado sigue ahí al volver. */
+.embedFrame{display:none;}
+.embedFrame.activo{display:block;}
 .embedLoader .sp{width:34px;height:34px;border-radius:50%;border:3px solid #E4EAE7;border-top-color:var(--sage);animation:spin .8s linear infinite;}
 .embedLoader .tx{font-size:12.5px;font-weight:700;color:var(--stone);}
 @keyframes spin{to{transform:rotate(360deg);}}
@@ -355,7 +359,10 @@ body.panelChico .toolsLayout .backbtn::before{content:'←';font-size:15px;}
     align-items:center;gap:8px;margin-top:0;}
   body.embedOpen #screen-embed .backbtn{flex:0 0 auto;margin:0;padding:9px 13px;font-size:0;}
   body.embedOpen #screen-embed .backbtn::before{content:'←';font-size:16px;font-weight:700;}
-  body.embedOpen #screen-embed .areaSidebar{flex:1 1 0;min-width:0;margin:0;padding:6px 8px;border-radius:12px;}
+  body.embedOpen #screen-embed .areaSidebar{flex:1 1 0;min-width:0;margin:0;padding:4px 6px;border-radius:10px;}
+  body.embedOpen #screen-embed .areaSidebar .sbItem{padding:6px 9px;font-size:12.5px;gap:6px;}
+  body.embedOpen #screen-embed .areaSidebar .sbItem .sbIcon{font-size:13px;}
+  body.embedOpen #screen-embed .backbtn{padding:7px 11px;}
   body.embedOpen #screen-embed .toolsContent{flex:0 0 100%;}
   body.embedOpen .embedFrame{height:calc(100vh - 152px);min-height:400px;border-radius:10px;}
 }
@@ -607,7 +614,6 @@ body.conSesion .quienBtn{display:inline-flex;}
       <aside class="areaSidebar" id="embedSidebar"></aside>
       <div class="toolsContent">
         <div class="embedBox" id="embedBox">
-          <iframe class="embedFrame" id="embedFrame" src="" allow="camera; microphone"></iframe>
           <div class="embedLoader"><div class="sp"></div><div class="tx" id="embedLoaderTxt">Abriendo…</div></div>
         </div>
       </div>
@@ -996,8 +1002,9 @@ function showScreen(id){
     document.body.classList.remove('embedOpen');
     var cr = document.getElementById('hcrumbName');
     if(cr) cr.textContent = '';
-    var fr = document.getElementById('embedFrame');
-    if(fr && fr.src && fr.src !== 'about:blank') fr.src = '';
+    /* Las herramientas abiertas NO se cierran al salir de la pantalla: se quedan cargadas
+       para volver a ellas tal como estaban. Se liberan al cerrar sesión o al pasar del
+       máximo de marcos. */
     if(_pollEmbed){ clearInterval(_pollEmbed); _pollEmbed = null; }
   }
   window.scrollTo(0,0);
@@ -1075,6 +1082,57 @@ function inyectarEstiloEmbed(frame, url){
    pone el estilo y se muestra: el usuario ve el indicador del portal y después la herramienta
    ya limpia, nunca el paso intermedio. Mientras tanto el estilo se reinyecta por si el
    documento se reemplaza a mitad de camino. */
+/* Cuántas herramientas se mantienen abiertas a la vez. Cada una ocupa memoria del equipo,
+   así que al pasar de este número se cierra la más antigua que no se esté usando. */
+var MAX_MARCOS = 4;
+
+function marcoActivo(){
+  return document.querySelector('#embedBox .embedFrame.activo');
+}
+
+/* Devuelve el marco de esa herramienta: si ya estaba abierta lo reutiliza tal como quedó,
+   con lo escrito y lo buscado intacto; si es la primera vez, lo crea y lo carga. */
+function marcoDe(url, title){
+  var caja = document.getElementById('embedBox');
+  var previos = caja.querySelectorAll('.embedFrame');
+  previos.forEach(function(f){ f.classList.remove('activo'); });
+
+  var frame = null;
+  for(var i = 0; i < previos.length; i++){
+    if(previos[i].dataset.url === url){ frame = previos[i]; break; }
+  }
+
+  if(frame){
+    /* ya estaba abierta: se muestra al instante, sin recargar nada */
+    frame.classList.add('activo');
+    frame.dataset.usada = Date.now();
+    if(_pollEmbed){ clearInterval(_pollEmbed); _pollEmbed = null; }
+    mostrarEmbed();
+    registrarApertura(title, url);
+    return frame;
+  }
+
+  /* no cabe una más: se cierra la que lleva más tiempo sin usarse */
+  var abiertas = [].slice.call(caja.querySelectorAll('.embedFrame'));
+  while(abiertas.length >= MAX_MARCOS){
+    abiertas.sort(function(a, b){ return (a.dataset.usada || 0) - (b.dataset.usada || 0); });
+    var vieja = abiertas.shift();
+    if(vieja) vieja.parentNode.removeChild(vieja);
+  }
+
+  frame = document.createElement('iframe');
+  frame.className = 'embedFrame activo';
+  frame.setAttribute('allow', 'camera; microphone');
+  frame.dataset.url = url;
+  frame.dataset.usada = Date.now();
+  frame.onload = function(){ compactarEmbebido(frame); mostrarEmbed(); };
+  caja.appendChild(frame);
+  frame.src = url;
+  vigilarEmbed(frame, url);
+  registrarApertura(title, url);
+  return frame;
+}
+
 function mostrarEmbed(){
   var box = document.getElementById('embedBox');
   if(box) box.classList.add('listo');
@@ -1167,12 +1225,8 @@ function openEmbed(cardEl){
   if(!originScreen) return;
   currentEmbedOrigin = originScreen.id;
 
-  var frame = document.getElementById('embedFrame');
-  frame.onload = function(){ compactarEmbebido(frame); mostrarEmbed(); };
-  frame.src = url;
-  vigilarEmbed(frame, url);
+  var frame = marcoDe(url, title);
   document.getElementById('hcrumbName').textContent = title;
-  registrarApertura(title, url);
   var lt = document.getElementById('embedLoaderTxt');
   if(lt) lt.textContent = 'Abriendo ' + title + '…';
   document.body.classList.add('embedOpen');
@@ -1285,8 +1339,6 @@ document.querySelectorAll('.tcard[data-url]').forEach(function(card){
 
 document.querySelector('[data-embed-back]').addEventListener('click', function(){
   if(_pollEmbed){ clearInterval(_pollEmbed); _pollEmbed = null; }
-  document.getElementById('embedBox').classList.remove('listo');
-  document.getElementById('embedFrame').src = '';
   document.body.classList.remove('embedOpen');
   if(currentEmbedOrigin){
     showScreen(currentEmbedOrigin);
@@ -1895,6 +1947,8 @@ function leerSesion(){
   }catch(e){ return null; }
 }
 function cerrarSesion(){
+  var caja = document.getElementById('embedBox');
+  if(caja) caja.querySelectorAll('.embedFrame').forEach(function(f){ f.parentNode.removeChild(f); });
   try{ sessionStorage.removeItem(CLAVE_SESION); }catch(e){}
   try{ localStorage.removeItem(CLAVE_SESION); }catch(e){}   /* limpia sesiones de la versión anterior */
   location.reload();
@@ -2120,9 +2174,9 @@ document.getElementById('accBtn').addEventListener('click', intentarEntrar);
 document.getElementById('refrescarBtn').addEventListener('click', function(){
   var btn = this;
   if(document.body.classList.contains('embedOpen')){
-    var frame = document.getElementById('embedFrame');
-    var url = frame.src;
-    if(url){
+    var frame = marcoActivo();
+    var url = frame ? frame.dataset.url : '';
+    if(frame && url){
       btn.classList.add('girando');
       btn.textContent = '↻ Actualizando…';
       document.getElementById('embedBox').classList.remove('listo');
