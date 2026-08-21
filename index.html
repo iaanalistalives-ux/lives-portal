@@ -31,8 +31,6 @@ body{margin:0;background:var(--warm-light);color:#333;font-family:Calibri,Arial,
 .hcrumb .sep{color:rgba(255,255,255,.45);font-weight:400;}
 body.embedOpen .hcrumb{display:flex;}
 body.embedOpen .hsub{display:none;}
-.openTabBtn{display:none;}
-body.embedOpen .openTabBtn{display:flex;}
 /* Con una herramienta abierta el aire de arriba sobra: el header ya dice dónde estamos */
 body.embedOpen .wrap{padding-top:0;}
 #screen-embed .toolsLayout{margin-top:12px;}
@@ -210,6 +208,34 @@ body.embedOpen .wrap{padding-top:0;}
 .areaSidebar .sbTitle{font-size:10.5px;font-weight:800;color:var(--stone);text-transform:uppercase;letter-spacing:.6px;margin:2px 4px 10px;}
 .areaSidebar .sbItem{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;color:#333;margin-bottom:3px;transition:.15s;}
 .areaSidebar .sbItem:hover{background:var(--warm-light);}
+
+/* ---- Panel angosto: solo iconos ----
+   El boton de la esquina del panel lo encoge y lo vuelve a abrir. La eleccion se recuerda. */
+.sbToggle{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:8px;
+  border:1px solid var(--warm);background:#fff;color:var(--stone);cursor:pointer;
+  font-family:inherit;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;
+  transition:.15s;padding:0;}
+.sbToggle:hover{border-color:var(--sage);color:var(--sage);}
+.areaSidebar{position:relative;}
+body.panelChico .toolsLayout{grid-template-columns:64px 1fr;}
+body.panelChico .areaSidebar{padding:12px 8px;}
+body.panelChico .areaSidebar .sbTitle,
+body.panelChico .areaSidebar .sbGroup{display:none;}
+body.panelChico .areaSidebar .sbItem{justify-content:center;padding:10px 0;gap:0;}
+body.panelChico .areaSidebar .sbItem span:not(.sbIcon){display:none;}
+body.panelChico .areaSidebar .sbItem .sbIcon{font-size:18px;}
+body.panelChico .sbToggle{position:static;margin:0 auto 8px;}
+/* el boton Volver tambien se encoge, para que la columna quede pareja */
+body.panelChico .toolsLayout .backbtn{padding:9px 0;font-size:0;}
+body.panelChico .toolsLayout .backbtn::before{content:'←';font-size:15px;}
+@media(max-width:760px){
+  .sbToggle{display:none;}
+  body.panelChico .toolsLayout{grid-template-columns:none;}
+  body.panelChico .areaSidebar .sbItem span:not(.sbIcon){display:inline;}
+  body.panelChico .areaSidebar .sbItem{justify-content:flex-start;padding:9px 11px;gap:9px;}
+  body.panelChico .toolsLayout .backbtn{padding:8px 16px;font-size:13px;}
+  body.panelChico .toolsLayout .backbtn::before{content:'';}
+}
 .areaSidebar .sbItem.active{background:var(--sage);color:#fff;}
 .areaSidebar .sbItem .sbIcon{font-size:15px;flex:0 0 auto;}
 .toolsContent{flex:1;min-width:0;}
@@ -412,7 +438,6 @@ body.conSesion .quienBtn{display:inline-flex;}
   <div class="headerActions">
     <button class="pinBtn refreshBtn" id="refrescarBtn" type="button" title="Volver a cargar">↻ Actualizar</button>
     <button class="quienBtn" id="quienBtn" type="button" title="Cerrar sesión"><span id="quienNombre"></span> · Salir</button>
-    <a class="pinBtn openTabBtn" id="embedExternalLink" href="#" target="_blank" rel="noopener">↗ Abrir en otra pestaña</a>
     <a class="pinBtn" id="miTableroBtn" style="display:none" href="https://iaanalistalives-ux.github.io/tablero-proyectos/" target="_blank" rel="noopener">📊 Mi Tablero</a>
     <button class="installBtn hidden" id="installBtn" type="button">
       <svg viewBox="0 0 24 24"><path d="M12 3v10.6l3.3-3.3 1.4 1.4L12 17l-4.7-5.3 1.4-1.4 3.3 3.3V3h0zM5 19h14v2H5v-2z"/></svg>
@@ -1119,11 +1144,11 @@ function openEmbed(cardEl){
   registrarApertura(title, url);
   var lt = document.getElementById('embedLoaderTxt');
   if(lt) lt.textContent = 'Abriendo ' + title + '…';
-  document.getElementById('embedExternalLink').href = url;
   document.body.classList.add('embedOpen');
 
   var sidebar = document.getElementById('embedSidebar');
   sidebar.innerHTML = '';
+  ponerToggle(sidebar);
   var titleEl = document.createElement('div');
   titleEl.className = 'sbTitle';
   titleEl.textContent = (currentEmbedOrigin === 'screen-mias') ? 'Tus herramientas' : 'Herramientas del área';
@@ -1170,6 +1195,7 @@ function openEmbed(cardEl){
       var item = document.createElement('div');
       item.className = 'sbItem' + (sib.dataset.url === url ? ' active' : '');
       item.innerHTML = '<span class="sbIcon">' + (g[0] === 'dash' ? '📊' : '📝') + '</span><span>' + sibTitle + '</span>';
+      item.title = sibTitle;
       item.addEventListener('click', function(){
         currentType = g[0];
         openEmbed(sib);
@@ -1204,6 +1230,7 @@ function openEmbed(cardEl){
         var it = document.createElement('div');
         it.className = 'sbItem sbArea';
         it.innerHTML = '<span class="sbIcon">' + a.icon + '</span><span>' + a.label + '</span>';
+        it.title = 'Ir a ' + a.label;
         it.addEventListener('click', function(){ goToTools(a.id, currentType); });
         sidebar.appendChild(it);
       });
@@ -1213,6 +1240,7 @@ function openEmbed(cardEl){
     backLink.addEventListener('click', function(){ renderAreaList(currentType); });
     sidebar.appendChild(backLink);
   }
+  aplicarPanel();
 
   showScreen('screen-embed');
 }
@@ -1294,12 +1322,43 @@ function switchDeArea(area, type){
   cont.insertBefore(sw, cont.firstChild);
 }
 
+/* Botón para encoger el panel a solo íconos y volver a abrirlo. La elección se guarda,
+   así que se mantiene al cambiar de área o de herramienta. */
+var CLAVE_PANEL = 'lives_panel_chico';
+
+function panelChico(){
+  try{ return localStorage.getItem(CLAVE_PANEL) === '1'; }catch(e){ return false; }
+}
+
+function aplicarPanel(){
+  var chico = panelChico();
+  document.body.classList.toggle('panelChico', chico);
+  document.querySelectorAll('.sbToggle').forEach(function(b){
+    b.textContent = chico ? '»' : '«';
+    b.title = chico ? 'Mostrar los nombres' : 'Mostrar solo íconos';
+    b.setAttribute('aria-label', b.title);
+  });
+}
+
+function ponerToggle(sidebar){
+  if(sidebar.querySelector('.sbToggle')) return;
+  var b = document.createElement('button');
+  b.className = 'sbToggle';
+  b.type = 'button';
+  b.addEventListener('click', function(){
+    try{ localStorage.setItem(CLAVE_PANEL, panelChico() ? '0' : '1'); }catch(e){}
+    aplicarPanel();
+  });
+  sidebar.insertBefore(b, sidebar.firstChild);
+}
+
 function renderSidebar(activeArea, type){
   var screen = document.getElementById('tools-' + activeArea + '-' + type);
   if(!screen) return;
   var aside = screen.querySelector('.areaSidebar');
   if(!aside) return;
   aside.innerHTML = '';
+  ponerToggle(aside);
   var titleEl = document.createElement('div');
   titleEl.className = 'sbTitle';
   titleEl.textContent = (type === 'dash') ? 'Otras áreas · Dashboards' : 'Otras áreas · Formularios';
@@ -1308,11 +1367,13 @@ function renderSidebar(activeArea, type){
     var item = document.createElement('div');
     item.className = 'sbItem' + (a.id === activeArea ? ' active' : '');
     item.innerHTML = '<span class="sbIcon">' + a.icon + '</span><span>' + a.label + '</span>';
+    item.title = a.label;
     item.addEventListener('click', function(){
       if(a.id !== activeArea) goToTools(a.id, type);
     });
     aside.appendChild(item);
   });
+  aplicarPanel();
 }
 
 function renderAreaList(type){
