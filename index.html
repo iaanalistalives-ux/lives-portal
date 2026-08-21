@@ -335,13 +335,44 @@ body.panelChico .toolsLayout .backbtn::before{content:'←';font-size:15px;}
   .embedFrame{height:calc(100vh - 230px);min-height:340px;}
 }
 
+/* ==================== CELULAR CON UNA HERRAMIENTA ABIERTA ====================
+   La herramienta necesita casi toda la pantalla. Se conserva el título del portal —hace
+   falta para saber dónde se está— pero todo lo demás se comprime: los botones del header
+   se achican, y el botón Volver comparte fila con la lista de herramientas en vez de
+   ocupar una línea propia. */
+@media(max-width:760px){
+  body.embedOpen .header{padding:8px 10px;gap:8px 10px;min-height:0;}
+  body.embedOpen .header img{height:26px;}
+  body.embedOpen .htitle{font-size:14px;}
+  body.embedOpen .hcrumb{font-size:12px;max-width:70vw;}
+  body.embedOpen .headerActions{width:auto;margin-left:auto;gap:6px;}
+  body.embedOpen .pinBtn,
+  body.embedOpen .quienBtn{padding:6px 9px;font-size:11px;}
+  body.embedOpen .quienBtn span{max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  body.embedOpen .wrap{padding:8px 8px 10px;}
+  body.embedOpen #screen-embed .toolsLayout{display:flex;flex-direction:row;flex-wrap:wrap;
+    align-items:center;gap:8px;margin-top:0;}
+  body.embedOpen #screen-embed .backbtn{flex:0 0 auto;margin:0;padding:9px 13px;font-size:0;}
+  body.embedOpen #screen-embed .backbtn::before{content:'←';font-size:16px;font-weight:700;}
+  body.embedOpen #screen-embed .areaSidebar{flex:1 1 0;min-width:0;margin:0;padding:6px 8px;border-radius:12px;}
+  body.embedOpen #screen-embed .toolsContent{flex:0 0 100%;}
+  body.embedOpen .embedFrame{height:calc(100vh - 152px);min-height:400px;border-radius:10px;}
+}
+@media(max-width:480px){
+  body.embedOpen .htitle{font-size:13px;}
+  body.embedOpen .embedFrame{height:calc(100vh - 144px);}
+}
+
 /* Navegadores con soporte de dvh: descuenta de verdad la barra de direcciones */
 @supports (height: 100dvh){
   @media(max-width:760px){
     .embedFrame{height:calc(100dvh - 250px);}
+    body.embedOpen .embedFrame{height:calc(100dvh - 152px);}
   }
   @media(max-width:480px){
     .embedFrame{height:calc(100dvh - 230px);}
+    body.embedOpen .embedFrame{height:calc(100dvh - 144px);}
   }
 }
 
