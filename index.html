@@ -133,6 +133,8 @@ body.embedOpen .wrap{padding-top:0;}
 .kv .ku{font-size:.48em;letter-spacing:0;margin-left:1px;}
 .kv.loading{font-size:17px;font-weight:700;color:var(--stone);letter-spacing:0;}
 .kperiodo{font-size:12px;font-weight:800;color:var(--stone);text-transform:uppercase;letter-spacing:.5px;margin-top:7px;}
+/* En las tarjetas de "quién tiene más rechazos" el nombre es el dato importante */
+.kperiodo.kquien{font-size:17px;color:var(--st);letter-spacing:.2px;margin-top:9px;line-height:1.2;}
 .kdelta{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:var(--st);margin-top:8px;}
 .kdelta .kar{font-size:15px;line-height:1;}
 .kdelta small{font-weight:700;color:var(--stone);font-size:11.5px;}
@@ -2621,6 +2623,17 @@ function numero(v){
 }
 
 /* Ranking por % de rechazo sobre las filas dadas, agrupando por la columna indicada */
+/* Busca en la ventana pedida; si ahí no hay nada, la va ampliando para no dejar la tarjeta
+   vacía cuando la carga de datos viene con retraso. Siempre se muestra qué período se usó. */
+function peorPorConRespaldo(filas, columna){
+  var ventanas = [DIAS_KPI, 60, 90, 180, 365];
+  for(var i = 0; i < ventanas.length; i++){
+    var r = peorPor(filas, columna, ventanas[i]);
+    if(r){ r.dias = ventanas[i]; return r; }
+  }
+  return null;
+}
+
 function peorPor(filas, columna, dias){
   var g = {};
   filas.forEach(function(r){
@@ -2657,7 +2670,9 @@ function pintarPeor(id, titulo, r, ts){
   var elV = document.getElementById(id + 'Val');
   elV.classList.remove('loading');
   elV.innerHTML = r.peor.pct.toFixed(1) + '<span class="ku">%</span>';
-  document.getElementById(id + 'Periodo').textContent = r.peor.nombre;
+  var elP = document.getElementById(id + 'Periodo');
+  elP.textContent = r.peor.nombre;
+  elP.classList.add('kquien');
   document.getElementById(id + 'Delta').innerHTML =
     '<span class="kar">▲</span>' + r.peor.rech + ' de ' + r.peor.aud +
     ' <small>auditorías rechazadas</small>';
@@ -2666,8 +2681,9 @@ function pintarPeor(id, titulo, r, ts){
   document.getElementById(id + 'Spark').innerHTML = '';
   card.classList.remove('ok','flat'); card.classList.add('bad');
   document.getElementById(id + 'Pill').textContent = 'El más alto';
+  var dias = r.dias || DIAS_KPI;
   document.getElementById(id + 'Fresh').textContent =
-    'Últimos ' + DIAS_KPI + ' días · mínimo ' + MIN_AUDITORIAS + ' auditorías · ' + kpiHace(ts);
+    'Últimos ' + dias + ' días · mínimo ' + MIN_AUDITORIAS + ' auditorías · ' + kpiHace(ts);
 }
 
 function fallaPeor(id){
@@ -2706,17 +2722,17 @@ function cargarKpisAuditoria(){
 
     /* Cliente: se juntan las tres auditorías que registran cliente */
     var todasCliente = lineas.concat(inspeccion).concat(cliente);
-    var rc = peorPor(todasCliente, 'CLIENTE', DIAS_KPI);
+    var rc = peorPorConRespaldo(todasCliente, 'CLIENTE');
     if(rc){ kpiCacheSet('kpiCliente', rc); pintarPeor('kpiCliente', '', rc, Date.now()); }
     else pintarPeor('kpiCliente', '', null);
 
     /* Taller: solo auditoría final */
-    var rt = peorPor(final, 'TALLER', DIAS_KPI);
+    var rt = peorPorConRespaldo(final, 'TALLER');
     if(rt){ kpiCacheSet('kpiTaller', rt); pintarPeor('kpiTaller', '', rt, Date.now()); }
     else pintarPeor('kpiTaller', '', null);
 
     /* Inspectora: líneas + inspección */
-    var ri = peorPor(lineas.concat(inspeccion), 'INSPECTOR', DIAS_KPI);
+    var ri = peorPorConRespaldo(lineas.concat(inspeccion), 'INSPECTOR');
     if(ri){ kpiCacheSet('kpiInspectora', ri); pintarPeor('kpiInspectora', '', ri, Date.now()); }
     else pintarPeor('kpiInspectora', '', null);
   })
@@ -2738,27 +2754,43 @@ function cargarKpiSegInterno(){
   if(ca) pintarSegInterno(ca.d, ca.ts);
 
   traerGviz(SEG_SHEET, 'REPORTES').then(function(filas){
-    if(!filas.length){ pintarSegInterno(null); return; }
+    if(!filas.length) throw new Error('hoja vacía');
+
     var cFecha = claveComo(filas[0], 'FECHA');
     var cCant  = claveComo(filas[0], 'CANTIDAD');
     var cConf  = claveComo(filas[0], 'PRENDAS CONFECCIONADAS');
     var cPrec  = claveComo(filas[0], 'PRECIO');
     if(!cCant || !cConf){
-      console.warn('KPI segundas: columnas encontradas ->', Object.keys(filas[0]));
-      pintarSegInterno(null); return;
+      console.warn('KPI segundas: columnas de la hoja REPORTES ->', Object.keys(filas[0]));
+      throw new Error('faltan columnas');
     }
-    var seg = 0, conf = 0, soles = 0;
-    filas.forEach(function(r){
-      if(cFecha && !dentroDeVentana(r[cFecha], DIAS_KPI)) return;
-      seg   += numero(r[cCant]);
-      conf  += numero(r[cConf]);
-      soles += cPrec ? numero(r[cPrec]) : 0;
-    });
-    if(conf <= 0){ pintarSegInterno(null); return; }
-    var d = {pct:(seg / conf) * 100, seg:seg, conf:conf, soles:soles};
-    kpiCacheSet('segInterno', d);
-    pintarSegInterno(d, Date.now());
-  }).catch(function(){
+
+    /* Los reportes se cargan por semana: si la última carga es de hace más de un mes,
+       la ventana de 30 días queda vacía. Se amplía hasta encontrar datos y se dice cuál
+       período se está mostrando. */
+    var ventanas = [DIAS_KPI, 60, 90, 180, 365];
+    for(var v = 0; v < ventanas.length; v++){
+      var seg = 0, conf = 0, soles = 0, filasUsadas = 0;
+      filas.forEach(function(r){
+        if(cFecha && !dentroDeVentana(r[cFecha], ventanas[v])) return;
+        var c = numero(r[cConf]);
+        if(c <= 0) return;
+        conf  += c;
+        seg   += numero(r[cCant]);
+        soles += cPrec ? numero(r[cPrec]) : 0;
+        filasUsadas++;
+      });
+      if(conf > 0){
+        var d = {pct:(seg / conf) * 100, seg:seg, conf:conf, soles:soles, dias:ventanas[v]};
+        kpiCacheSet('segInterno', d);
+        pintarSegInterno(d, Date.now());
+        return;
+      }
+    }
+    console.warn('KPI segundas: sin filas con denominador. Ejemplo de fila ->', filas[0]);
+    pintarSegInterno(null);
+  }).catch(function(err){
+    console.warn('KPI segundas:', err);
     var c = kpiCacheGet('segInterno');
     if(c) pintarSegInterno(c.d, c.ts, true); else fallaPeor('kpiSegInterno');
   });
@@ -2773,7 +2805,7 @@ function pintarSegInterno(d, ts, offline){
   var elV = document.getElementById(id + 'Val');
   elV.classList.remove('loading');
   elV.innerHTML = d.pct.toFixed(2) + '<span class="ku">%</span>';
-  document.getElementById(id + 'Periodo').textContent = 'ÚLTIMOS ' + DIAS_KPI + ' DÍAS';
+  document.getElementById(id + 'Periodo').textContent = 'ÚLTIMOS ' + (d.dias || DIAS_KPI) + ' DÍAS';
   document.getElementById(id + 'Delta').innerHTML =
     '<span class="kar">S/</span>' + Math.round(d.soles).toLocaleString('es-PE') +
     ' <small>costo de las segundas</small>';
