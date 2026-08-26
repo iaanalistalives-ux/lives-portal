@@ -127,14 +127,26 @@ body.embedOpen .wrap{padding-top:0;}
 .kpiCard.bad .kpiPill{animation:kpulse 2.2s ease-in-out infinite;}
 @keyframes kpulse{0%,100%{box-shadow:0 0 0 0 rgba(180,35,24,.45);}50%{box-shadow:0 0 0 7px rgba(180,35,24,0);}}
 
-.kpiBody{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:12px;position:relative;z-index:1;}
+/* Todo el cuerpo centrado: el número, el período, el nombre y el pie quedan alineados
+   en el eje de la tarjeta, sin nada colgando a un costado. */
+.kpiBody{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;
+  margin-top:12px;position:relative;z-index:1;}
+.kpiNums{width:100%;}
+.kpiCard .kbase{text-align:center;}
+.kpiFoot{justify-content:center;text-align:center;flex-direction:column;gap:4px;}
+/* El período se lee de un vistazo: mes, año o ventana de días, en una etiqueta propia. */
+.kchip{display:inline-flex;align-items:center;gap:6px;background:var(--stSoft);color:var(--st);
+  border:1px solid var(--st);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.6px;margin-top:9px;}
 .kpiNums{min-width:0;}
 .kv{font-size:clamp(38px,4.4vw,54px);font-weight:800;color:var(--st);line-height:.95;letter-spacing:-1.5px;}
 .kv .ku{font-size:.48em;letter-spacing:0;margin-left:1px;}
 .kv.loading{font-size:17px;font-weight:700;color:var(--stone);letter-spacing:0;}
 .kperiodo{font-size:12px;font-weight:800;color:var(--stone);text-transform:uppercase;letter-spacing:.5px;margin-top:7px;}
 /* En las tarjetas de "quién tiene más rechazos" el nombre es el dato importante */
-.kperiodo.kquien{font-size:17px;color:var(--st);letter-spacing:.2px;margin-top:9px;line-height:1.2;}
+.kperiodo.kquien{font-size:19px;color:var(--st);letter-spacing:.2px;margin-top:6px;line-height:1.2;}
+.kdelta{justify-content:center;}
+.kmeta{justify-content:center;}
 .kdelta{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:var(--st);margin-top:8px;}
 .kdelta .kar{font-size:15px;line-height:1;}
 .kdelta small{font-weight:700;color:var(--stone);font-size:11.5px;}
@@ -602,6 +614,7 @@ body.conSesion .quienBtn{display:inline-flex;}
           <div class="kpiBody">
             <div class="kpiNums">
               <div class="kv loading" id="kpiSegundasVal"><span class="kskel"></span></div>
+              <div class="kchip" id="kpiSegundasChip"></div>
               <div class="kperiodo" id="kpiSegundasPeriodo"></div>
               <div class="kdelta" id="kpiSegundasDelta"></div>
               <div class="kmeta" id="kpiSegundasMeta"></div>
@@ -623,6 +636,7 @@ body.conSesion .quienBtn{display:inline-flex;}
           <div class="kpiBody">
             <div class="kpiNums">
               <div class="kv loading" id="kpiSegInternoVal"><span class="kskel"></span></div>
+              <div class="kchip" id="kpiSegInternoChip"></div>
               <div class="kperiodo" id="kpiSegInternoPeriodo"></div>
               <div class="kdelta" id="kpiSegInternoDelta"></div>
               <div class="kmeta" id="kpiSegInternoMeta"></div>
@@ -641,6 +655,7 @@ body.conSesion .quienBtn{display:inline-flex;}
           <div class="kpiBody">
             <div class="kpiNums">
               <div class="kv loading" id="kpiClienteVal"><span class="kskel"></span></div>
+              <div class="kchip" id="kpiClienteChip"></div>
               <div class="kperiodo" id="kpiClientePeriodo"></div>
               <div class="kdelta" id="kpiClienteDelta"></div>
               <div class="kmeta" id="kpiClienteMeta"></div>
@@ -659,13 +674,14 @@ body.conSesion .quienBtn{display:inline-flex;}
           <div class="kpiBody">
             <div class="kpiNums">
               <div class="kv loading" id="kpiTallerVal"><span class="kskel"></span></div>
+              <div class="kchip" id="kpiTallerChip"></div>
               <div class="kperiodo" id="kpiTallerPeriodo"></div>
               <div class="kdelta" id="kpiTallerDelta"></div>
               <div class="kmeta" id="kpiTallerMeta"></div>
             </div>
             <div class="kspark" id="kpiTallerSpark"></div>
           </div>
-          <div class="kbase" id="kpiTallerBase">Auditorías rechazadas sobre auditadas en auditoría final.</div>
+          <div class="kbase" id="kpiTallerBase">Auditorías rechazadas sobre auditadas en auditoría final, solo talleres externos.</div>
           <div class="kpiFoot"><span class="kfresh" id="kpiTallerFresh"></span><span class="klink">Ver dashboard →</span></div>
         </div>
 
@@ -677,6 +693,7 @@ body.conSesion .quienBtn{display:inline-flex;}
           <div class="kpiBody">
             <div class="kpiNums">
               <div class="kv loading" id="kpiInspectoraVal"><span class="kskel"></span></div>
+              <div class="kchip" id="kpiInspectoraChip"></div>
               <div class="kperiodo" id="kpiInspectoraPeriodo"></div>
               <div class="kdelta" id="kpiInspectoraDelta"></div>
               <div class="kmeta" id="kpiInspectoraMeta"></div>
@@ -687,6 +704,25 @@ body.conSesion .quienBtn{display:inline-flex;}
           <div class="kpiFoot"><span class="kfresh" id="kpiInspectoraFresh"></span><span class="klink">Ver dashboard →</span></div>
         </div>
 
+        <div class="kpiCard" id="kpiAcabados" data-url="https://iaanalistalives-ux.github.io/formulario-acabados/dashboard_acabados_v2.html">
+          <div class="kpiHead">
+            <div class="kpiName"><span class="kico">👕</span>Acabados — Eficiencia</div>
+            <div class="kpiPill" id="kpiAcabadosPill">Cargando</div>
+          </div>
+          <div class="kpiBody">
+            <div class="kpiNums">
+              <div class="kv loading" id="kpiAcabadosVal"><span class="kskel"></span></div>
+              <div class="kchip" id="kpiAcabadosChip"></div>
+              <div class="kperiodo" id="kpiAcabadosPeriodo"></div>
+              <div class="kdelta" id="kpiAcabadosDelta"></div>
+              <div class="kmeta" id="kpiAcabadosMeta"></div>
+            </div>
+            <div class="kspark" id="kpiAcabadosSpark"></div>
+          </div>
+          <div class="kbase" id="kpiAcabadosBase">Promedio de las áreas de acabados: doblado, plancha, vapor y encajado.</div>
+          <div class="kpiFoot"><span class="kfresh" id="kpiAcabadosFresh"></span><span class="klink">Ver dashboard →</span></div>
+        </div>
+
         <div class="kpiCard" id="kpiInspeccion" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/dashboard.html">
           <div class="kpiHead">
             <div class="kpiName"><span class="kico">🔍</span>Inspección — Eficiencia</div>
@@ -695,6 +731,7 @@ body.conSesion .quienBtn{display:inline-flex;}
           <div class="kpiBody">
             <div class="kpiNums">
               <div class="kv loading" id="kpiInspeccionVal"><span class="kskel"></span></div>
+              <div class="kchip" id="kpiInspeccionChip"></div>
               <div class="kperiodo" id="kpiInspeccionPeriodo"></div>
               <div class="kdelta" id="kpiInspeccionDelta"></div>
               <div class="kmeta" id="kpiInspeccionMeta"></div>
@@ -1804,12 +1841,39 @@ window.addEventListener('appinstalled', function(){
    Pintado instantáneo: primero se muestra el último valor guardado en este equipo,
    y en segundo plano se pide el dato fresco. El sello de abajo dice de cuándo es el número. */
 
+/* Los indicadores de Inicio abren su dashboard dentro del portal, no en otra pestaña:
+   así se conserva la sesión, el panel de navegación y el registro de aperturas. */
 document.querySelectorAll('.kpiCard').forEach(function(card){
   card.addEventListener('click', function(e){
     if(e.target.closest('[data-kpi-retry]')) return;
-    window.open(card.dataset.url, '_blank');
+    var nombre = card.querySelector('.kpiName');
+    abrirEnPortal(card.dataset.url, nombre ? nombre.textContent.trim() : 'Dashboard');
   });
 });
+
+/* Abre una dirección dentro del portal sin depender de una tarjeta de herramienta.
+   Si esa herramienta ya existe como tarjeta, se usa esa para que el panel lateral muestre
+   sus compañeras de área; si no, se abre sola. */
+function abrirEnPortal(url, titulo){
+  var limpio = String(url).split('#')[0].replace(/\/$/, '');
+  var tarjeta = null;
+  document.querySelectorAll('.tcard[data-url]').forEach(function(c){
+    if(tarjeta) return;
+    if(String(c.dataset.url).split('#')[0].replace(/\/$/, '') === limpio) tarjeta = c;
+  });
+  if(tarjeta && tarjeta.closest('.screen')){ openEmbed(tarjeta); return; }
+
+  /* sin tarjeta propia: se abre igual, con el nombre del indicador */
+  var suelta = document.createElement('div');
+  suelta.className = 'tcard';
+  suelta.dataset.url = url;
+  suelta.innerHTML = '<div class="tt">' + titulo + '</div>';
+  var destino = document.getElementById('screen-mias') ||
+                document.querySelector('.screen[id^="tools-"]');
+  suelta.style.display = 'none';
+  destino.appendChild(suelta);
+  openEmbed(suelta);
+}
 
 var MESES_KPI = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SETIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 var MESES_COR = ['ene','feb','mar','abr','may','jun','jul','ago','set','oct','nov','dic'];
@@ -1903,7 +1967,9 @@ function kpiPintar(id, d, ts, offline){
   card.classList.remove('ok','bad','flat');
   elV.classList.remove('loading');
   elV.innerHTML = d.val.toFixed(d.dec) + '<span class="ku">%</span>';
-  elP.textContent = d.periodo;
+  elP.textContent = '';
+  var chip = document.getElementById(id + 'Chip');
+  if(chip) chip.textContent = d.periodo;
 
   /* Movimiento contra el mes anterior: siempre se muestra como dato de apoyo */
   var flecha = '', txt = '', mejoro = null;
@@ -2152,7 +2218,8 @@ function iniciarKpis(){
    ['kpiSegInterno', cargarKpiSegInterno, 'calidad'],
    ['kpiCliente', cargarKpisAuditoria, 'calidad'],
    ['kpiTaller', cargarKpisAuditoria, 'calidad'],
-   ['kpiInspectora', cargarKpisAuditoria, 'calidad']].forEach(function(par){
+   ['kpiInspectora', cargarKpisAuditoria, 'calidad'],
+   ['kpiAcabados', cargarKpiAcabados, 'ingenieria']].forEach(function(par){
     var card = document.getElementById(par[0]);
     if(!card) return;
     if(SESION && puedeVer(card.dataset.url, par[2])){ vivos++; par[1](); }
@@ -2624,6 +2691,89 @@ function numero(v){
 }
 
 /* Ranking por % de rechazo sobre las filas dadas, agrupando por la columna indicada */
+/* ---------- por mes calendario ---------- */
+
+var MESES_LARGO = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO',
+                   'AGOSTO','SETIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+function mesDe(v){
+  var d = fechaDe(v);
+  if(!d) return null;
+  return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2);
+}
+
+function etiquetaMes(clave){
+  if(!clave) return '';
+  var p = clave.split('-');
+  return MESES_LARGO[parseInt(p[1], 10) - 1] + ' ' + p[0];
+}
+
+function mesAnterior(clave){
+  var p = clave.split('-'), a = +p[0], m = +p[1] - 1;
+  if(m === 0){ m = 12; a--; }
+  return a + '-' + ('0' + m).slice(-2);
+}
+
+/* Ranking de un mes concreto: devuelve el peor, el promedio del mes y cuántos se compararon */
+function rankingMes(filas, columna, clave, minimo){
+  var g = {};
+  filas.forEach(function(r){
+    if(mesDe(r.FECHA) !== clave) return;
+    var k = String(r[columna] || '').trim().toUpperCase();
+    if(!k) return;
+    var res = String(r.RESULTADO || '').trim().toUpperCase();
+    if(res !== 'APROBADO' && res !== 'RECHAZADO') return;
+    if(!g[k]) g[k] = {aud:0, rech:0};
+    g[k].aud++;
+    if(res === 'RECHAZADO') g[k].rech++;
+  });
+  var lista = Object.keys(g).map(function(k){
+    return {nombre:k, aud:g[k].aud, rech:g[k].rech, pct:(g[k].rech / g[k].aud) * 100};
+  }).filter(function(x){ return x.aud >= minimo; });
+  if(!lista.length) return null;
+  lista.sort(function(a,b){ return b.pct - a.pct || b.rech - a.rech; });
+  var tA = lista.reduce(function(a,x){ return a + x.aud; }, 0);
+  var tR = lista.reduce(function(a,x){ return a + x.rech; }, 0);
+  return {peor:lista[0], cuantos:lista.length, promedio:(tR / tA) * 100, mapa:g};
+}
+
+/* Mes en curso; si aún no tiene datos suficientes, el último mes que sí los tenga.
+   Además calcula cómo estaba esa misma persona, cliente o taller el mes anterior. */
+function peorDelMes(filas, columna){
+  var meses = {};
+  filas.forEach(function(r){
+    var m = mesDe(r.FECHA);
+    if(m) meses[m] = true;
+  });
+  var claves = Object.keys(meses).sort();
+  if(!claves.length) return null;
+
+  var hoy = new Date();
+  var actual = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth() + 1)).slice(-2);
+  var orden = claves.indexOf(actual) !== -1
+      ? [actual].concat(claves.slice().reverse())
+      : claves.slice().reverse();
+
+  var minimos = [MIN_AUDITORIAS, 3, 2];
+  for(var m = 0; m < minimos.length; m++){
+    for(var i = 0; i < orden.length; i++){
+      var r = rankingMes(filas, columna, orden[i], minimos[m]);
+      if(!r) continue;
+      r.mes = orden[i];
+      r.min = minimos[m];
+      /* comparativo: la misma entidad, el mes anterior */
+      var ant = rankingMes(filas, columna, mesAnterior(orden[i]), 1);
+      if(ant && ant.mapa[r.peor.nombre]){
+        var e = ant.mapa[r.peor.nombre];
+        r.antPct = (e.rech / e.aud) * 100;
+        r.antMes = mesAnterior(orden[i]);
+      }
+      return r;
+    }
+  }
+  return null;
+}
+
 /* Busca en la ventana pedida; si ahí no hay nada, la va ampliando para no dejar la tarjeta
    vacía cuando la carga de datos viene con retraso. Siempre se muestra qué período se usó. */
 function peorPorConRespaldo(filas, columna){
@@ -2678,20 +2828,31 @@ function pintarPeor(id, titulo, r, ts){
   var elV = document.getElementById(id + 'Val');
   elV.classList.remove('loading');
   elV.innerHTML = r.peor.pct.toFixed(1) + '<span class="ku">%</span>';
+  var chip = document.getElementById(id + 'Chip');
+  if(chip) chip.textContent = r.mes ? etiquetaMes(r.mes) : ('Últimos ' + (r.dias || DIAS_KPI) + ' días');
   var elP = document.getElementById(id + 'Periodo');
   elP.textContent = r.peor.nombre;
   elP.classList.add('kquien');
   document.getElementById(id + 'Delta').innerHTML =
     '<span class="kar">▲</span>' + r.peor.rech + ' de ' + r.peor.aud +
     ' <small>auditorías rechazadas</small>';
+  /* comparativo pequeño contra el mes anterior, cuando esa misma persona o cliente aparece */
+  var comp = '';
+  if(r.antPct != null){
+    var dif = r.peor.pct - r.antPct;
+    var flecha = dif > 0 ? '▲' : (dif < 0 ? '▼' : '=');
+    comp = ' · <b>' + flecha + ' ' + Math.abs(dif).toFixed(1) + ' pts vs ' +
+           etiquetaMes(r.antMes).split(' ')[0].slice(0,3) + ' (' + r.antPct.toFixed(1) + '%)</b>';
+  }
   document.getElementById(id + 'Meta').innerHTML =
-    'Promedio general ' + r.promedio.toFixed(1) + '% · <b>' + r.cuantos + ' comparados</b>';
+    'Promedio ' + r.promedio.toFixed(1) + '% · ' + r.cuantos + ' comparados' + comp;
   document.getElementById(id + 'Spark').innerHTML = '';
   card.classList.remove('ok','flat'); card.classList.add('bad');
   document.getElementById(id + 'Pill').textContent = 'El más alto';
-  var dias = r.dias || DIAS_KPI;
+  var per = r.mes ? 'Mes de ' + etiquetaMes(r.mes).toLowerCase()
+                  : ('Últimos ' + (r.dias || DIAS_KPI) + ' días');
   document.getElementById(id + 'Fresh').textContent =
-    'Últimos ' + dias + ' días · mínimo ' + (r.min || MIN_AUDITORIAS) + ' auditorías · ' + kpiHace(ts);
+    per + ' · mínimo ' + (r.min || MIN_AUDITORIAS) + ' auditorías · ' + kpiHace(ts);
 }
 
 function fallaPeor(id, motivo){
@@ -2735,17 +2896,25 @@ function cargarKpisAuditoria(){
 
     /* Cliente: se juntan las tres auditorías que registran cliente */
     var todasCliente = lineas.concat(inspeccion).concat(cliente);
-    var rc = peorPorConRespaldo(todasCliente, 'CLIENTE');
+    var rc = peorDelMes(todasCliente, 'CLIENTE');
     if(rc){ kpiCacheSet('kpiCliente', rc); pintarPeor('kpiCliente', '', rc, Date.now()); }
     else pintarPeor('kpiCliente', '', null);
 
-    /* Taller: solo auditoría final */
-    var rt = peorPorConRespaldo(final, 'TALLER');
+    /* Taller: en la hoja de auditoría final el taller viene en la columna SERVICIO
+       (MAEYE, SEPHATA, LIVES…). INT/EXT dice si fue interno o de taller externo: se dejan
+       fuera los internos, que no son un taller. */
+    var soloTalleres = final.filter(function(r){
+      var ie = String(r['INT/EXT'] || r['INT_EXT'] || '').trim().toUpperCase();
+      var sv = String(r['SERVICIO'] || '').trim().toUpperCase();
+      if(ie === 'INTERNO') return false;
+      return sv && sv !== 'LIVES';
+    });
+    var rt = peorDelMes(soloTalleres.length ? soloTalleres : final, 'SERVICIO');
     if(rt){ kpiCacheSet('kpiTaller', rt); pintarPeor('kpiTaller', '', rt, Date.now()); }
     else pintarPeor('kpiTaller', '', null);
 
     /* Inspectora: líneas + inspección */
-    var ri = peorPorConRespaldo(lineas.concat(inspeccion), 'INSPECTOR');
+    var ri = peorDelMes(lineas.concat(inspeccion), 'INSPECTOR');
     if(ri){ kpiCacheSet('kpiInspectora', ri); pintarPeor('kpiInspectora', '', ri, Date.now()); }
     else pintarPeor('kpiInspectora', '', null);
   })
@@ -2788,23 +2957,36 @@ function cargarKpiSegInterno(){
         return;
       }
 
-      var ventanas = [DIAS_KPI, 60, 90, 180, 365];
-      for(var v = 0; v < ventanas.length; v++){
-        var seg = 0, conf = 0, soles = 0;
-        filas.forEach(function(r){
-          if(cFecha && !dentroDeVentana(r[cFecha], ventanas[v])) return;
-          var c = numero(r[cConf]);
-          if(c <= 0) return;
-          conf  += c;
-          seg   += numero(r[cCant]);
-          soles += cPrec ? numero(r[cPrec]) : 0;
-        });
-        if(conf > 0){
-          var d = {pct:(seg / conf) * 100, seg:seg, conf:conf, soles:soles, dias:ventanas[v]};
-          kpiCacheSet('segInterno', d);
-          pintarSegInterno(d, Date.now());
-          return;
-        }
+      /* Se agrupa por mes calendario: el mes en curso, y si aún no tiene carga, el último
+         mes con datos. El mes anterior queda para el comparativo. */
+      var porMes = {};
+      filas.forEach(function(r){
+        var m = cFecha ? mesDe(r[cFecha]) : null;
+        if(!m) return;
+        var c = numero(r[cConf]);
+        if(c <= 0) return;
+        if(!porMes[m]) porMes[m] = {seg:0, conf:0, soles:0};
+        porMes[m].conf  += c;
+        porMes[m].seg   += numero(r[cCant]);
+        porMes[m].soles += cPrec ? numero(r[cPrec]) : 0;
+      });
+
+      var claves = Object.keys(porMes).sort();
+      if(claves.length){
+        var hoy = new Date();
+        var actual = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth() + 1)).slice(-2);
+        var elegido = porMes[actual] ? actual : claves[claves.length - 1];
+        var b = porMes[elegido];
+        var ant = porMes[mesAnterior(elegido)];
+        var d = {
+          pct:(b.seg / b.conf) * 100, seg:b.seg, conf:b.conf, soles:b.soles,
+          mes:elegido,
+          antPct: ant ? (ant.seg / ant.conf) * 100 : null,
+          antMes: ant ? mesAnterior(elegido) : null
+        };
+        kpiCacheSet('segInterno', d);
+        pintarSegInterno(d, Date.now());
+        return;
       }
       console.warn('KPI segundas · ninguna fila con confeccionadas. Primera fila:', filas[0]);
       fallaPeor('kpiSegInterno', filas.length + ' filas leídas, ninguna con prendas confeccionadas');
@@ -2829,13 +3011,22 @@ function pintarSegInterno(d, ts, offline){
   var elV = document.getElementById(id + 'Val');
   elV.classList.remove('loading');
   elV.innerHTML = d.pct.toFixed(2) + '<span class="ku">%</span>';
-  document.getElementById(id + 'Periodo').textContent = 'ÚLTIMOS ' + (d.dias || DIAS_KPI) + ' DÍAS';
+  document.getElementById(id + 'Periodo').textContent = '';
+  var chipS = document.getElementById(id + 'Chip');
+  if(chipS) chipS.textContent = d.mes ? etiquetaMes(d.mes) : ('Últimos ' + (d.dias || DIAS_KPI) + ' días');
   document.getElementById(id + 'Delta').innerHTML =
     '<span class="kar">S/</span>' + Math.round(d.soles).toLocaleString('es-PE') +
     ' <small>costo de las segundas</small>';
+  var comp = '';
+  if(d.antPct != null){
+    var dif = d.pct - d.antPct;
+    var fl = dif > 0 ? '▲' : (dif < 0 ? '▼' : '=');
+    comp = ' · <b>' + fl + ' ' + Math.abs(dif).toFixed(2) + ' pts vs ' +
+           etiquetaMes(d.antMes).split(' ')[0].slice(0,3) + ' (' + d.antPct.toFixed(2) + '%)</b>';
+  }
   document.getElementById(id + 'Meta').innerHTML =
-    'Meta ' + meta.toFixed(2) + '% · <b>' + Math.abs(d.pct - meta).toFixed(2) + ' pts ' +
-    (cumple ? 'por debajo' : 'por encima') + '</b>';
+    'Meta ' + meta.toFixed(2) + '% · ' + Math.abs(d.pct - meta).toFixed(2) + ' pts ' +
+    (cumple ? 'por debajo' : 'por encima') + comp;
   card.classList.remove('ok','bad','flat');
   card.classList.add(cumple ? 'ok' : 'bad');
   document.getElementById(id + 'Pill').textContent = cumple ? 'Meta cumplida' : 'Fuera de meta';
@@ -2843,6 +3034,69 @@ function pintarSegInterno(d, ts, offline){
   document.getElementById(id + 'Fresh').textContent =
     Math.round(d.seg).toLocaleString('es-PE') + ' de ' + Math.round(d.conf).toLocaleString('es-PE') +
     ' prendas · ' + (offline ? 'sin conexión · dato ' : '') + kpiHace(ts || Date.now());
+}
+
+
+/* ---------- KPI: eficiencia de acabados ----------
+   Usa el mismo endpoint que la vista Mensual/Anual del dashboard, que ya devuelve la
+   eficiencia por mes y por área. Se muestra el último mes con dato y el promedio de las
+   áreas activas, igual que el dashboard. */
+var API_ACABADOS = 'https://script.google.com/macros/s/AKfycbx_RVCdk3GSyPjTRCxRDsIcSELk1bAMyDK2khgSZGPoPVrTwxYHFXRd_TspcnpbabvNFg/exec';
+var AREAS_ACABADOS = ['DOBLADO','PLANCHA','VAPOR','ENCAJADO'];
+
+function promedioAreas(bloque){
+  if(!bloque) return null;
+  var vals = [];
+  AREAS_ACABADOS.forEach(function(a){
+    var v = bloque[a];
+    if(v !== null && v !== undefined && v > 0) vals.push(v);
+  });
+  if(!vals.length) return null;
+  return vals.reduce(function(x,y){ return x + y; }, 0) / vals.length;
+}
+
+function cargarKpiAcabados(){
+  var ca = kpiCacheGet('acabados');
+  if(ca) kpiPintar('kpiAcabados', ca.d, ca.ts, true);
+
+  fetch(API_ACABADOS + '?accion=resumenMensualAnual&_=' + Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(!res || !res.ok || !res.anios || !res.anios.length) throw new Error('sin datos');
+
+      var anio = res.anios[res.anios.length - 1];      /* el más reciente */
+      var meses = res.meses || [];
+      var serie = [], ultimo = null, previo = null;
+
+      meses.forEach(function(m){
+        var p = promedioAreas(res.datos[anio][m]);
+        if(p === null) return;
+        serie.push({lab:String(m).slice(0,3).toLowerCase(), v:p * 100, mes:m});
+        previo = ultimo;
+        ultimo = {mes:m, v:p * 100};
+      });
+      if(!ultimo) throw new Error('sin meses con dato');
+
+      var promAnio = promedioAreas(res.datos[anio].PROMEDIO);
+      var d = {
+        val: ultimo.v, dec: 1,
+        periodo: String(ultimo.mes).toUpperCase() + ' ' + anio,
+        prev: previo ? previo.v : null,
+        prevPeriodo: previo ? String(previo.mes).slice(0,3).toUpperCase() : '',
+        serie: serie.slice(-6),
+        anual: promAnio !== null ? promAnio * 100 : null,
+        mejorEs: 'alto',
+        base: 'Promedio de las áreas de acabados: doblado, plancha, vapor y encajado.'
+      };
+      kpiCacheSet('acabados', d);
+      kpiPintar('kpiAcabados', d, Date.now(), false);
+    })
+    .catch(function(err){
+      console.warn('KPI acabados:', err);
+      var c = kpiCacheGet('acabados');
+      if(c) kpiPintar('kpiAcabados', c.d, c.ts, true);
+      else fallaPeor('kpiAcabados', 'No se pudo leer el resumen de acabados');
+    });
 }
 
 </script>
