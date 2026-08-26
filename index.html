@@ -451,6 +451,8 @@ body.sinSesion #pantallaAcceso{display:flex;}
 .accesoPie{margin-top:16px;padding-top:14px;border-top:1px dashed var(--warm);
   font-size:11px;color:var(--sage);line-height:1.6;text-align:center;}
 /* Identidad de quien entró, en el header */
+/* Abrir en otra pestaña: solo para quien tenga el permiso PESTANA en el Sheet */
+body.embedOpen .openTabBtn.permitido{display:inline-flex;}
 .refreshBtn{display:none;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;
   font-family:inherit;cursor:pointer;}
 .refreshBtn:hover{background:rgba(255,255,255,.2);}
@@ -512,6 +514,7 @@ body.conSesion .quienBtn{display:inline-flex;}
     <div class="hcrumb"><span class="sep">›</span><span id="hcrumbName"></span></div>
   </div>
   <div class="headerActions">
+    <a class="pinBtn openTabBtn" id="embedExternalLink" style="display:none" href="#" target="_blank" rel="noopener">↗ Abrir en otra pestaña</a>
     <button class="pinBtn refreshBtn" id="refrescarBtn" type="button" title="Volver a cargar">↻ Actualizar</button>
     <button class="quienBtn" id="quienBtn" type="button" title="Cerrar sesión"><span id="quienNombre"></span> · Salir</button>
     <a class="pinBtn" id="miTableroBtn" style="display:none" href="https://iaanalistalives-ux.github.io/tablero-proyectos/" target="_blank" rel="noopener">📊 Mi Tablero</a>
@@ -607,6 +610,78 @@ body.conSesion .quienBtn{display:inline-flex;}
             <span class="kfresh" id="kpiSegundasFresh"></span>
             <span class="klink">Ver dashboard →</span>
           </div>
+        </div>
+
+        <div class="kpiCard" id="kpiSegInterno" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/segundas-interno/en-vivo.html">
+          <div class="kpiHead">
+            <div class="kpiName"><span class="kico">🏷️</span>Segundas — Prendas Facturadas</div>
+            <div class="kpiPill" id="kpiSegInternoPill">Cargando</div>
+          </div>
+          <div class="kpiBody">
+            <div class="kpiNums">
+              <div class="kv loading" id="kpiSegInternoVal"><span class="kskel"></span></div>
+              <div class="kperiodo" id="kpiSegInternoPeriodo"></div>
+              <div class="kdelta" id="kpiSegInternoDelta"></div>
+              <div class="kmeta" id="kpiSegInternoMeta"></div>
+            </div>
+            <div class="kspark" id="kpiSegInternoSpark"></div>
+          </div>
+          <div class="kbase" id="kpiSegInternoBase">Prendas de segunda sobre las prendas confeccionadas.</div>
+          <div class="kpiFoot"><span class="kfresh" id="kpiSegInternoFresh"></span><span class="klink">Ver dashboard →</span></div>
+        </div>
+
+        <div class="kpiCard" id="kpiCliente" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/cliente/dashboard-cliente.html">
+          <div class="kpiHead">
+            <div class="kpiName"><span class="kico">👔</span>Cliente con más rechazos</div>
+            <div class="kpiPill" id="kpiClientePill">Cargando</div>
+          </div>
+          <div class="kpiBody">
+            <div class="kpiNums">
+              <div class="kv loading" id="kpiClienteVal"><span class="kskel"></span></div>
+              <div class="kperiodo" id="kpiClientePeriodo"></div>
+              <div class="kdelta" id="kpiClienteDelta"></div>
+              <div class="kmeta" id="kpiClienteMeta"></div>
+            </div>
+            <div class="kspark" id="kpiClienteSpark"></div>
+          </div>
+          <div class="kbase" id="kpiClienteBase">Auditorías rechazadas sobre auditadas, sumando líneas, inspección y cliente.</div>
+          <div class="kpiFoot"><span class="kfresh" id="kpiClienteFresh"></span><span class="klink">Ver dashboard →</span></div>
+        </div>
+
+        <div class="kpiCard" id="kpiTaller" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/final/dashboard-final.html">
+          <div class="kpiHead">
+            <div class="kpiName"><span class="kico">🏭</span>Taller con más rechazos</div>
+            <div class="kpiPill" id="kpiTallerPill">Cargando</div>
+          </div>
+          <div class="kpiBody">
+            <div class="kpiNums">
+              <div class="kv loading" id="kpiTallerVal"><span class="kskel"></span></div>
+              <div class="kperiodo" id="kpiTallerPeriodo"></div>
+              <div class="kdelta" id="kpiTallerDelta"></div>
+              <div class="kmeta" id="kpiTallerMeta"></div>
+            </div>
+            <div class="kspark" id="kpiTallerSpark"></div>
+          </div>
+          <div class="kbase" id="kpiTallerBase">Auditorías rechazadas sobre auditadas en auditoría final.</div>
+          <div class="kpiFoot"><span class="kfresh" id="kpiTallerFresh"></span><span class="klink">Ver dashboard →</span></div>
+        </div>
+
+        <div class="kpiCard" id="kpiInspectora" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/lineas/dashboard-lineas.html">
+          <div class="kpiHead">
+            <div class="kpiName"><span class="kico">👷</span>Inspectora con más rechazos</div>
+            <div class="kpiPill" id="kpiInspectoraPill">Cargando</div>
+          </div>
+          <div class="kpiBody">
+            <div class="kpiNums">
+              <div class="kv loading" id="kpiInspectoraVal"><span class="kskel"></span></div>
+              <div class="kperiodo" id="kpiInspectoraPeriodo"></div>
+              <div class="kdelta" id="kpiInspectoraDelta"></div>
+              <div class="kmeta" id="kpiInspectoraMeta"></div>
+            </div>
+            <div class="kspark" id="kpiInspectoraSpark"></div>
+          </div>
+          <div class="kbase" id="kpiInspectoraBase">Auditorías rechazadas sobre auditadas, en líneas y en inspección.</div>
+          <div class="kpiFoot"><span class="kfresh" id="kpiInspectoraFresh"></span><span class="klink">Ver dashboard →</span></div>
         </div>
 
         <div class="kpiCard" id="kpiInspeccion" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/dashboard.html">
@@ -1370,6 +1445,8 @@ function openEmbed(cardEl){
 
   var frame = marcoDe(urlConUsuario(url), title, url);
   document.getElementById('hcrumbName').textContent = title;
+  var bt2 = document.getElementById('embedExternalLink');
+  if(bt2) bt2.href = url;
   var lt = document.getElementById('embedLoaderTxt');
   if(lt) lt.textContent = 'Abriendo ' + title + '…';
   document.body.classList.add('embedOpen');
@@ -2067,7 +2144,12 @@ function cargarKpiInspeccion(){
 function iniciarKpis(){
   var sec = document.querySelector('.kpiSection');
   var vivos = 0;
-  [['kpiSegundas', cargarKpiSegundas, 'textil'], ['kpiInspeccion', cargarKpiInspeccion, 'ingenieria']].forEach(function(par){
+  [['kpiSegundas', cargarKpiSegundas, 'textil'],
+   ['kpiInspeccion', cargarKpiInspeccion, 'ingenieria'],
+   ['kpiSegInterno', cargarKpiSegInterno, 'calidad'],
+   ['kpiCliente', cargarKpisAuditoria, 'calidad'],
+   ['kpiTaller', function(){}, 'calidad'],
+   ['kpiInspectora', function(){}, 'calidad']].forEach(function(par){
     var card = document.getElementById(par[0]);
     if(!card) return;
     if(SESION && puedeVer(card.dataset.url, par[2])){ vivos++; par[1](); }
@@ -2279,10 +2361,22 @@ function mostrarMiTablero(){
   btn.style.display = suyo ? '' : 'none';
 }
 
+/* El botón de abrir en otra pestaña se habilita con el permiso PESTANA en el Sheet.
+   Un permiso TODO no lo incluye: se pide expresamente, persona por persona. */
+function permisoPestana(){
+  if(!SESION || !SESION.permisos) return false;
+  for(var i = 0; i < SESION.permisos.length; i++){
+    if(String(SESION.permisos[i]).trim().toUpperCase() === 'PESTANA') return true;
+  }
+  return false;
+}
+
 function entrarAlPortal(){
   var lista = aplicarPermisos();
   iniciarKpis();
   mostrarMiTablero();
+  var bt = document.getElementById('embedExternalLink');
+  if(bt){ bt.classList.toggle('permitido', permisoPestana()); bt.style.display = ''; }
   document.body.classList.remove('sinSesion');
   document.body.classList.add('conSesion');
   document.getElementById('quienNombre').textContent = SESION.nombre || SESION.usuario;
@@ -2398,6 +2492,260 @@ document.getElementById('quienBtn').addEventListener('click', function(){
   if(s){ SESION = s; entrarAlPortal(); }
   else { document.body.classList.add('sinSesion'); }
 })();
+
+
+/* ============================================================
+   KPIs de auditoría y de segundas
+   Leen las mismas fuentes que sus dashboards:
+     - Auditorías: un Sheet publicado en CSV, una hoja por tipo de auditoría.
+     - Segundas: el Sheet de segundas, pestaña REPORTES (una fila por semana),
+       que es de donde sale el denominador sin duplicar.
+   Período: últimos 30 días. Ranking por % de rechazo = rechazadas / auditadas.
+   ============================================================ */
+
+var CSV_AUD = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTKWLLY0X8T7RtdteQstuEPubtGudtgTpJEa5gRClMFK2PCgDR7wFv07AIYUMJwmtxhL-xX4uEGQkp4/pub?single=true&output=csv&gid=';
+var HOJAS_AUD = { lineas:'1904553181', inspeccion:'2121673266', cliente:'1219204979', final:'1078730994' };
+
+var SEG_SHEET = '132AodMryBN4fbdSFuepe-VM6xsLJcXHf8DtgvpF5MaI';
+
+/* Mínimo de auditorías para entrar al ranking: sin esto, quien tenga una sola auditoría
+   rechazada aparecería con 100% y taparía un problema real. */
+var MIN_AUDITORIAS = 5;
+var DIAS_KPI = 30;
+
+/* ---------- lectura ---------- */
+
+function leerCSV(texto){
+  var filas = [], fila = [], campo = '', dentro = false;
+  for(var i = 0; i < texto.length; i++){
+    var c = texto[i];
+    if(dentro){
+      if(c === '"'){ if(texto[i+1] === '"'){ campo += '"'; i++; } else dentro = false; }
+      else campo += c;
+    } else {
+      if(c === '"') dentro = true;
+      else if(c === ','){ fila.push(campo); campo = ''; }
+      else if(c === '\n'){ fila.push(campo); filas.push(fila); fila = []; campo = ''; }
+      else if(c !== '\r') campo += c;
+    }
+  }
+  if(campo.length || fila.length){ fila.push(campo); filas.push(fila); }
+  if(!filas.length) return [];
+  var enc = filas[0].map(function(x){ return String(x).trim().toUpperCase(); });
+  return filas.slice(1).filter(function(f){ return f.length > 1; }).map(function(f){
+    var o = {};
+    for(var j = 0; j < enc.length; j++) o[enc[j]] = (f[j] || '').trim();
+    return o;
+  });
+}
+
+function traerCSV(gid){
+  return fetch(CSV_AUD + gid + '&_=' + Date.now())
+    .then(function(r){ if(!r.ok) throw new Error('csv'); return r.text(); })
+    .then(leerCSV);
+}
+
+/* Google devuelve el gviz envuelto; se recorta y se convierte a objetos por encabezado */
+function traerGviz(sheetId, hoja){
+  var u = 'https://docs.google.com/spreadsheets/d/' + sheetId +
+          '/gviz/tq?tqx=out:json&sheet=' + encodeURIComponent(hoja) + '&_=' + Date.now();
+  return fetch(u).then(function(r){ return r.text(); }).then(function(txt){
+    var ini = txt.indexOf('{'), fin = txt.lastIndexOf('}');
+    var j = JSON.parse(txt.slice(ini, fin + 1));
+    var cols = j.table.cols.map(function(c){ return String(c.label || '').trim().toUpperCase(); });
+    return j.table.rows.map(function(r){
+      var o = {};
+      for(var i = 0; i < cols.length; i++){
+        var cel = r.c[i];
+        o[cols[i]] = cel ? (cel.f != null ? cel.f : cel.v) : '';
+      }
+      return o;
+    });
+  });
+}
+
+/* ---------- utilidades ---------- */
+
+function fechaDe(v){
+  var t = String(v || '').trim();
+  if(!t) return null;
+  var m = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return new Date(+m[1], +m[2]-1, +m[3]);
+  m = t.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  if(m) return new Date(+m[3], +m[2]-1, +m[1]);
+  m = t.match(/^Date\((\d+),(\d+),(\d+)/);
+  if(m) return new Date(+m[1], +m[2], +m[3]);
+  var d = new Date(t);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function dentroDeVentana(v, dias){
+  var d = fechaDe(v);
+  if(!d) return false;
+  var hoy = new Date();
+  return (hoy - d) <= dias * 86400000 && d <= hoy;
+}
+
+function numero(v){
+  var t = String(v == null ? '' : v).replace(/[^0-9.,-]/g, '');
+  if(!t) return 0;
+  var coma = t.lastIndexOf(','), punto = t.lastIndexOf('.');
+  if(coma > punto){
+    /* Con tres dígitos detrás, la coma separa miles (1,234); con uno o dos, es decimal. */
+    var detras = t.length - coma - 1;
+    if(detras === 3 && punto === -1) t = t.replace(/,/g, '');
+    else t = t.replace(/\./g, '').replace(',', '.');
+  } else {
+    t = t.replace(/,/g, '');   /* 1,234.56 -> la coma agrupa miles */
+  }
+  var n = parseFloat(t);
+  return isNaN(n) ? 0 : n;
+}
+
+/* Ranking por % de rechazo sobre las filas dadas, agrupando por la columna indicada */
+function peorPor(filas, columna, dias){
+  var g = {};
+  filas.forEach(function(r){
+    if(!dentroDeVentana(r.FECHA, dias)) return;
+    var k = String(r[columna] || '').trim().toUpperCase();
+    if(!k) return;
+    var res = String(r.RESULTADO || '').trim().toUpperCase();
+    if(res !== 'APROBADO' && res !== 'RECHAZADO') return;
+    if(!g[k]) g[k] = {aud:0, rech:0};
+    g[k].aud++;
+    if(res === 'RECHAZADO') g[k].rech++;
+  });
+  var lista = Object.keys(g).map(function(k){
+    return {nombre:k, aud:g[k].aud, rech:g[k].rech, pct:(g[k].rech / g[k].aud) * 100};
+  }).filter(function(x){ return x.aud >= MIN_AUDITORIAS; });
+  if(!lista.length) return null;
+  lista.sort(function(a,b){ return b.pct - a.pct || b.rech - a.rech; });
+  var totAud = lista.reduce(function(a,x){ return a + x.aud; }, 0);
+  var totRech = lista.reduce(function(a,x){ return a + x.rech; }, 0);
+  return {peor:lista[0], cuantos:lista.length, promedio:(totRech / totAud) * 100};
+}
+
+/* Pinta una tarjeta de "quién tiene más rechazos" */
+function pintarPeor(id, titulo, r, ts){
+  var card = document.getElementById(id);
+  if(!r){
+    document.getElementById(id + 'Val').classList.add('loading');
+    document.getElementById(id + 'Val').textContent = 'Sin datos del período';
+    document.getElementById(id + 'Pill').textContent = 'Sin datos';
+    card.classList.remove('ok','bad'); card.classList.add('flat');
+    document.getElementById(id + 'Fresh').textContent = 'Últimos ' + DIAS_KPI + ' días';
+    return;
+  }
+  var elV = document.getElementById(id + 'Val');
+  elV.classList.remove('loading');
+  elV.innerHTML = r.peor.pct.toFixed(1) + '<span class="ku">%</span>';
+  document.getElementById(id + 'Periodo').textContent = r.peor.nombre;
+  document.getElementById(id + 'Delta').innerHTML =
+    '<span class="kar">▲</span>' + r.peor.rech + ' de ' + r.peor.aud +
+    ' <small>auditorías rechazadas</small>';
+  document.getElementById(id + 'Meta').innerHTML =
+    'Promedio general ' + r.promedio.toFixed(1) + '% · <b>' + r.cuantos + ' comparados</b>';
+  document.getElementById(id + 'Spark').innerHTML = '';
+  card.classList.remove('ok','flat'); card.classList.add('bad');
+  document.getElementById(id + 'Pill').textContent = 'El más alto';
+  document.getElementById(id + 'Fresh').textContent =
+    'Últimos ' + DIAS_KPI + ' días · mínimo ' + MIN_AUDITORIAS + ' auditorías · ' + kpiHace(ts);
+}
+
+function fallaPeor(id){
+  var elV = document.getElementById(id + 'Val');
+  elV.classList.add('loading');
+  elV.textContent = 'No disponible';
+  document.getElementById(id + 'Pill').textContent = 'Sin dato';
+  document.getElementById(id).classList.add('flat');
+}
+
+/* ---------- KPI: cliente, taller e inspectora ---------- */
+
+function cargarKpisAuditoria(){
+  ['kpiCliente','kpiTaller','kpiInspectora'].forEach(function(id){
+    var c = kpiCacheGet(id);
+    if(c) pintarPeor(id, '', c.d, c.ts);
+  });
+
+  Promise.all([traerCSV(HOJAS_AUD.lineas), traerCSV(HOJAS_AUD.inspeccion),
+               traerCSV(HOJAS_AUD.cliente), traerCSV(HOJAS_AUD.final)])
+  .then(function(res){
+    var lineas = res[0], inspeccion = res[1], cliente = res[2], final = res[3];
+
+    /* Cliente: se juntan las tres auditorías que registran cliente */
+    var todasCliente = lineas.concat(inspeccion).concat(cliente);
+    var rc = peorPor(todasCliente, 'CLIENTE', DIAS_KPI);
+    if(rc){ kpiCacheSet('kpiCliente', rc); pintarPeor('kpiCliente', '', rc, Date.now()); }
+    else pintarPeor('kpiCliente', '', null);
+
+    /* Taller: solo auditoría final */
+    var rt = peorPor(final, 'TALLER', DIAS_KPI);
+    if(rt){ kpiCacheSet('kpiTaller', rt); pintarPeor('kpiTaller', '', rt, Date.now()); }
+    else pintarPeor('kpiTaller', '', null);
+
+    /* Inspectora: líneas + inspección */
+    var ri = peorPor(lineas.concat(inspeccion), 'INSPECTOR', DIAS_KPI);
+    if(ri){ kpiCacheSet('kpiInspectora', ri); pintarPeor('kpiInspectora', '', ri, Date.now()); }
+    else pintarPeor('kpiInspectora', '', null);
+  })
+  .catch(function(){
+    ['kpiCliente','kpiTaller','kpiInspectora'].forEach(function(id){
+      var c = kpiCacheGet(id);
+      if(c) pintarPeor(id, '', c.d, c.ts);
+      else fallaPeor(id);
+    });
+  });
+}
+
+/* ---------- KPI: segundas en prendas facturadas ---------- */
+
+function cargarKpiSegInterno(){
+  var ca = kpiCacheGet('segInterno');
+  if(ca) pintarSegInterno(ca.d, ca.ts);
+
+  traerGviz(SEG_SHEET, 'REPORTES').then(function(filas){
+    var seg = 0, conf = 0, soles = 0;
+    filas.forEach(function(r){
+      if(!dentroDeVentana(r['FECHA'], DIAS_KPI)) return;
+      seg   += numero(r['CANTIDAD']);
+      conf  += numero(r['PRENDAS CONFECCIONADAS']);
+      soles += numero(r['PRECIO']);
+    });
+    if(conf <= 0){ pintarSegInterno(null); return; }
+    var d = {pct:(seg / conf) * 100, seg:seg, conf:conf, soles:soles};
+    kpiCacheSet('segInterno', d);
+    pintarSegInterno(d, Date.now());
+  }).catch(function(){
+    var c = kpiCacheGet('segInterno');
+    if(c) pintarSegInterno(c.d, c.ts, true); else fallaPeor('kpiSegInterno');
+  });
+}
+
+function pintarSegInterno(d, ts, offline){
+  var id = 'kpiSegInterno';
+  var card = document.getElementById(id);
+  if(!d){ fallaPeor(id); return; }
+  var meta = 2.5;
+  var cumple = d.pct <= meta;
+  var elV = document.getElementById(id + 'Val');
+  elV.classList.remove('loading');
+  elV.innerHTML = d.pct.toFixed(2) + '<span class="ku">%</span>';
+  document.getElementById(id + 'Periodo').textContent = 'ÚLTIMOS ' + DIAS_KPI + ' DÍAS';
+  document.getElementById(id + 'Delta').innerHTML =
+    '<span class="kar">S/</span>' + Math.round(d.soles).toLocaleString('es-PE') +
+    ' <small>costo de las segundas</small>';
+  document.getElementById(id + 'Meta').innerHTML =
+    'Meta ' + meta.toFixed(2) + '% · <b>' + Math.abs(d.pct - meta).toFixed(2) + ' pts ' +
+    (cumple ? 'por debajo' : 'por encima') + '</b>';
+  card.classList.remove('ok','bad','flat');
+  card.classList.add(cumple ? 'ok' : 'bad');
+  document.getElementById(id + 'Pill').textContent = cumple ? 'Meta cumplida' : 'Fuera de meta';
+  document.getElementById(id + 'Spark').innerHTML = '';
+  document.getElementById(id + 'Fresh').textContent =
+    Math.round(d.seg).toLocaleString('es-PE') + ' de ' + Math.round(d.conf).toLocaleString('es-PE') +
+    ' prendas · ' + (offline ? 'sin conexión · dato ' : '') + kpiHace(ts || Date.now());
+}
 
 </script>
 
