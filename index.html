@@ -2148,8 +2148,8 @@ function iniciarKpis(){
    ['kpiInspeccion', cargarKpiInspeccion, 'ingenieria'],
    ['kpiSegInterno', cargarKpiSegInterno, 'calidad'],
    ['kpiCliente', cargarKpisAuditoria, 'calidad'],
-   ['kpiTaller', function(){}, 'calidad'],
-   ['kpiInspectora', function(){}, 'calidad']].forEach(function(par){
+   ['kpiTaller', cargarKpisAuditoria, 'calidad'],
+   ['kpiInspectora', cargarKpisAuditoria, 'calidad']].forEach(function(par){
     var card = document.getElementById(par[0]);
     if(!card) return;
     if(SESION && puedeVer(card.dataset.url, par[2])){ vivos++; par[1](); }
@@ -2552,16 +2552,34 @@ function traerGviz(sheetId, hoja){
   return fetch(u).then(function(r){ return r.text(); }).then(function(txt){
     var ini = txt.indexOf('{'), fin = txt.lastIndexOf('}');
     var j = JSON.parse(txt.slice(ini, fin + 1));
-    var cols = j.table.cols.map(function(c){ return String(c.label || '').trim().toUpperCase(); });
-    return j.table.rows.map(function(r){
+    /* igual que el dashboard: si la columna no trae rótulo se usa su letra, y se lee el
+       valor crudo (c.v), no el formateado */
+    var cols = (j.table.cols || []).map(function(c){ return String(c.label || c.id || ''); });
+    return (j.table.rows || []).map(function(r){
       var o = {};
-      for(var i = 0; i < cols.length; i++){
-        var cel = r.c[i];
-        o[cols[i]] = cel ? (cel.f != null ? cel.f : cel.v) : '';
-      }
+      (r.c || []).forEach(function(cel, i){ o[cols[i]] = cel ? cel.v : null; });
       return o;
     });
   });
+}
+
+/* Los encabezados del Sheet pueden traer tildes, espacios de más o distinta capitalización.
+   Se busca la columna por aproximación en vez de exigir el nombre exacto. */
+function claveComo(fila, aproximado){
+  var meta = String(aproximado).toUpperCase().replace(/[ÁÉÍÓÚ]/g, function(c){
+    return {'Á':'A','É':'E','Í':'I','Ó':'O','Ú':'U'}[c];
+  }).replace(/[^A-Z0-9]/g, '');
+  for(var k in fila){
+    var n = String(k).toUpperCase().replace(/[ÁÉÍÓÚ]/g, function(c){
+      return {'Á':'A','É':'E','Í':'I','Ó':'O','Ú':'U'}[c];
+    }).replace(/[^A-Z0-9]/g, '');
+    if(n === meta) return k;
+  }
+  for(var k2 in fila){
+    var n2 = String(k2).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if(n2.indexOf(meta) !== -1 || meta.indexOf(n2) !== -1) return k2;
+  }
+  return null;
 }
 
 /* ---------- utilidades ---------- */
@@ -2662,12 +2680,25 @@ function fallaPeor(id){
 
 /* ---------- KPI: cliente, taller e inspectora ---------- */
 
+var _audPedido = false;
+
 function cargarKpisAuditoria(){
+  if(_audPedido) return;      /* una sola descarga para las tres tarjetas */
+  _audPedido = true;
+
+  /* Primero lo guardado, para que no se vea vacío mientras llegan los datos */
   ['kpiCliente','kpiTaller','kpiInspectora'].forEach(function(id){
     var c = kpiCacheGet(id);
     if(c) pintarPeor(id, '', c.d, c.ts);
+    else {
+      var p = document.getElementById(id + 'Pill');
+      if(p) p.textContent = 'Consultando…';
+    }
   });
 
+  /* Son cuatro hojas grandes: se piden después de que el portal ya se pintó, para no
+     competir con lo que la persona necesita ver primero. */
+  setTimeout(function(){
   Promise.all([traerCSV(HOJAS_AUD.lineas), traerCSV(HOJAS_AUD.inspeccion),
                traerCSV(HOJAS_AUD.cliente), traerCSV(HOJAS_AUD.final)])
   .then(function(res){
@@ -2689,13 +2720,15 @@ function cargarKpisAuditoria(){
     if(ri){ kpiCacheSet('kpiInspectora', ri); pintarPeor('kpiInspectora', '', ri, Date.now()); }
     else pintarPeor('kpiInspectora', '', null);
   })
-  .catch(function(){
+  .catch(function(err){
+    console.warn('KPIs de auditoría:', err);
     ['kpiCliente','kpiTaller','kpiInspectora'].forEach(function(id){
       var c = kpiCacheGet(id);
       if(c) pintarPeor(id, '', c.d, c.ts);
       else fallaPeor(id);
     });
   });
+  }, 400);
 }
 
 /* ---------- KPI: segundas en prendas facturadas ---------- */
@@ -2705,12 +2738,21 @@ function cargarKpiSegInterno(){
   if(ca) pintarSegInterno(ca.d, ca.ts);
 
   traerGviz(SEG_SHEET, 'REPORTES').then(function(filas){
+    if(!filas.length){ pintarSegInterno(null); return; }
+    var cFecha = claveComo(filas[0], 'FECHA');
+    var cCant  = claveComo(filas[0], 'CANTIDAD');
+    var cConf  = claveComo(filas[0], 'PRENDAS CONFECCIONADAS');
+    var cPrec  = claveComo(filas[0], 'PRECIO');
+    if(!cCant || !cConf){
+      console.warn('KPI segundas: columnas encontradas ->', Object.keys(filas[0]));
+      pintarSegInterno(null); return;
+    }
     var seg = 0, conf = 0, soles = 0;
     filas.forEach(function(r){
-      if(!dentroDeVentana(r['FECHA'], DIAS_KPI)) return;
-      seg   += numero(r['CANTIDAD']);
-      conf  += numero(r['PRENDAS CONFECCIONADAS']);
-      soles += numero(r['PRECIO']);
+      if(cFecha && !dentroDeVentana(r[cFecha], DIAS_KPI)) return;
+      seg   += numero(r[cCant]);
+      conf  += numero(r[cConf]);
+      soles += cPrec ? numero(r[cPrec]) : 0;
     });
     if(conf <= 0){ pintarSegInterno(null); return; }
     var d = {pct:(seg / conf) * 100, seg:seg, conf:conf, soles:soles};
