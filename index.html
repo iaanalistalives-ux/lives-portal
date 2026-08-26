@@ -135,6 +135,7 @@ body.embedOpen .wrap{padding-top:0;}
 .kpiCard .kbase{text-align:center;}
 .kpiFoot{justify-content:center;text-align:center;flex-direction:column;gap:4px;}
 /* El período se lee de un vistazo: mes, año o ventana de días, en una etiqueta propia. */
+.kchip:empty{display:none;}
 .kchip{display:inline-flex;align-items:center;gap:6px;background:var(--stSoft);color:var(--st);
   border:1px solid var(--st);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;
   text-transform:uppercase;letter-spacing:.6px;margin-top:9px;}
@@ -2889,44 +2890,48 @@ function cargarKpisAuditoria(){
   /* Son cuatro hojas grandes: se piden después de que el portal ya se pintó, para no
      competir con lo que la persona necesita ver primero. */
   setTimeout(function(){
-  Promise.all([traerCSV(HOJAS_AUD.lineas), traerCSV(HOJAS_AUD.inspeccion),
-               traerCSV(HOJAS_AUD.cliente), traerCSV(HOJAS_AUD.final)])
-  .then(function(res){
-    var lineas = res[0], inspeccion = res[1], cliente = res[2], final = res[3];
+    /* Cada hoja se pide por su lado y cada tarjeta se pinta apenas tiene lo suyo: el taller
+       no espera a las de líneas, y quien solo necesita una hoja aparece primero. */
+    var pLineas     = traerCSV(HOJAS_AUD.lineas);
+    var pInspeccion = traerCSV(HOJAS_AUD.inspeccion);
+    var pCliente    = traerCSV(HOJAS_AUD.cliente);
+    var pFinal      = traerCSV(HOJAS_AUD.final);
 
-    /* Cliente: se juntan las tres auditorías que registran cliente */
-    var todasCliente = lineas.concat(inspeccion).concat(cliente);
-    var rc = peorDelMes(todasCliente, 'CLIENTE');
-    if(rc){ kpiCacheSet('kpiCliente', rc); pintarPeor('kpiCliente', '', rc, Date.now()); }
-    else pintarPeor('kpiCliente', '', null);
-
-    /* Taller: en la hoja de auditoría final el taller viene en la columna SERVICIO
-       (MAEYE, SEPHATA, LIVES…). INT/EXT dice si fue interno o de taller externo: se dejan
-       fuera los internos, que no son un taller. */
-    var soloTalleres = final.filter(function(r){
-      var ie = String(r['INT/EXT'] || r['INT_EXT'] || '').trim().toUpperCase();
-      var sv = String(r['SERVICIO'] || '').trim().toUpperCase();
-      if(ie === 'INTERNO') return false;
-      return sv && sv !== 'LIVES';
-    });
-    var rt = peorDelMes(soloTalleres.length ? soloTalleres : final, 'SERVICIO');
-    if(rt){ kpiCacheSet('kpiTaller', rt); pintarPeor('kpiTaller', '', rt, Date.now()); }
-    else pintarPeor('kpiTaller', '', null);
+    /* Taller: solo necesita la hoja de auditoría final */
+    pFinal.then(function(final){
+      var soloTalleres = final.filter(function(r){
+        var ie = String(r['INT/EXT'] || r['INT_EXT'] || '').trim().toUpperCase();
+        var sv = String(r['SERVICIO'] || '').trim().toUpperCase();
+        if(ie === 'INTERNO') return false;
+        return sv && sv !== 'LIVES';
+      });
+      var rt = peorDelMes(soloTalleres.length ? soloTalleres : final, 'SERVICIO');
+      if(rt){ kpiCacheSet('kpiTaller', rt); pintarPeor('kpiTaller', '', rt, Date.now()); }
+      else pintarPeor('kpiTaller', '', null);
+    }).catch(function(e){ respaldoPeor('kpiTaller', e); });
 
     /* Inspectora: líneas + inspección */
-    var ri = peorDelMes(lineas.concat(inspeccion), 'INSPECTOR');
-    if(ri){ kpiCacheSet('kpiInspectora', ri); pintarPeor('kpiInspectora', '', ri, Date.now()); }
-    else pintarPeor('kpiInspectora', '', null);
-  })
-  .catch(function(err){
-    console.warn('KPIs de auditoría:', err);
-    ['kpiCliente','kpiTaller','kpiInspectora'].forEach(function(id){
-      var c = kpiCacheGet(id);
-      if(c) pintarPeor(id, '', c.d, c.ts);
-      else fallaPeor(id);
-    });
-  });
-  }, 400);
+    Promise.all([pLineas, pInspeccion]).then(function(r){
+      var ri = peorDelMes(r[0].concat(r[1]), 'INSPECTOR');
+      if(ri){ kpiCacheSet('kpiInspectora', ri); pintarPeor('kpiInspectora', '', ri, Date.now()); }
+      else pintarPeor('kpiInspectora', '', null);
+    }).catch(function(e){ respaldoPeor('kpiInspectora', e); });
+
+    /* Cliente: las tres auditorías que registran cliente */
+    Promise.all([pLineas, pInspeccion, pCliente]).then(function(r){
+      var rc = peorDelMes(r[0].concat(r[1]).concat(r[2]), 'CLIENTE');
+      if(rc){ kpiCacheSet('kpiCliente', rc); pintarPeor('kpiCliente', '', rc, Date.now()); }
+      else pintarPeor('kpiCliente', '', null);
+    }).catch(function(e){ respaldoPeor('kpiCliente', e); });
+  }, 300);
+}
+
+/* Si una hoja no llega, la tarjeta se queda con lo último que se guardó en el equipo */
+function respaldoPeor(id, err){
+  console.warn('KPI ' + id + ':', err);
+  var c = kpiCacheGet(id);
+  if(c) pintarPeor(id, '', c.d, c.ts);
+  else fallaPeor(id, 'No se pudo leer la hoja de auditorías');
 }
 
 /* ---------- KPI: segundas en prendas facturadas ---------- */
