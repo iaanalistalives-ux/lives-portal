@@ -454,6 +454,7 @@ body.sinSesion #pantallaAcceso{display:flex;}
   font-size:11px;color:var(--sage);line-height:1.6;text-align:center;}
 /* Identidad de quien entró, en el header */
 /* Abrir en otra pestaña: solo para quien tenga el permiso PESTANA en el Sheet */
+.openTabBtn{display:none;}
 body.embedOpen .openTabBtn.permitido{display:inline-flex;}
 .refreshBtn{display:none;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;
   font-family:inherit;cursor:pointer;}
@@ -516,7 +517,7 @@ body.conSesion .quienBtn{display:inline-flex;}
     <div class="hcrumb"><span class="sep">›</span><span id="hcrumbName"></span></div>
   </div>
   <div class="headerActions">
-    <a class="pinBtn openTabBtn" id="embedExternalLink" style="display:none" href="#" target="_blank" rel="noopener">↗ Abrir en otra pestaña</a>
+    <a class="pinBtn openTabBtn" id="embedExternalLink" href="#" target="_blank" rel="noopener">↗ Abrir en otra pestaña</a>
     <button class="pinBtn refreshBtn" id="refrescarBtn" type="button" title="Volver a cargar">↻ Actualizar</button>
     <button class="quienBtn" id="quienBtn" type="button" title="Cerrar sesión"><span id="quienNombre"></span> · Salir</button>
     <a class="pinBtn" id="miTableroBtn" style="display:none" href="https://iaanalistalives-ux.github.io/tablero-proyectos/" target="_blank" rel="noopener">📊 Mi Tablero</a>
@@ -2378,7 +2379,7 @@ function entrarAlPortal(){
   iniciarKpis();
   mostrarMiTablero();
   var bt = document.getElementById('embedExternalLink');
-  if(bt){ bt.classList.toggle('permitido', permisoPestana()); bt.style.display = ''; }
+  if(bt) bt.classList.toggle('permitido', permisoPestana());
   document.body.classList.remove('sinSesion');
   document.body.classList.add('conSesion');
   document.getElementById('quienNombre').textContent = SESION.nombre || SESION.usuario;
@@ -2627,14 +2628,21 @@ function numero(v){
    vacía cuando la carga de datos viene con retraso. Siempre se muestra qué período se usó. */
 function peorPorConRespaldo(filas, columna){
   var ventanas = [DIAS_KPI, 60, 90, 180, 365];
-  for(var i = 0; i < ventanas.length; i++){
-    var r = peorPor(filas, columna, ventanas[i]);
-    if(r){ r.dias = ventanas[i]; return r; }
+  /* El mínimo de auditorías evita que alguien con una sola rechazada aparezca con 100%.
+     Pero en el piloto de talleres hay pocas auditorías por taller y ninguno llegaba al
+     mínimo: antes de rendirse se baja el listón, y la tarjeta dice con cuántas se calculó. */
+  var minimos = [MIN_AUDITORIAS, 3, 2];
+  for(var m = 0; m < minimos.length; m++){
+    for(var i = 0; i < ventanas.length; i++){
+      var r = peorPor(filas, columna, ventanas[i], minimos[m]);
+      if(r){ r.dias = ventanas[i]; r.min = minimos[m]; return r; }
+    }
   }
   return null;
 }
 
-function peorPor(filas, columna, dias){
+function peorPor(filas, columna, dias, minimo){
+  minimo = minimo || MIN_AUDITORIAS;
   var g = {};
   filas.forEach(function(r){
     if(!dentroDeVentana(r.FECHA, dias)) return;
@@ -2648,7 +2656,7 @@ function peorPor(filas, columna, dias){
   });
   var lista = Object.keys(g).map(function(k){
     return {nombre:k, aud:g[k].aud, rech:g[k].rech, pct:(g[k].rech / g[k].aud) * 100};
-  }).filter(function(x){ return x.aud >= MIN_AUDITORIAS; });
+  }).filter(function(x){ return x.aud >= minimo; });
   if(!lista.length) return null;
   lista.sort(function(a,b){ return b.pct - a.pct || b.rech - a.rech; });
   var totAud = lista.reduce(function(a,x){ return a + x.aud; }, 0);
@@ -2683,15 +2691,20 @@ function pintarPeor(id, titulo, r, ts){
   document.getElementById(id + 'Pill').textContent = 'El más alto';
   var dias = r.dias || DIAS_KPI;
   document.getElementById(id + 'Fresh').textContent =
-    'Últimos ' + dias + ' días · mínimo ' + MIN_AUDITORIAS + ' auditorías · ' + kpiHace(ts);
+    'Últimos ' + dias + ' días · mínimo ' + (r.min || MIN_AUDITORIAS) + ' auditorías · ' + kpiHace(ts);
 }
 
-function fallaPeor(id){
+function fallaPeor(id, motivo){
   var elV = document.getElementById(id + 'Val');
   elV.classList.add('loading');
   elV.textContent = 'No disponible';
   document.getElementById(id + 'Pill').textContent = 'Sin dato';
   document.getElementById(id).classList.add('flat');
+  /* el motivo se muestra en la propia tarjeta para poder diagnosticar sin abrir la consola */
+  if(motivo){
+    var elF = document.getElementById(id + 'Fresh');
+    if(elF){ elF.className = 'kfresh stale'; elF.textContent = motivo; }
+  }
 }
 
 /* ---------- KPI: cliente, taller e inspectora ---------- */
@@ -2753,47 +2766,58 @@ function cargarKpiSegInterno(){
   var ca = kpiCacheGet('segInterno');
   if(ca) pintarSegInterno(ca.d, ca.ts);
 
-  traerGviz(SEG_SHEET, 'REPORTES').then(function(filas){
-    if(!filas.length) throw new Error('hoja vacía');
+  var hojas = ['REPORTES', 'Reportes', 'REPORTE', 'Hoja de reportes'];
 
-    var cFecha = claveComo(filas[0], 'FECHA');
-    var cCant  = claveComo(filas[0], 'CANTIDAD');
-    var cConf  = claveComo(filas[0], 'PRENDAS CONFECCIONADAS');
-    var cPrec  = claveComo(filas[0], 'PRECIO');
-    if(!cCant || !cConf){
-      console.warn('KPI segundas: columnas de la hoja REPORTES ->', Object.keys(filas[0]));
-      throw new Error('faltan columnas');
+  function intentar(k){
+    if(k >= hojas.length){
+      fallaPeor('kpiSegInterno', 'No se encontró la pestaña de reportes en el archivo');
+      return;
     }
+    traerGviz(SEG_SHEET, hojas[k]).then(function(filas){
+      if(!filas.length){ intentar(k + 1); return; }
 
-    /* Los reportes se cargan por semana: si la última carga es de hace más de un mes,
-       la ventana de 30 días queda vacía. Se amplía hasta encontrar datos y se dice cuál
-       período se está mostrando. */
-    var ventanas = [DIAS_KPI, 60, 90, 180, 365];
-    for(var v = 0; v < ventanas.length; v++){
-      var seg = 0, conf = 0, soles = 0, filasUsadas = 0;
-      filas.forEach(function(r){
-        if(cFecha && !dentroDeVentana(r[cFecha], ventanas[v])) return;
-        var c = numero(r[cConf]);
-        if(c <= 0) return;
-        conf  += c;
-        seg   += numero(r[cCant]);
-        soles += cPrec ? numero(r[cPrec]) : 0;
-        filasUsadas++;
-      });
-      if(conf > 0){
-        var d = {pct:(seg / conf) * 100, seg:seg, conf:conf, soles:soles, dias:ventanas[v]};
-        kpiCacheSet('segInterno', d);
-        pintarSegInterno(d, Date.now());
+      var cFecha = claveComo(filas[0], 'FECHA');
+      var cCant  = claveComo(filas[0], 'CANTIDAD');
+      var cConf  = claveComo(filas[0], 'PRENDAS CONFECCIONADAS');
+      var cPrec  = claveComo(filas[0], 'PRECIO');
+
+      if(!cCant || !cConf){
+        console.warn('KPI segundas · columnas de "' + hojas[k] + '":', Object.keys(filas[0]));
+        if(k + 1 < hojas.length){ intentar(k + 1); return; }
+        fallaPeor('kpiSegInterno', 'Columnas encontradas: ' + Object.keys(filas[0]).slice(0,6).join(', '));
         return;
       }
-    }
-    console.warn('KPI segundas: sin filas con denominador. Ejemplo de fila ->', filas[0]);
-    pintarSegInterno(null);
-  }).catch(function(err){
-    console.warn('KPI segundas:', err);
-    var c = kpiCacheGet('segInterno');
-    if(c) pintarSegInterno(c.d, c.ts, true); else fallaPeor('kpiSegInterno');
-  });
+
+      var ventanas = [DIAS_KPI, 60, 90, 180, 365];
+      for(var v = 0; v < ventanas.length; v++){
+        var seg = 0, conf = 0, soles = 0;
+        filas.forEach(function(r){
+          if(cFecha && !dentroDeVentana(r[cFecha], ventanas[v])) return;
+          var c = numero(r[cConf]);
+          if(c <= 0) return;
+          conf  += c;
+          seg   += numero(r[cCant]);
+          soles += cPrec ? numero(r[cPrec]) : 0;
+        });
+        if(conf > 0){
+          var d = {pct:(seg / conf) * 100, seg:seg, conf:conf, soles:soles, dias:ventanas[v]};
+          kpiCacheSet('segInterno', d);
+          pintarSegInterno(d, Date.now());
+          return;
+        }
+      }
+      console.warn('KPI segundas · ninguna fila con confeccionadas. Primera fila:', filas[0]);
+      fallaPeor('kpiSegInterno', filas.length + ' filas leídas, ninguna con prendas confeccionadas');
+    }).catch(function(err){
+      if(k + 1 < hojas.length){ intentar(k + 1); return; }
+      console.warn('KPI segundas:', err);
+      var c = kpiCacheGet('segInterno');
+      if(c) pintarSegInterno(c.d, c.ts, true);
+      else fallaPeor('kpiSegInterno', 'No se pudo leer el archivo de segundas');
+    });
+  }
+
+  intentar(0);
 }
 
 function pintarSegInterno(d, ts, offline){
