@@ -2223,7 +2223,10 @@ function iniciarKpis(){
    ['kpiAcabados', cargarKpiAcabados, 'ingenieria']].forEach(function(par){
     var card = document.getElementById(par[0]);
     if(!card) return;
-    if(SESION && puedeVer(card.dataset.url, par[2])){ vivos++; par[1](); }
+    if(SESION && puedeVer(card.dataset.url, par[2])){
+      vivos++;
+      try{ par[1](); }catch(e){ console.warn('Indicador ' + par[0] + ':', e); }
+    }
     else { card.style.display = 'none'; }
   });
   if(sec) sec.style.display = vivos ? '' : 'none';
@@ -2444,7 +2447,8 @@ function permisoPestana(){
 
 function entrarAlPortal(){
   var lista = aplicarPermisos();
-  iniciarKpis();
+  /* Los indicadores son un extra: si alguno falla, la persona igual debe poder entrar */
+  try{ iniciarKpis(); }catch(e){ console.warn('Indicadores de Inicio:', e); }
   mostrarMiTablero();
   var bt = document.getElementById('embedExternalLink');
   if(bt) bt.classList.toggle('permitido', permisoPestana());
@@ -2557,12 +2561,7 @@ document.getElementById('quienBtn').addEventListener('click', function(){
   if(confirm('¿Cerrar sesión en este equipo?')) cerrarSesion();
 });
 
-/* Sesión guardada: se entra directo, sin volver a pedir la clave */
-(function(){
-  var s = leerSesion();
-  if(s){ SESION = s; entrarAlPortal(); }
-  else { document.body.classList.add('sinSesion'); }
-})();
+/* El arranque va al final del archivo: ver "ARRANQUE". */
 
 
 /* ============================================================
@@ -3104,6 +3103,19 @@ function cargarKpiAcabados(){
     });
 }
 
+
+
+/* ============================================================
+   ARRANQUE
+   Va al final a propósito: si se ejecuta antes de que estén definidas las direcciones de
+   los indicadores, al recargar con la sesión abierta el proceso se corta a medias y el
+   portal queda sin marcar la sesión (header sin botones).
+   ============================================================ */
+(function(){
+  var s = leerSesion();
+  if(s){ SESION = s; entrarAlPortal(); }
+  else { document.body.classList.add('sinSesion'); }
+})();
 </script>
 
 </body>
