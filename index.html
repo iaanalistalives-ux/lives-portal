@@ -1324,9 +1324,50 @@ function neutralizarTextos(doc, win){
   }catch(e){}
 }
 
-/* Cuántas herramientas se mantienen abiertas a la vez. Cada una ocupa memoria del equipo,
-   así que al pasar de este número se cierra la más antigua que no se esté usando. */
-var MAX_MARCOS = 4;
+/* Dentro de un marco, el navegador bloquea con facilidad las ventanas emergentes, y cuando
+   lo hace no avisa: la persona pulsa y no pasa nada. Aquí se detecta ese bloqueo y la página
+   se abre en el propio marco, con la flecha del portal para volver. Si la emergente sí se
+   permite, todo sigue como siempre. */
+function rescatarEmergentes(win){
+  try{
+    if(!win || win.__rescateEmergentes) return;
+    win.__rescateEmergentes = true;
+    var original = win.open;
+    win.open = function(url, nombre, opciones){
+      var v = null;
+      try{ v = original.apply(win, arguments); }catch(e){}
+      var bloqueada = !v || v.closed || typeof v.closed === 'undefined';
+      if(bloqueada && url){
+        try{ win.location.href = url; }catch(e){}
+      }
+      return v;
+    };
+
+    /* Lo mismo con los enlaces que piden pestaña nueva: si el navegador los ignora dentro
+       del marco, se abren aquí en vez de quedarse en nada. */
+    win.document.addEventListener('click', function(ev){
+      var a = ev.target && ev.target.closest ? ev.target.closest('a[target="_blank"]') : null;
+      if(!a || !a.href) return;
+      var abierta = null;
+      try{ abierta = original.call(win, a.href, '_blank'); }catch(e){}
+      if(!abierta){
+        ev.preventDefault();
+        win.location.href = a.href;
+      }
+    }, true);
+  }catch(e){}
+}
+
+/* Cuántas herramientas se mantienen abiertas a la vez. Cada una ocupa memoria del equipo.
+   En el celular se guarda solo la que se está usando: tomar una foto exige un pico grande
+   de memoria y, con varias herramientas cargadas detrás, Android cierra la aplicación y
+   devuelve a la pantalla de acceso. En la computadora sobra memoria, así que se conservan
+   cuatro y no se pierde lo que se estaba haciendo al saltar de una a otra. */
+function maxMarcos(){
+  var chico = window.innerWidth <= 760;
+  var pocaMemoria = (navigator.deviceMemory && navigator.deviceMemory <= 4);
+  return (chico || pocaMemoria) ? 1 : 4;
+}
 
 function marcoActivo(){
   return document.querySelector('#embedBox .embedFrame.activo');
@@ -1369,12 +1410,17 @@ function marcoDe(url, title, urlLimpia){
     return frame;
   }
 
-  /* no cabe una más: se cierra la que lleva más tiempo sin usarse */
+  /* no cabe una más: se cierra la que lleva más tiempo sin usarse. Antes de quitarla se
+     vacía su dirección, que es lo que de verdad libera la memoria en el celular. */
+  var tope = maxMarcos();
   var abiertas = [].slice.call(caja.querySelectorAll('.embedFrame'));
-  while(abiertas.length >= MAX_MARCOS){
+  while(abiertas.length >= tope){
     abiertas.sort(function(a, b){ return (a.dataset.usada || 0) - (b.dataset.usada || 0); });
     var vieja = abiertas.shift();
-    if(vieja) vieja.parentNode.removeChild(vieja);
+    if(vieja){
+      try{ vieja.src = 'about:blank'; }catch(e){}
+      if(vieja.parentNode) vieja.parentNode.removeChild(vieja);
+    }
   }
 
   frame = document.createElement('iframe');
@@ -1465,6 +1511,7 @@ function compactarEmbebido(frame){
     }catch(e){}
 
     neutralizarTextos(doc, frame.contentWindow);
+    rescatarEmergentes(frame.contentWindow);
 
     /* el contenido ocupa el ancho completo cuando se le quitó el panel lateral propio */
     var nav = doc.querySelector('.shell > nav.side');
@@ -2277,20 +2324,46 @@ function equipoActual(){
 /* La sesión vive en sessionStorage, no en localStorage: se mantiene mientras la app o la
    pestaña sigan abiertas — aunque se recargue o se navegue — y se borra al cerrarlas del todo.
    Así nadie queda con la sesión abierta en un equipo compartido. */
+/* Minutos que se tolera un cierre involuntario. Si el celular cierra la aplicación por
+   falta de memoria —tomar una foto la deja al límite— la persona vuelve a entrar sin
+   escribir la clave otra vez. Pasado ese rato se considera un cierre de verdad y se pide
+   de nuevo, que es lo acordado para equipos compartidos. */
+var MINUTOS_GRACIA = 20;
+
 function guardarSesion(d){
   SESION = d;
   try{ sessionStorage.setItem(CLAVE_SESION, JSON.stringify(d)); }catch(e){}
+  try{ localStorage.setItem(CLAVE_SESION + '_resp', JSON.stringify({d:d, ts:Date.now()})); }catch(e){}
 }
+
 function leerSesion(){
   try{
     var d = JSON.parse(sessionStorage.getItem(CLAVE_SESION) || 'null');
-    return (d && d.token && d.permisos) ? d : null;
-  }catch(e){ return null; }
+    if(d && d.token && d.permisos) return d;
+  }catch(e){}
+  /* rescate tras un cierre inesperado */
+  try{
+    var r = JSON.parse(localStorage.getItem(CLAVE_SESION + '_resp') || 'null');
+    if(r && r.d && r.d.token && r.d.permisos &&
+       (Date.now() - r.ts) < MINUTOS_GRACIA * 60000){
+      try{ sessionStorage.setItem(CLAVE_SESION, JSON.stringify(r.d)); }catch(e){}
+      return r.d;
+    }
+  }catch(e){}
+  return null;
 }
+
+/* Mientras la persona usa el portal se refresca la marca de tiempo, para que el rescate
+   cuente desde la última actividad y no desde que inició sesión. */
+setInterval(function(){
+  if(!SESION) return;
+  try{ localStorage.setItem(CLAVE_SESION + '_resp', JSON.stringify({d:SESION, ts:Date.now()})); }catch(e){}
+}, 60000);
 function cerrarSesion(){
   var caja = document.getElementById('embedBox');
   if(caja) caja.querySelectorAll('.embedFrame').forEach(function(f){ f.parentNode.removeChild(f); });
   try{ sessionStorage.removeItem(CLAVE_SESION); }catch(e){}
+  try{ localStorage.removeItem(CLAVE_SESION + '_resp'); }catch(e){}   /* salir es salir */
   try{ localStorage.removeItem(CLAVE_SESION); }catch(e){}   /* limpia sesiones de la versión anterior */
   location.reload();
 }
