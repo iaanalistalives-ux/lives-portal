@@ -84,6 +84,19 @@ body.embedOpen .wrap{padding-top:0;}
 .tcard .tt{font-size:13.5px;font-weight:700;color:#222;margin-bottom:9px;line-height:1.35;}
 .tcard .ta{font-size:11px;font-weight:800;color:var(--accent);display:inline-flex;align-items:center;gap:4px;}
 
+/* Tarjeta que agrupa dos herramientas parecidas. No abre nada: despliega debajo, en la
+   misma pantalla, las tarjetas que contiene. Se hace asi y no con una pantalla aparte
+   porque los permisos se guardan por direccion: las tarjetas de adentro son tarjetas
+   normales y siguen respetando quien puede verlas, sin tocar el Sheet de accesos. */
+.tcard.tgrupo{border-top-style:dashed;cursor:pointer;}
+.tgrid .subgrid{flex:0 0 100%;display:flex;flex-wrap:wrap;gap:14px;align-items:stretch;
+  background:rgba(15,122,90,.05);border:1px dashed var(--warm);border-radius:14px;padding:14px;margin:0;}
+.tgrid .subgrid[hidden]{display:none;}
+.tgrid .subgrid .sublabel{flex:0 0 100%;font-size:12px;font-weight:800;color:var(--sage-dark);margin:0 0 2px;}
+.tgrid .subgrid .tcard{flex:0 0 210px;}
+@media(max-width:760px){.tgrid .subgrid .tcard{flex:0 0 calc(50% - 7px);}}
+@media(max-width:420px){.tgrid .subgrid .tcard{flex:0 0 100%;}}
+
 .hero{text-align:center;padding:14px 10px 28px;}
 .hero .hbig{font-size:23px;font-weight:800;color:var(--petrol);margin-bottom:6px;}
 .hero .hsm{font-size:13px;color:var(--stone);}
@@ -792,7 +805,12 @@ body.conSesion .quienBtn{display:inline-flex;}
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria/dashboard_avances_auditoria.html" role="button" tabindex="0"><div class="tt">Status de Auditoría Final y Clientes</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/final/dashboard-final.html" role="button" tabindex="0"><div class="tt">Auditorías Acabados/Costura</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria-final/buscar.html" role="button" tabindex="0"><div class="tt">Buscar Auditorías</div><div class="ta">Abrir →</div></div>
-      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditorias-visor/" role="button" tabindex="0"><div class="tt">Escaneos de Auditorías Acabados/Costura</div><div class="ta">Abrir →</div></div>
+      <div class="tcard tgrupo" data-grupo="escaneos" role="button" tabindex="0" aria-expanded="false" aria-controls="grupo-escaneos"><div class="tt">Escaneos y Fotos</div><div class="ta">Ver opciones ↓</div></div>
+      <div class="subgrid" id="grupo-escaneos" hidden>
+        <div class="sublabel">Escaneos y Fotos · elige cuál abrir</div>
+        <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditorias-visor/" role="button" tabindex="0"><div class="tt">Escaneos y Fotos · Nuevos</div><div class="ta">Abrir →</div></div>
+        <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-reportes-calidad/" role="button" tabindex="0"><div class="tt">Escaneos y Fotos · Antiguos</div><div class="ta">Abrir →</div></div>
+      </div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/historial.html" role="button" tabindex="0"><div class="tt">Verificación de Medidas realizadas en Auditorías</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
@@ -1637,6 +1655,25 @@ document.querySelectorAll('.tcard[data-url]').forEach(function(card){
   });
 });
 
+/* Las tarjetas que agrupan no abren ninguna herramienta: muestran u ocultan debajo las
+   tarjetas que contienen. La caja se queda como estaba al volver de una herramienta. */
+function alternarGrupo(card){
+  var caja = document.getElementById('grupo-' + card.dataset.grupo);
+  if(!caja) return;
+  var abierta = !caja.hasAttribute('hidden');
+  if(abierta) caja.setAttribute('hidden', ''); else caja.removeAttribute('hidden');
+  card.setAttribute('aria-expanded', abierta ? 'false' : 'true');
+  var a = card.querySelector('.ta');
+  if(a) a.textContent = abierta ? 'Ver opciones \u2193' : 'Ocultar \u2191';
+}
+
+document.querySelectorAll('.tcard.tgrupo[data-grupo]').forEach(function(card){
+  card.addEventListener('click', function(){ alternarGrupo(card); });
+  card.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); alternarGrupo(card); }
+  });
+});
+
 document.querySelector('[data-embed-back]').addEventListener('click', function(){
   if(_pollEmbed){ clearInterval(_pollEmbed); _pollEmbed = null; }
   document.body.classList.remove('embedOpen');
@@ -2398,6 +2435,9 @@ function aplicarPermisos(){
     var vivas = 0;
 
     pant.querySelectorAll('.tcard').forEach(function(card){
+      /* Las tarjetas que agrupan no tienen direccion propia: se resuelven mas abajo,
+         segun cuantas de las suyas quedaron visibles. */
+      if(card.classList.contains('tgrupo')) return;
       var ok = puedeVer(card.dataset.url, area);
       card.style.display = ok ? '' : 'none';
       if(ok){
@@ -2409,6 +2449,19 @@ function aplicarPermisos(){
           area: area, tipo: tipo
         });
       }
+    });
+
+    /* una tarjeta que agrupa se ve solo si al menos una de las suyas quedo visible */
+    pant.querySelectorAll('.tcard.tgrupo').forEach(function(g){
+      var caja = document.getElementById('grupo-' + g.dataset.grupo);
+      var hijas = 0;
+      if(caja){
+        caja.querySelectorAll('.tcard').forEach(function(c){
+          if(c.style.display !== 'none') hijas++;
+        });
+      }
+      g.style.display = hijas ? '' : 'none';
+      if(caja && !hijas) caja.setAttribute('hidden', '');
     });
 
     /* secciones que se quedaron sin tarjetas visibles */
