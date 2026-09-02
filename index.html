@@ -487,6 +487,12 @@ body.embedOpen .openTabBtn.permitido{display:inline-flex;}
 .refreshBtn:hover{background:rgba(255,255,255,.2);}
 .refreshBtn.girando{pointer-events:none;opacity:.65;}
 body.conSesion .refreshBtn{display:inline-flex;}
+/* Botón de Inicio: devuelve a la primera pantalla de cada persona sin ir retrocediendo
+   pantalla por pantalla. Solo aparece con la sesión abierta. */
+.inicioBtn{display:none;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;}
+.inicioBtn:hover{background:rgba(255,255,255,.2);}
+body.conSesion .inicioBtn{display:inline-flex;}
+@media(max-width:520px){.inicioBtn .txt{display:none;}}
 .quienBtn{display:none;align-items:center;gap:7px;background:rgba(255,255,255,.12);color:#fff;
   border:1px solid rgba(255,255,255,.28);border-radius:20px;padding:7px 14px;
   font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
@@ -544,6 +550,7 @@ body.conSesion .quienBtn{display:inline-flex;}
   </div>
   <div class="headerActions">
     <a class="pinBtn openTabBtn" id="embedExternalLink" href="#" target="_blank" rel="noopener">↗ Abrir en otra pestaña</a>
+    <button class="pinBtn inicioBtn" id="inicioBtn" type="button" title="Volver al inicio">⌂ <span class="txt">Inicio</span></button>
     <button class="pinBtn refreshBtn" id="refrescarBtn" type="button" title="Volver a cargar">↻ Actualizar</button>
     <button class="quienBtn" id="quienBtn" type="button" title="Cerrar sesión"><span id="quienNombre"></span> · Salir</button>
     <a class="pinBtn" id="miTableroBtn" style="display:none" href="https://iaanalistalives-ux.github.io/tablero-proyectos/" target="_blank" rel="noopener">📊 Mi Tablero</a>
@@ -1674,6 +1681,9 @@ function alternarGrupo(card){
   if(a) a.textContent = abierta ? 'Ver opciones \u2193' : 'Ocultar \u2191';
 }
 
+var _inicioBtn = document.getElementById('inicioBtn');
+if(_inicioBtn) _inicioBtn.addEventListener('click', irAlInicio);
+
 document.querySelectorAll('.tcard.tgrupo[data-grupo]').forEach(function(card){
   card.addEventListener('click', function(){ alternarGrupo(card); });
   card.addEventListener('keydown', function(e){
@@ -2576,6 +2586,14 @@ function permisoPestana(){
     if(String(SESION.permisos[i]).trim().toUpperCase() === 'PESTANA') return true;
   }
   return false;
+}
+
+/* Devuelve a la pantalla con la que cada persona empieza: las áreas para quien recorre el
+   portal completo, o sus propias tarjetas para quien entra directo a sus herramientas.
+   La herramienta abierta no se descarga: sigue ahí para volver a ella tal como estaba. */
+function irAlInicio(){
+  if(!SESION) return;
+  showScreen(SESION.inicio === 'areas' ? 'screen-root' : 'screen-mias');
 }
 
 function entrarAlPortal(){
