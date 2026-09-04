@@ -57,6 +57,13 @@ body.embedOpen .wrap{padding-top:0;}
 #screen-mias .toolsLayout{margin-top:4px;}
 #screen-mias .areaSidebar{grid-row:1;}
 #screen-mias .toolsContent{grid-row:1;}
+/* Con el panel a la izquierda, el contenido va alineado a la izquierda igual que en las
+   pantallas de área. Centrado tenía sentido cuando esta pantalla no tenía panel. */
+@media(min-width:761px){
+  #screen-mias .hero{text-align:left;padding:6px 2px 22px;}
+  #screen-mias .sectitle{text-align:left;}
+  #screen-mias .miaGrid{justify-content:flex-start;}
+}
 /* En el celular todo se queda como estaba: el panel se oculta y manda la lista de tarjetas. */
 @media(max-width:760px){
   #miasSidebar{display:none;}
