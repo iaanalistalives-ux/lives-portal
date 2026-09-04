@@ -50,6 +50,18 @@ body.embedOpen .wrap{padding-top:0;}
   .toolsLayout .backbtn{margin-bottom:10px;}
 }
 
+/* La pantalla de entrada de quien va directo a sus herramientas lleva el mismo panel de
+   siempre, pero ya visible al entrar: se elige y se abre sin pantallas intermedias. Como
+   aquí no hay botón "Volver", el panel ocupa la primera fila. */
+#screen-mias .toolsLayout{margin-top:4px;}
+#screen-mias .areaSidebar{grid-row:1;}
+#screen-mias .toolsContent{grid-row:1;}
+/* En el celular todo se queda como estaba: el panel se oculta y manda la lista de tarjetas. */
+@media(max-width:760px){
+  #miasSidebar{display:none;}
+  #screen-mias .toolsLayout{display:block;}
+}
+
 .headerActions{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
 .pinBtn{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:22px;padding:9px 15px;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:6px;white-space:nowrap;}
 .pinBtn:hover{border-color:#fff;}
@@ -594,14 +606,20 @@ body.conSesion .quienBtn{display:inline-flex;}
 
   <!-- ===== PANTALLA: MIS HERRAMIENTAS (para quien entra directo) ===== -->
   <div class="screen" id="screen-mias">
-    <div class="hero">
-      <div class="hbig" id="miasSaludo">Tus herramientas</div>
-      <div class="hsm" id="miasSub">Todo lo que tienes asignado, en un solo lugar.</div>
+    <div class="toolsLayout" id="miasLayout">
+      <aside class="areaSidebar" id="miasSidebar"></aside>
+      <div class="toolsContent">
+        <div class="hero">
+          <div class="hbig" id="miasSaludo">Tus herramientas</div>
+          <div class="hsm" id="miasSub">Todo lo que tienes asignado, en un solo lugar.</div>
+        </div>
+        <div id="miasKpis"></div>
+        <div class="sectitle" id="miasTitForm">📝 Formularios · para registrar</div>
+        <div class="miaGrid" id="miasForm"></div>
+        <div class="sectitle" id="miasTitDash">📊 Dashboards · para consultar</div>
+        <div class="miaGrid" id="miasDash"></div>
+      </div>
     </div>
-    <div class="sectitle" id="miasTitForm">📝 Formularios · para registrar</div>
-    <div class="miaGrid" id="miasForm"></div>
-    <div class="sectitle" id="miasTitDash">📊 Dashboards · para consultar</div>
-    <div class="miaGrid" id="miasDash"></div>
   </div>
 
   <!-- ===== PANTALLA 1: RAÍZ ===== -->
@@ -2515,6 +2533,48 @@ function aplicarPermisos(){
 
 /* ---------- Pantalla "Mis herramientas" ---------- */
 
+/* Panel lateral de la pantalla de entrada. Es el mismo panel que ya aparece al abrir una
+   herramienta, solo que disponible desde el primer segundo: se entra y se elige, sin pasar
+   por tipo ni por área. Los elementos apuntan a las mismas tarjetas, así que respetan los
+   permisos sin lógica aparte. */
+function pintarPanelMias(){
+  var sb = document.getElementById('miasSidebar');
+  if(!sb) return;
+  sb.innerHTML = '';
+
+  var tit = document.createElement('div');
+  tit.className = 'sbTitle';
+  tit.innerHTML = '<span>Tus herramientas</span>';
+  sb.appendChild(tit);
+
+  var grupos = [
+    ['form', '📝 Formularios', document.getElementById('miasForm')],
+    ['dash', '📊 Dashboards',  document.getElementById('miasDash')]
+  ];
+  var conAlgo = grupos.filter(function(g){ return g[2] && g[2].children.length; });
+
+  conAlgo.forEach(function(g){
+    if(conAlgo.length > 1){
+      var enc = document.createElement('div');
+      enc.className = 'sbGroup';
+      enc.innerHTML = '<span>' + g[1] + '</span>';
+      sb.appendChild(enc);
+    }
+    [].slice.call(g[2].children).forEach(function(card){
+      if(!card.dataset.url) return;
+      var et = card.querySelector('.mt');
+      var nombre = et ? et.textContent : card.dataset.url;
+      var item = document.createElement('div');
+      item.className = 'sbItem';
+      item.title = nombre;
+      item.innerHTML = '<span class="sbIcon">' + (g[0] === 'dash' ? '📊' : '📝') +
+                       '</span><span>' + nombre + '</span>';
+      item.addEventListener('click', function(){ openEmbed(card); });
+      sb.appendChild(item);
+    });
+  });
+}
+
 function pintarMias(lista){
   var dash = lista.filter(function(x){ return x.tipo === 'dash'; });
   var form = lista.filter(function(x){ return x.tipo === 'form'; });
@@ -2556,6 +2616,16 @@ function pintarMias(lista){
       cont.appendChild(d);
     });
   });
+
+  pintarPanelMias();
+
+  /* Los indicadores viven en la pantalla de áreas. Quien entra directo a sus herramientas
+     nunca pasaba por ahí y no los veía nunca. Se mueve el bloque, no se copia: cada persona
+     usa un solo modo de entrada, así que el bloque existe una sola vez y iniciarKpis() lo
+     sigue encontrando por sus mismos identificadores. */
+  var kpis = document.querySelector('#screen-root .kpiSection');
+  var destinoKpis = document.getElementById('miasKpis');
+  if(kpis && destinoKpis && !destinoKpis.children.length) destinoKpis.appendChild(kpis);
 }
 
 /* ---------- Arranque ---------- */
