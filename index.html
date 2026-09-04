@@ -2715,19 +2715,24 @@ function entrarAlPortal(){
     showScreen('screen-mias');
   }
 
-  /* Vuelta al punto donde se pulsó Actualizar. Se comprueba que la pantalla exista y que
-     todavía tenga algo visible: si entretanto le quitaron un permiso, se queda en el
-     inicio en vez de mandarla a una pantalla vacía. La marca se usa una sola vez. */
+  /* Vuelta al punto donde se pulsó Actualizar. Se rehace la navegación con las mismas
+     funciones que usa un clic normal: mostrar la pantalla a secas dejaba el panel lateral
+     vacío y las tarjetas sin icono, porque eso se pinta al navegar, no al mostrarse.
+     La marca se usa una sola vez. */
   try{
-    var volverA = sessionStorage.getItem('lives_volver_a');
+    var volverA   = sessionStorage.getItem('lives_volver_a');
+    var volverTipo = sessionStorage.getItem('lives_volver_tipo') || 'dash';
     sessionStorage.removeItem('lives_volver_a');
-    if(volverA && volverA !== 'screen-mias' && volverA !== 'screen-root'){
+    sessionStorage.removeItem('lives_volver_tipo');
+
+    if(volverA && volverA.indexOf('tools-') === 0){
+      var partes = volverA.split('-');            /* tools-{area}-{tipo} */
       var pant = document.getElementById(volverA);
-      if(pant){
-        var viva = [].slice.call(pant.querySelectorAll('.tcard'))
-                     .some(function(c){ return c.style.display !== 'none'; });
-        if(viva || volverA === 'screen-areas') showScreen(volverA);
-      }
+      var viva = pant && [].slice.call(pant.querySelectorAll('.tcard'))
+                          .some(function(c){ return c.style.display !== 'none'; });
+      if(viva) goToTools(partes[1], partes[2]);
+    } else if(volverA === 'screen-areas'){
+      if(areasDe(volverTipo).length) renderAreaList(volverTipo);
     }
   }catch(e){}
 }
@@ -2811,6 +2816,7 @@ document.getElementById('refrescarBtn').addEventListener('click', function(){
     var actual = document.querySelector('.screen.active');
     if(actual && actual.id !== 'screen-embed'){
       sessionStorage.setItem('lives_volver_a', actual.id);
+      sessionStorage.setItem('lives_volver_tipo', currentType || 'dash');
     }
   }catch(e){}
   if(navigator.serviceWorker && navigator.serviceWorker.getRegistration){
