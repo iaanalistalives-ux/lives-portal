@@ -2714,6 +2714,22 @@ function entrarAlPortal(){
     pintarMias(lista);
     showScreen('screen-mias');
   }
+
+  /* Vuelta al punto donde se pulsó Actualizar. Se comprueba que la pantalla exista y que
+     todavía tenga algo visible: si entretanto le quitaron un permiso, se queda en el
+     inicio en vez de mandarla a una pantalla vacía. La marca se usa una sola vez. */
+  try{
+    var volverA = sessionStorage.getItem('lives_volver_a');
+    sessionStorage.removeItem('lives_volver_a');
+    if(volverA && volverA !== 'screen-mias' && volverA !== 'screen-root'){
+      var pant = document.getElementById(volverA);
+      if(pant){
+        var viva = [].slice.call(pant.querySelectorAll('.tcard'))
+                     .some(function(c){ return c.style.display !== 'none'; });
+        if(viva || volverA === 'screen-areas') showScreen(volverA);
+      }
+    }
+  }catch(e){}
 }
 
 /* Deja constancia de qué abrió cada quien. Si falla, no se interrumpe nada. */
@@ -2789,6 +2805,14 @@ document.getElementById('refrescarBtn').addEventListener('click', function(){
       return;
     }
   }
+  /* Actualizar recarga el portal para traer la versión recién publicada, pero eso devolvía
+     a la primera pantalla. Se anota dónde estaba la persona para volver ahí al terminar. */
+  try{
+    var actual = document.querySelector('.screen.active');
+    if(actual && actual.id !== 'screen-embed'){
+      sessionStorage.setItem('lives_volver_a', actual.id);
+    }
+  }catch(e){}
   if(navigator.serviceWorker && navigator.serviceWorker.getRegistration){
     navigator.serviceWorker.getRegistration().then(function(reg){
       if(reg) reg.update();
