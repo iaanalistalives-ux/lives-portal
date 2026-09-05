@@ -376,11 +376,25 @@ body.panelChico .toolsLayout .backbtn::before{content:'←';font-size:15px;}
 }
 
 /* --- Celular --- */
+/* Tablet: la cabecera de escritorio reservaba 96px de alto y un logo de 52px, que en una
+   pantalla apaisada de tablet se come una franja grande sin aportar nada. Se compacta sin
+   quitar ningún elemento. Va antes del bloque de celular, que sigue afinando por encima. */
+@media(max-width:1024px) and (min-width:761px){
+  .header{min-height:0;padding:10px 16px;gap:12px;}
+  .header img{height:40px;}
+  .divider{height:34px;}
+  .htitle{font-size:19px;}
+  .hsub{font-size:12px;}
+  .hcrumb{font-size:14px;}
+  .pinBtn,.installBtn{padding:8px 13px;font-size:12px;}
+  .wrap{padding:14px 14px 44px;}
+}
+
 @media(max-width:760px){
   .wrap{padding:12px 10px 36px;}
 
   /* Header: dos líneas como máximo, y los botones en una fila deslizable */
-  .header{padding:10px 12px;gap:10px 12px;}
+  .header{padding:8px 12px;gap:8px 12px;min-height:0;}
   .header img{height:34px;}
   .divider{display:none;}
   .htitle{font-size:17px;}
