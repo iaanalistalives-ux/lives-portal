@@ -47,8 +47,14 @@ body.embedOpen .wrap{padding-top:0;}
 .toolsLayout .areaSidebar{grid-column:1;grid-row:2;flex:none;width:100%;}
 .toolsLayout .toolsContent{grid-column:2;grid-row:1 / span 2;}
 @media(max-width:760px){
-  .toolsLayout{display:flex;flex-direction:column;}
-  .toolsLayout .backbtn{margin-bottom:10px;}
+  .toolsLayout{display:flex;flex-direction:column;gap:0;}
+  /* Franja de áreas y botón Volver más ajustados: en el celular cada espacio en blanco
+     de más empuja las tarjetas fuera de la pantalla. Se recortan los huecos y el alto de
+     la franja, sin tocar el tamaño de lo que va dentro. */
+  .toolsLayout .backbtn{margin-bottom:8px;padding:7px 14px;}
+  .toolsLayout .areaSidebar{padding:6px 8px;border-radius:12px;margin-bottom:10px;}
+  .toolsLayout .areaSidebar .sbItem{padding:7px 10px;margin-bottom:0;}
+  .toolsLayout .areaSidebar .sbVolver{padding-top:7px;}
 }
 
 /* La pantalla de entrada de quien va directo a sus herramientas lleva el mismo panel de
@@ -391,7 +397,7 @@ body.panelChico .toolsLayout .backbtn::before{content:'←';font-size:15px;}
 }
 
 @media(max-width:760px){
-  .wrap{padding:12px 10px 36px;}
+  .wrap{padding:8px 10px 36px;}
 
   /* Header: dos líneas como máximo, y los botones en una fila deslizable */
   .header{padding:8px 12px;gap:8px 12px;min-height:0;}
