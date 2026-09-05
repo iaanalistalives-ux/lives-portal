@@ -998,7 +998,7 @@ body.conSesion .quienBtn{display:inline-flex;}
       <div class="toolsContent">
     <div class="sectitle">Flujo de Tela</div>
     <div class="tgrid">
-      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/pcp-flujo-tela/tela-teñida/" role="button" tabindex="0"><div class="tt">Flujo de Tela Teñida</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/pcp-flujo-tela/tela-te%C3%B1ida/" role="button" tabindex="0"><div class="tt">Flujo de Tela Teñida</div><div class="ta">Abrir →</div></div>
     </div>
     <div class="sectitle">Flujo de Costura y Móvil Acabados</div>
     <div class="tgrid">
@@ -1188,6 +1188,48 @@ body.conSesion .quienBtn{display:inline-flex;}
   </div>
 
 </div>
+
+<script>
+/* ============================================================================
+   ALTURA DEL MARCO DE LAS HERRAMIENTAS
+   ----------------------------------------------------------------------------
+   El alto del iframe estaba escrito como "100dvh menos un número fijo" (230px en celular).
+   Ese número no coincide con lo que realmente ocupa el encabezado: logo, título, botones y
+   la fila de pestañas suman bastante más. El marco terminaba extendiéndose por debajo del
+   borde de la pantalla, y la barra de "Veredicto / Guardar" del formulario —que va pegada
+   al fondo de su propio documento— quedaba fuera de la vista, cortada.
+   Aquí se mide dónde empieza el marco de verdad y se le da exactamente el alto que queda
+   hasta el borde inferior. Funciona con cualquier encabezado y cualquier pantalla.
+   ========================================================================== */
+(function(){
+  function ajustarMarcos(){
+    var marcos = document.querySelectorAll('.embedFrame');
+    for (var i=0;i<marcos.length;i++){
+      var f = marcos[i];
+      if (getComputedStyle(f).display === 'none') continue;
+      var arriba = f.getBoundingClientRect().top + (window.scrollY||0);
+      var visible = window.innerHeight - arriba - 10;   // 10px de respiro abajo
+      if (visible < 320) visible = 320;                 // nunca tan chico que no se use
+      f.style.height = Math.round(visible) + 'px';
+    }
+  }
+  window.ajustarMarcos = ajustarMarcos;
+
+  window.addEventListener('load', ajustarMarcos);
+  window.addEventListener('resize', ajustarMarcos);
+  window.addEventListener('orientationchange', function(){ setTimeout(ajustarMarcos, 250); });
+
+  /* El portal crea y muestra los marcos al abrir una herramienta, así que se vuelve a medir
+     cuando cambia el contenido en vez de solo al cargar la página. */
+  try{
+    var obs = new MutationObserver(function(){ clearTimeout(window._tAj); window._tAj = setTimeout(ajustarMarcos, 60); });
+    obs.observe(document.body, {childList:true, subtree:true, attributes:true, attributeFilter:['class','style']});
+  }catch(e){}
+
+  setTimeout(ajustarMarcos, 300);
+  setTimeout(ajustarMarcos, 1200);
+})();
+</script>
 
 <script>
 /* Catálogo de áreas: qué tipos tiene cada una (para filtrar la lista de áreas) */
@@ -3370,6 +3412,5 @@ function cargarKpiAcabados(){
   else { document.body.classList.add('sinSesion'); }
 })();
 </script>
-
 </body>
 </html>
