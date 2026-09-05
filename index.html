@@ -730,24 +730,6 @@ body.conSesion .quienBtn{display:inline-flex;}
           <div class="kpiFoot"><span class="kfresh" id="kpiSegInternoFresh"></span><span class="klink">Ver dashboard →</span></div>
         </div>
 
-        <div class="kpiCard" id="kpiCliente" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/cliente/dashboard-cliente.html">
-          <div class="kpiHead">
-            <div class="kpiName"><span class="kico">👔</span>Cliente con más rechazos</div>
-            <div class="kpiPill" id="kpiClientePill">Cargando</div>
-          </div>
-          <div class="kpiBody">
-            <div class="kpiNums">
-              <div class="kv loading" id="kpiClienteVal"><span class="kskel"></span></div>
-              <div class="kchip" id="kpiClienteChip"></div>
-              <div class="kperiodo" id="kpiClientePeriodo"></div>
-              <div class="kdelta" id="kpiClienteDelta"></div>
-              <div class="kmeta" id="kpiClienteMeta"></div>
-            </div>
-            <div class="kspark" id="kpiClienteSpark"></div>
-          </div>
-          <div class="kbase" id="kpiClienteBase">Auditorías rechazadas sobre auditadas, sumando líneas, inspección y cliente.</div>
-          <div class="kpiFoot"><span class="kfresh" id="kpiClienteFresh"></span><span class="klink">Ver dashboard →</span></div>
-        </div>
 
         <div class="kpiCard" id="kpiTaller" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/final/dashboard-final.html">
           <div class="kpiHead">
@@ -768,65 +750,40 @@ body.conSesion .quienBtn{display:inline-flex;}
           <div class="kpiFoot"><span class="kfresh" id="kpiTallerFresh"></span><span class="klink">Ver dashboard →</span></div>
         </div>
 
-        <div class="kpiCard" id="kpiInspectora" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/lineas/dashboard-lineas.html">
+        <div class="kpiCard" id="kpiPacking" data-url="https://iaanalistalives-ux.github.io/lives-auditoria/dashboard_avances_auditoria.html">
           <div class="kpiHead">
-            <div class="kpiName"><span class="kico">👷</span>Inspectora con más rechazos</div>
-            <div class="kpiPill" id="kpiInspectoraPill">Cargando</div>
+            <div class="kpiName"><span class="kico">📦</span>Packing esperando auditoría</div>
+            <div class="kpiPill" id="kpiPackingPill">Cargando</div>
           </div>
           <div class="kpiBody">
             <div class="kpiNums">
-              <div class="kv loading" id="kpiInspectoraVal"><span class="kskel"></span></div>
-              <div class="kchip" id="kpiInspectoraChip"></div>
-              <div class="kperiodo" id="kpiInspectoraPeriodo"></div>
-              <div class="kdelta" id="kpiInspectoraDelta"></div>
-              <div class="kmeta" id="kpiInspectoraMeta"></div>
+              <div class="kv loading" id="kpiPackingVal"><span class="kskel"></span></div>
+              <div class="kchip" id="kpiPackingChip"></div>
+              <div class="kdelta" id="kpiPackingDelta"></div>
             </div>
-            <div class="kspark" id="kpiInspectoraSpark"></div>
           </div>
-          <div class="kbase" id="kpiInspectoraBase">Auditorías rechazadas sobre auditadas, en líneas y en inspección.</div>
-          <div class="kpiFoot"><span class="kfresh" id="kpiInspectoraFresh"></span><span class="klink">Ver dashboard →</span></div>
+          <div class="kbase" id="kpiPackingBase">Lotes con el packing cerrado que todavía no tienen resultado de auditoría, esperando programación o esperando que se audite.</div>
+          <div class="kpiFoot"><span class="kfresh" id="kpiPackingFresh"></span><span class="klink">Ver dashboard →</span></div>
         </div>
 
-        <div class="kpiCard" id="kpiAcabados" data-url="https://iaanalistalives-ux.github.io/formulario-acabados/dashboard_acabados_v2.html">
+        <div class="kpiCard" id="kpiMovVencidas" data-url="https://iaanalistalives-ux.github.io/lives-movilidades/sara_programacion.html">
           <div class="kpiHead">
-            <div class="kpiName"><span class="kico">👕</span>Acabados — Eficiencia</div>
-            <div class="kpiPill" id="kpiAcabadosPill">Cargando</div>
+            <div class="kpiName"><span class="kico">🚚</span>Movilidades vencidas</div>
+            <div class="kpiPill" id="kpiMovVencidasPill">Cargando</div>
           </div>
           <div class="kpiBody">
             <div class="kpiNums">
-              <div class="kv loading" id="kpiAcabadosVal"><span class="kskel"></span></div>
-              <div class="kchip" id="kpiAcabadosChip"></div>
-              <div class="kperiodo" id="kpiAcabadosPeriodo"></div>
-              <div class="kdelta" id="kpiAcabadosDelta"></div>
-              <div class="kmeta" id="kpiAcabadosMeta"></div>
+              <div class="kv loading" id="kpiMovVencidasVal"><span class="kskel"></span></div>
+              <div class="kchip" id="kpiMovVencidasChip"></div>
+              <div class="kdelta" id="kpiMovVencidasDelta"></div>
             </div>
-            <div class="kspark" id="kpiAcabadosSpark"></div>
           </div>
-          <div class="kbase" id="kpiAcabadosBase">Promedio de las áreas de acabados: doblado, plancha, vapor y encajado.</div>
-          <div class="kpiFoot"><span class="kfresh" id="kpiAcabadosFresh"></span><span class="klink">Ver dashboard →</span></div>
+          <div class="kbase" id="kpiMovVencidasBase">Solicitudes cuya fecha de necesidad ya pasó y siguen abiertas, sin programar o programadas sin cerrar. No cuenta las canceladas ni las que ya tienen respuesta.</div>
+          <div class="kpiFoot"><span class="kfresh" id="kpiMovVencidasFresh"></span><span class="klink">Ver herramienta →</span></div>
         </div>
 
-        <div class="kpiCard" id="kpiInspeccion" data-url="https://iaanalistalives-ux.github.io/inspeccion-final-costura/dashboard.html">
-          <div class="kpiHead">
-            <div class="kpiName"><span class="kico">🔍</span>Inspección — Eficiencia</div>
-            <div class="kpiPill" id="kpiInspeccionPill">Cargando</div>
-          </div>
-          <div class="kpiBody">
-            <div class="kpiNums">
-              <div class="kv loading" id="kpiInspeccionVal"><span class="kskel"></span></div>
-              <div class="kchip" id="kpiInspeccionChip"></div>
-              <div class="kperiodo" id="kpiInspeccionPeriodo"></div>
-              <div class="kdelta" id="kpiInspeccionDelta"></div>
-              <div class="kmeta" id="kpiInspeccionMeta"></div>
-            </div>
-            <div class="kspark" id="kpiInspeccionSpark"></div>
-          </div>
-          <div class="kbase" id="kpiInspeccionBase">Minutos de prenda revisada sobre los minutos productivos del turno.</div>
-          <div class="kpiFoot">
-            <span class="kfresh" id="kpiInspeccionFresh"></span>
-            <span class="klink">Ver dashboard →</span>
-          </div>
-        </div>
+
+
 
       </div>
     </div>
@@ -2388,12 +2345,10 @@ function iniciarKpis(){
   var sec = document.querySelector('.kpiSection');
   var vivos = 0;
   [['kpiSegundas', cargarKpiSegundas, 'textil'],
-   ['kpiInspeccion', cargarKpiInspeccion, 'ingenieria'],
    ['kpiSegInterno', cargarKpiSegInterno, 'calidad'],
-   ['kpiCliente', cargarKpisAuditoria, 'calidad'],
    ['kpiTaller', cargarKpisAuditoria, 'calidad'],
-   ['kpiInspectora', cargarKpisAuditoria, 'calidad'],
-   ['kpiAcabados', cargarKpiAcabados, 'ingenieria']].forEach(function(par){
+   ['kpiPacking', cargarKpiPacking, 'calidad'],
+   ['kpiMovVencidas', cargarKpiMovVencidas, 'logistica']].forEach(function(par){
     var card = document.getElementById(par[0]);
     if(!card) return;
     if(SESION && puedeVer(card.dataset.url, par[2])){
@@ -3197,6 +3152,141 @@ function fallaPeor(id, motivo){
   }
 }
 
+/* ================== KPI: alertas que miran hacia adelante ==================
+   Las dos siguientes no dicen cómo salió lo de ayer: dicen qué está detenido hoy.
+   Por eso muestran un conteo y no un porcentaje, y por eso se pintan con su propia
+   función en vez de kpiPintar, que está hecha para tasas. */
+
+var API_AVANCES = 'https://script.google.com/macros/s/AKfycby-ZCzYEK9Y-N95TVjbWSMer4rxdxWoZCx8l1rhHln36QbywiCR-pIux3tyTIq8SoP3/exec';
+var API_MOVIL   = 'https://script.google.com/macros/s/AKfycbwY21RREcAXwgrruPzEgAkd_CcEj2PRJSb3ERRFCzOPSAzb2RS2h8zJ1CHDoM0i7UTN/exec';
+
+/* Pinta una tarjeta de conteo. tono: 'ok' cuando no hay nada pendiente, 'bad' cuando sí.
+   El cero es buena noticia y se dice con palabras, no con un 0 suelto. */
+function kpiConteo(id, d, ts, offline){
+  var card = document.getElementById(id);
+  var elV  = document.getElementById(id + 'Val');
+  var elC  = document.getElementById(id + 'Chip');
+  var elD  = document.getElementById(id + 'Delta');
+  var elF  = document.getElementById(id + 'Fresh');
+  var elP  = document.getElementById(id + 'Pill');
+  if(!card || !elV) return;
+
+  card.classList.remove('ok','bad','flat');
+  card.classList.add(d.n > 0 ? 'bad' : 'ok');
+  elV.classList.remove('loading');
+  elV.innerHTML = d.n > 0
+    ? String(d.n) + '<span class="ku">' + d.unidad + '</span>'
+    : 'Ninguna';
+  if(elC) elC.textContent = d.chip || '';
+  if(elD) elD.textContent = d.detalle || '';
+  if(elP) elP.textContent = d.n > 0 ? 'Requiere acción' : 'Al día';
+  if(elF) elF.textContent = offline ? ('guardado · ' + kpiHace(ts)) : ('actualizado ' + kpiHace(ts));
+}
+
+/* --- Packing cerrado sin resultado de auditoría ---
+   Dos estados cuentan y significan cosas distintas: "Packing Cerrado" es el lote cerrado
+   que todavía hay que programar, y "Packing Cerrado - Pendiente Auditoría" es el que ya
+   está programado y espera que lo auditen. Los dos son producto detenido, así que la
+   tarjeta suma ambos y los desglosa debajo. */
+function cargarKpiPacking(){
+  var ca = kpiCacheGet('kpiPacking');
+  if(ca) kpiConteo('kpiPacking', ca.d, ca.ts, true);
+
+  return kpiJsonp(API_AVANCES, {accion:'datos'}, 20000).then(function(res){
+    if(!res || !res.ok || !res.rows) throw new Error('sin datos');
+
+    var porProgramar = 0, porAuditar = 0, prendas = 0;
+    res.rows.forEach(function(r){
+      var est = String(r.estatusEnc || '').trim().toUpperCase();
+      if(est.indexOf('PACKING CERRADO') !== 0) return;
+      /* Si ya tiene resultado de auditoría, dejó de estar detenido */
+      if(String(r.status || '').trim()) return;
+      if(est.indexOf('PENDIENTE') !== -1) porAuditar++; else porProgramar++;
+      var c = parseFloat(String(r.cantidad || '0').replace(/[^0-9.]/g, ''));
+      if(!isNaN(c)) prendas += c;
+    });
+
+    var total = porProgramar + porAuditar;
+    var d = {
+      n: total,
+      unidad: total === 1 ? ' lote' : ' lotes',
+      chip: prendas > 0 ? (Math.round(prendas).toLocaleString('es-PE') + ' prendas detenidas') : '',
+      detalle: total > 0
+        ? (porProgramar + ' por programar · ' + porAuditar + ' esperando auditoría')
+        : 'Todo el packing cerrado ya fue auditado'
+    };
+    kpiCacheSet('kpiPacking', d);
+    kpiConteo('kpiPacking', d, Date.now(), false);
+  }).catch(function(e){
+    console.warn('KPI packing:', e);
+    var c = kpiCacheGet('kpiPacking');
+    if(c) kpiConteo('kpiPacking', c.d, c.ts, true);
+    else kpiFallo('kpiPacking');
+  });
+}
+
+/* --- Movilidades vencidas ---
+   Vencida = la fecha en que el área la necesitaba ya pasó y la solicitud sigue abierta.
+   Abierta es PENDIENTE (sin programar) o PROGRAMADO (con chofer, sin cerrar). Las
+   canceladas y las que ya tienen respuesta del chofer no cuentan: están cerradas. */
+function cargarKpiMovVencidas(){
+  var ca = kpiCacheGet('kpiMovVencidas');
+  if(ca) kpiConteo('kpiMovVencidas', ca.d, ca.ts, true);
+
+  return kpiJsonp(API_MOVIL, {accion:'listarsolicitudes'}, 20000).then(function(res){
+    if(!res || !res.filas) throw new Error('sin datos');
+
+    /* Hoy a las 00:00, para que "vencida" signifique de ayer hacia atrás */
+    var hoy = new Date(); hoy.setHours(0,0,0,0);
+
+    function aFecha(txt){
+      txt = String(txt || '').trim();
+      if(!txt) return null;
+      var m = txt.match(/^(\d{4})-(\d{2})-(\d{2})/);            /* 2026-07-08 */
+      if(m) return new Date(+m[1], +m[2] - 1, +m[3]);
+      m = txt.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);          /* 08/07/2026 */
+      if(m) return new Date(+m[3], +m[2] - 1, +m[1]);
+      return null;
+    }
+
+    var vencidas = 0, sinProgramar = 0, masVieja = null, areas = {};
+    res.filas.forEach(function(row){
+      var id = String(row[0] || '').trim();
+      if(!id || id.toUpperCase() === 'ID') return;
+      var estado = String(row[14] || 'PENDIENTE').trim().toUpperCase();
+      if(estado !== 'PENDIENTE' && estado !== 'PROGRAMADO') return;
+      var fn = aFecha(row[23]);
+      if(!fn || fn >= hoy) return;
+      vencidas++;
+      if(estado === 'PENDIENTE') sinProgramar++;
+      if(!masVieja || fn < masVieja) masVieja = fn;
+      var ar = String(row[2] || '').trim().toUpperCase();
+      if(ar) areas[ar] = (areas[ar] || 0) + 1;
+    });
+
+    var dias = masVieja ? Math.round((hoy - masVieja) / 86400000) : 0;
+    var peor = Object.keys(areas).sort(function(a,b){ return areas[b] - areas[a]; })[0];
+
+    var d = {
+      n: vencidas,
+      unidad: vencidas === 1 ? ' solicitud' : ' solicitudes',
+      chip: vencidas > 0
+        ? ('la más antigua lleva ' + dias + (dias === 1 ? ' día' : ' días'))
+        : '',
+      detalle: vencidas > 0
+        ? (sinProgramar + ' sin programar' + (peor ? ' · más de ' + peor : ''))
+        : 'Ninguna solicitud pasó su fecha'
+    };
+    kpiCacheSet('kpiMovVencidas', d);
+    kpiConteo('kpiMovVencidas', d, Date.now(), false);
+  }).catch(function(e){
+    console.warn('KPI movilidades:', e);
+    var c = kpiCacheGet('kpiMovVencidas');
+    if(c) kpiConteo('kpiMovVencidas', c.d, c.ts, true);
+    else kpiFallo('kpiMovVencidas');
+  });
+}
+
 /* ---------- KPI: cliente, taller e inspectora ---------- */
 
 var _audPedido = false;
@@ -3206,7 +3296,7 @@ function cargarKpisAuditoria(){
   _audPedido = true;
 
   /* Primero lo guardado, para que no se vea vacío mientras llegan los datos */
-  ['kpiCliente','kpiTaller','kpiInspectora'].forEach(function(id){
+  ['kpiTaller'].forEach(function(id){
     var c = kpiCacheGet(id);
     if(c) pintarPeor(id, '', c.d, c.ts);
     else {
@@ -3220,9 +3310,9 @@ function cargarKpisAuditoria(){
   setTimeout(function(){
     /* Cada hoja se pide por su lado y cada tarjeta se pinta apenas tiene lo suyo: el taller
        no espera a las de líneas, y quien solo necesita una hoja aparece primero. */
-    var pLineas     = traerCSV(HOJAS_AUD.lineas);
-    var pInspeccion = traerCSV(HOJAS_AUD.inspeccion);
-    var pCliente    = traerCSV(HOJAS_AUD.cliente);
+    /* Solo se pide la hoja de auditoría final: es la única que alimenta la tarjeta que
+       quedó. Antes se descargaban cuatro hojas grandes, y tres eran para tarjetas que ya
+       no existen. */
     var pFinal      = traerCSV(HOJAS_AUD.final);
 
     /* Taller: solo necesita la hoja de auditoría final */
@@ -3237,20 +3327,6 @@ function cargarKpisAuditoria(){
       if(rt){ kpiCacheSet('kpiTaller', rt); pintarPeor('kpiTaller', '', rt, Date.now()); }
       else pintarPeor('kpiTaller', '', null);
     }).catch(function(e){ respaldoPeor('kpiTaller', e); });
-
-    /* Inspectora: líneas + inspección */
-    Promise.all([pLineas, pInspeccion]).then(function(r){
-      var ri = peorDelMes(r[0].concat(r[1]), 'INSPECTOR');
-      if(ri){ kpiCacheSet('kpiInspectora', ri); pintarPeor('kpiInspectora', '', ri, Date.now()); }
-      else pintarPeor('kpiInspectora', '', null);
-    }).catch(function(e){ respaldoPeor('kpiInspectora', e); });
-
-    /* Cliente: las tres auditorías que registran cliente */
-    Promise.all([pLineas, pInspeccion, pCliente]).then(function(r){
-      var rc = peorDelMes(r[0].concat(r[1]).concat(r[2]), 'CLIENTE');
-      if(rc){ kpiCacheSet('kpiCliente', rc); pintarPeor('kpiCliente', '', rc, Date.now()); }
-      else pintarPeor('kpiCliente', '', null);
-    }).catch(function(e){ respaldoPeor('kpiCliente', e); });
   }, 300);
 }
 
