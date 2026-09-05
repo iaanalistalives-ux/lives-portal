@@ -293,13 +293,16 @@ body.embedOpen .wrap{padding-top:0;}
   border-radius:14px;padding:14px;position:sticky;top:16px;
   box-shadow:0 2px 10px rgba(14,59,54,.16);}
 .areaSidebar{max-height:calc(100vh - 190px);overflow-y:auto;}
-/* El panel mantiene siempre el mismo alto, se adapte o no a la pantalla. Antes se encogía
-   hasta el contenido, así que al pasar de un área con doce herramientas a otra con tres
-   la columna daba un salto. Con el mismo valor de mínimo y de máximo, el alto queda fijo
-   y solo aparece barra interna cuando la lista no cabe. En el celular no aplica: ahí el
-   panel es una franja horizontal. */
+/* El panel mantiene el mismo alto aunque el área tenga pocas herramientas: antes se
+   encogía hasta el contenido y la columna daba un salto al cambiar de área.
+   El alto mínimo descuenta todo lo que ocupa espacio antes y después del panel —la
+   cabecera, el margen de arriba, el botón Volver y el margen de abajo—; si se descuenta
+   de menos, el panel termina por debajo del borde y aparece la barra de la ventana.
+   Son dos valores porque la pantalla de entrada no lleva botón Volver.
+   En el celular no aplica: ahí el panel es una franja horizontal. */
 @media(min-width:761px){
-  .areaSidebar{min-height:calc(100vh - 190px);}
+  .areaSidebar{min-height:calc(100vh - 250px);}
+  #screen-mias .areaSidebar{min-height:calc(100vh - 210px);}
 }
 .areaSidebar::-webkit-scrollbar{width:6px;}
 .areaSidebar::-webkit-scrollbar-thumb{background:#C9D6D1;border-radius:3px;}
