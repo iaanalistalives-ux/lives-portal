@@ -293,6 +293,14 @@ body.embedOpen .wrap{padding-top:0;}
   border-radius:14px;padding:14px;position:sticky;top:16px;
   box-shadow:0 2px 10px rgba(14,59,54,.16);}
 .areaSidebar{max-height:calc(100vh - 190px);overflow-y:auto;}
+/* El panel mantiene siempre el mismo alto, se adapte o no a la pantalla. Antes se encogía
+   hasta el contenido, así que al pasar de un área con doce herramientas a otra con tres
+   la columna daba un salto. Con el mismo valor de mínimo y de máximo, el alto queda fijo
+   y solo aparece barra interna cuando la lista no cabe. En el celular no aplica: ahí el
+   panel es una franja horizontal. */
+@media(min-width:761px){
+  .areaSidebar{min-height:calc(100vh - 190px);}
+}
 .areaSidebar::-webkit-scrollbar{width:6px;}
 .areaSidebar::-webkit-scrollbar-thumb{background:#C9D6D1;border-radius:3px;}
 .areaSidebar .sbTitle{font-size:10.5px;font-weight:800;color:#8FB3AC;text-transform:uppercase;letter-spacing:.6px;margin:2px 4px 10px;}
