@@ -537,7 +537,11 @@ body.embedOpen .openTabBtn.permitido{display:inline-flex;}
 .refreshBtn{display:none;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;
   font-family:inherit;cursor:pointer;}
 .refreshBtn:hover{background:rgba(255,255,255,.2);}
-.refreshBtn.girando{pointer-events:none;opacity:.65;}
+.refreshBtn.girando{pointer-events:none;opacity:.75;}
+/* El símbolo gira mientras dura la actualización, para que se vea que está trabajando y
+   nadie vuelva a pulsar. Se detiene solo cuando la herramienta terminó de cargar. */
+.refreshBtn .gira{display:inline-block;}
+.refreshBtn.girando .gira{animation:spin .8s linear infinite;}
 body.conSesion .refreshBtn{display:inline-flex;}
 /* Botón de Inicio: devuelve a la primera pantalla de cada persona sin ir retrocediendo
    pantalla por pantalla. Solo aparece con la sesión abierta. */
@@ -603,7 +607,7 @@ body.conSesion .quienBtn{display:inline-flex;}
   <div class="headerActions">
     <a class="pinBtn openTabBtn" id="embedExternalLink" href="#" target="_blank" rel="noopener">↗ Abrir en otra pestaña</a>
     <button class="pinBtn inicioBtn" id="inicioBtn" type="button" title="Volver al inicio">⌂ <span class="txt">Inicio</span></button>
-    <button class="pinBtn refreshBtn" id="refrescarBtn" type="button" title="Volver a cargar">↻ Actualizar</button>
+    <button class="pinBtn refreshBtn" id="refrescarBtn" type="button" title="Volver a cargar"><span class="gira">↻</span> <span class="txt">Actualizar</span></button>
     <button class="quienBtn" id="quienBtn" type="button" title="Cerrar sesión"><span id="quienNombre"></span> · Salir</button>
     <a class="pinBtn" id="miTableroBtn" style="display:none" href="https://iaanalistalives-ux.github.io/tablero-proyectos/" target="_blank" rel="noopener">📊 Mi Tablero</a>
     <button class="installBtn hidden" id="installBtn" type="button">
@@ -2831,14 +2835,23 @@ document.getElementById('accBtn').addEventListener('click', intentarEntrar);
 });
 /* Actualizar: dentro de una herramienta vuelve a cargarla sin perder dónde estabas;
    fuera de ella recarga el portal completo. La sesión se mantiene en ambos casos. */
+/* Enciende o apaga el aviso de "Actualizando" del botón. Mientras está encendido el botón
+   no responde a más pulsaciones, para que nadie lance tres recargas seguidas. */
+function marcarActualizando(btn, activo){
+  if(!btn) return;
+  var txt = btn.querySelector('.txt');
+  btn.classList.toggle('girando', !!activo);
+  btn.disabled = !!activo;
+  if(txt) txt.textContent = activo ? 'Actualizando…' : 'Actualizar';
+}
+
 document.getElementById('refrescarBtn').addEventListener('click', function(){
   var btn = this;
   if(document.body.classList.contains('embedOpen')){
     var frame = marcoActivo();
     var url = frame ? frame.dataset.url : '';
     if(frame && url){
-      btn.classList.add('girando');
-      btn.textContent = '↻ Actualizando…';
+      marcarActualizando(btn, true);
       document.getElementById('embedBox').classList.remove('listo');
       /* GitHub guarda una copia de cada página unos minutos. Al pulsar Actualizar se le añade
          una marca de tiempo para forzar que traiga la versión recién publicada. La navegación
@@ -2850,7 +2863,19 @@ document.getElementById('refrescarBtn').addEventListener('click', function(){
       setTimeout(function(){
         frame.src = fresca;
         vigilarEmbed(frame, fresca);
-        setTimeout(function(){ btn.classList.remove('girando'); btn.textContent = '↻ Actualizar'; }, 900);
+        /* Se apaga cuando la herramienta avisa que terminó de cargar. El tope de 25 s es
+           por si nunca avisa (una página caída no dispara ese aviso) y así el botón no se
+           queda girando para siempre. */
+        var fin = function(){
+          /* El marco se vacía antes de recargar, y ese vaciado también avisa que "cargó".
+             Se ignora ese aviso: solo cuenta el de la herramienta de verdad. */
+          if(frame.src.indexOf('about:blank') !== -1) return;
+          clearTimeout(tope);
+          frame.removeEventListener('load', fin);
+          marcarActualizando(btn, false);
+        };
+        var tope = setTimeout(fin, 25000);
+        frame.addEventListener('load', fin);
       }, 60);
       return;
     }
@@ -2864,12 +2889,15 @@ document.getElementById('refrescarBtn').addEventListener('click', function(){
       sessionStorage.setItem('lives_volver_tipo', currentType || 'dash');
     }
   }catch(e){}
+  /* Recargar el portal entero tarda un momento en conexiones lentas y hasta ahora no se
+     veía nada: el botón se queda girando hasta que la página se va y vuelve. */
+  marcarActualizando(btn, true);
   if(navigator.serviceWorker && navigator.serviceWorker.getRegistration){
     navigator.serviceWorker.getRegistration().then(function(reg){
       if(reg) reg.update();
     }).catch(function(){});
   }
-  location.reload();
+  setTimeout(function(){ location.reload(); }, 120);
 });
 
 document.getElementById('quienBtn').addEventListener('click', function(){
