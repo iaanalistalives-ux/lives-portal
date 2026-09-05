@@ -766,6 +766,38 @@ body.conSesion .quienBtn{display:inline-flex;}
           <div class="kpiFoot"><span class="kfresh" id="kpiPackingFresh"></span><span class="klink">Ver dashboard →</span></div>
         </div>
 
+        <div class="kpiCard" id="kpiDerivados" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/final/dashboard-final.html">
+          <div class="kpiHead">
+            <div class="kpiName"><span class="kico">🏭</span>Taller con más derivados</div>
+            <div class="kpiPill" id="kpiDerivadosPill">Cargando</div>
+          </div>
+          <div class="kpiBody">
+            <div class="kpiNums">
+              <div class="kv loading" id="kpiDerivadosVal"><span class="kskel"></span></div>
+              <div class="kchip" id="kpiDerivadosChip"></div>
+              <div class="kdelta" id="kpiDerivadosDelta"></div>
+            </div>
+          </div>
+          <div class="kbase" id="kpiDerivadosBase">Prendas derivadas sobre las prendas del lote, solo talleres externos. Derivado es la prenda que sale del lote por falla de tela, mancha, contaminación o zurcido. Se compara contra el promedio de todos los talleres del período.</div>
+          <div class="kpiFoot"><span class="kfresh" id="kpiDerivadosFresh"></span><span class="klink">Ver dashboard →</span></div>
+        </div>
+
+        <div class="kpiCard" id="kpiPartidas" data-url="https://iaanalistalives-ux.github.io/seguimiento-partidas/seguimiento.html">
+          <div class="kpiHead">
+            <div class="kpiName"><span class="kico">🧶</span>Partidas de tela sin aprobar</div>
+            <div class="kpiPill" id="kpiPartidasPill">Cargando</div>
+          </div>
+          <div class="kpiBody">
+            <div class="kpiNums">
+              <div class="kv loading" id="kpiPartidasVal"><span class="kskel"></span></div>
+              <div class="kchip" id="kpiPartidasChip"></div>
+              <div class="kdelta" id="kpiPartidasDelta"></div>
+            </div>
+          </div>
+          <div class="kbase" id="kpiPartidasBase">Partidas activas cuya fecha de auditoría proyectada ya pasó y siguen con la aprobación pendiente. Si la fecha de hito está cerca, la tela puede llegar tarde a producción.</div>
+          <div class="kpiFoot"><span class="kfresh" id="kpiPartidasFresh"></span><span class="klink">Ver herramienta →</span></div>
+        </div>
+
         <div class="kpiCard" id="kpiMovVencidas" data-url="https://iaanalistalives-ux.github.io/lives-movilidades/sara_programacion.html">
           <div class="kpiHead">
             <div class="kpiName"><span class="kico">🚚</span>Movilidades vencidas</div>
@@ -2348,7 +2380,9 @@ function iniciarKpis(){
    ['kpiSegInterno', cargarKpiSegInterno, 'calidad'],
    ['kpiTaller', cargarKpisAuditoria, 'calidad'],
    ['kpiPacking', cargarKpiPacking, 'calidad'],
-   ['kpiMovVencidas', cargarKpiMovVencidas, 'logistica']].forEach(function(par){
+   ['kpiMovVencidas', cargarKpiMovVencidas, 'logistica'],
+   ['kpiPartidas', cargarKpiPartidas, 'pcp'],
+   ['kpiDerivados', cargarKpiDerivados, 'calidad']].forEach(function(par){
     var card = document.getElementById(par[0]);
     if(!card) return;
     if(SESION && puedeVer(card.dataset.url, par[2])){
@@ -3159,6 +3193,7 @@ function fallaPeor(id, motivo){
 
 var API_AVANCES = 'https://script.google.com/macros/s/AKfycby-ZCzYEK9Y-N95TVjbWSMer4rxdxWoZCx8l1rhHln36QbywiCR-pIux3tyTIq8SoP3/exec';
 var API_MOVIL   = 'https://script.google.com/macros/s/AKfycbwY21RREcAXwgrruPzEgAkd_CcEj2PRJSb3ERRFCzOPSAzb2RS2h8zJ1CHDoM0i7UTN/exec';
+var API_PARTIDAS = 'https://script.google.com/macros/s/AKfycbzkkOKzEAW9AJVIim0QOzSzB6Ec4hfRU7ZKb64-UF0pPZjRACjcPRD7tYwn6mfJa6Da9g/exec';
 
 /* Pinta una tarjeta de conteo. tono: 'ok' cuando no hay nada pendiente, 'bad' cuando sí.
    El cero es buena noticia y se dice con palabras, no con un 0 suelto. */
@@ -3172,14 +3207,21 @@ function kpiConteo(id, d, ts, offline){
   if(!card || !elV) return;
 
   card.classList.remove('ok','bad','flat');
-  card.classList.add(d.n > 0 ? 'bad' : 'ok');
+  /* Algunas de estas tarjetas muestran un nombre en vez de un conteo (el taller con más
+     derivados). En ese caso el color lo decide el campo alerta, no si el número es > 0. */
+  var mal = d.esTexto ? !!d.alerta : (d.n > 0);
+  card.classList.add(mal ? 'bad' : 'ok');
   elV.classList.remove('loading');
-  elV.innerHTML = d.n > 0
-    ? String(d.n) + '<span class="ku">' + d.unidad + '</span>'
-    : 'Ninguna';
+  if(d.esTexto){
+    elV.innerHTML = '<span style="font-size:.62em;line-height:1.15;display:inline-block;">' + d.n + '</span>';
+  } else {
+    elV.innerHTML = d.n > 0
+      ? String(d.n) + '<span class="ku">' + d.unidad + '</span>'
+      : 'Ninguna';
+  }
   if(elC) elC.textContent = d.chip || '';
   if(elD) elD.textContent = d.detalle || '';
-  if(elP) elP.textContent = d.n > 0 ? 'Requiere acción' : 'Al día';
+  if(elP) elP.textContent = mal ? 'Requiere acción' : 'Al día';
   if(elF) elF.textContent = offline ? ('guardado · ' + kpiHace(ts)) : ('actualizado ' + kpiHace(ts));
 }
 
@@ -3222,6 +3264,205 @@ function cargarKpiPacking(){
     var c = kpiCacheGet('kpiPacking');
     if(c) kpiConteo('kpiPacking', c.d, c.ts, true);
     else kpiFallo('kpiPacking');
+  });
+}
+
+/* --- Taller con más derivados sobre su lote ---
+   Por qué esta métrica y no "el que más auditorías le rechazan": una auditoría rechazada
+   pesa igual venga de un lote de 30 prendas o de 1,200, y con dos auditorías cualquiera
+   puede salir primero. Los derivados son un conteo de prendas que salieron del lote, así
+   que dividirlos entre las prendas del lote da una tasa comparable entre talleres y que
+   no depende del criterio del auditor al poner "aprobado" o "rechazado".
+
+   Reglas del cálculo:
+   - Solo talleres externos. Lo interno es LIVES y no se gestiona como proveedor.
+   - Solo filas con LOTE_CONTABLE mayor que cero. El Sheet pone 0 en las repetidas y en
+     las ampliaciones de auditoría, así que esa sola condición evita el doble conteo.
+   - Un taller entra al ranking solo si audita al menos el 5% de las prendas del período,
+     con un piso de 200. Sin eso, un taller con un lote chico y mala suerte encabeza. */
+function cargarKpiDerivados(){
+  var ca = kpiCacheGet('kpiDerivados');
+  if(ca) kpiConteo('kpiDerivados', ca.d, ca.ts, true);
+
+  var url = 'https://docs.google.com/spreadsheets/d/1zM-ajBkOs_PgyzEaXh_gVJ1seXvjRJSVO1ZRql7KnVQ' +
+            '/gviz/tq?tqx=out:csv&_=' + Date.now();
+
+  return fetch(url, {cache:'no-store'}).then(function(r){ return r.text(); }).then(function(txt){
+    var filas = csvAFilas(txt);
+    if(filas.length < 2) throw new Error('sin datos');
+
+    var cab = filas[0].map(function(c){ return String(c).trim().toUpperCase(); });
+    var iSrv = cab.indexOf('SERVICIO'), iExt = cab.indexOf('INT_EXT');
+    var iLote = cab.indexOf('LOTE_CONTABLE'), iDer = cab.indexOf('TOTAL_DER');
+    var iFec = cab.indexOf('FECHA');
+    /* Si el Sheet cambia de estructura, la tarjeta dice "no disponible" en vez de
+       inventar un número con las columnas equivocadas. */
+    if(iSrv < 0 || iExt < 0 || iLote < 0 || iDer < 0 || iFec < 0) throw new Error('faltan columnas');
+
+    function mesDe(txt){
+      var m = String(txt || '').trim().match(/^(\d{4})-(\d{2})/);
+      if(m) return m[1] + '-' + m[2];
+      m = String(txt || '').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if(m) return m[3] + '-' + ('0' + m[2]).slice(-2);
+      return '';
+    }
+    var num = function(v){ var n = parseFloat(String(v || '').replace(/[^0-9.\-]/g, '')); return isNaN(n) ? 0 : n; };
+
+    /* Se agrupa por mes para poder caer al mes anterior si el actual aún no tiene volumen */
+    var porMes = {};
+    for(var i = 1; i < filas.length; i++){
+      var f = filas[i];
+      if(String(f[iExt] || '').trim().toUpperCase() !== 'EXTERNA') continue;
+      var lote = num(f[iLote]);
+      if(lote <= 0) continue;
+      var srv = String(f[iSrv] || '').trim().toUpperCase();
+      if(!srv || srv === 'LIVES') continue;
+      var mes = mesDe(f[iFec]);
+      if(!mes) continue;
+      if(!porMes[mes]) porMes[mes] = {};
+      if(!porMes[mes][srv]) porMes[mes][srv] = {der:0, lote:0, aud:0};
+      porMes[mes][srv].der  += num(f[iDer]);
+      porMes[mes][srv].lote += lote;
+      porMes[mes][srv].aud  += 1;
+    }
+
+    var hoy = new Date();
+    var mesActual = hoy.getFullYear() + '-' + ('0' + (hoy.getMonth() + 1)).slice(-2);
+    var meses = Object.keys(porMes).sort();
+    if(!meses.length) throw new Error('sin filas de talleres');
+
+    /* Si el mes en curso todavía no junta 1,000 prendas, se usa el último mes con datos
+       y la tarjeta lo dice, para no comparar talleres con dos días de información. */
+    function prendas(mes){
+      var t = 0, g = porMes[mes] || {};
+      Object.keys(g).forEach(function(k){ t += g[k].lote; });
+      return t;
+    }
+    var mes = (porMes[mesActual] && prendas(mesActual) >= 1000) ? mesActual : meses[meses.length - 1];
+    var grupos = porMes[mes];
+    var totalPrendas = prendas(mes);
+    var totalDer = 0;
+    Object.keys(grupos).forEach(function(k){ totalDer += grupos[k].der; });
+
+    var minimo = Math.max(200, totalPrendas * 0.05);
+    var elegibles = Object.keys(grupos).filter(function(k){ return grupos[k].lote >= minimo; });
+    if(!elegibles.length) elegibles = Object.keys(grupos);   /* mes flojo: entran todos */
+
+    elegibles.sort(function(a, b){
+      return (grupos[b].der / grupos[b].lote) - (grupos[a].der / grupos[a].lote);
+    });
+    var peor = elegibles[0];
+    var pct = grupos[peor].lote ? (grupos[peor].der * 100 / grupos[peor].lote) : 0;
+    var promedio = totalPrendas ? (totalDer * 100 / totalPrendas) : 0;
+
+    var etiquetaMes = (function(){
+      var p = mes.split('-');
+      var nombres = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto',
+                     'setiembre','octubre','noviembre','diciembre'];
+      return nombres[parseInt(p[1], 10) - 1] + ' ' + p[0];
+    })();
+
+    var d = {
+      n: peor,
+      esTexto: true,
+      unidad: '',
+      chip: pct.toFixed(1) + '% de sus prendas derivadas · ' +
+            Math.round(grupos[peor].der).toLocaleString('es-PE') + ' de ' +
+            Math.round(grupos[peor].lote).toLocaleString('es-PE'),
+      detalle: 'Promedio de talleres: ' + promedio.toFixed(1) + '% · ' +
+               grupos[peor].aud + (grupos[peor].aud === 1 ? ' auditoría' : ' auditorías') +
+               ' · ' + etiquetaMes,
+      alerta: pct > promedio
+    };
+    kpiCacheSet('kpiDerivados', d);
+    kpiConteo('kpiDerivados', d, Date.now(), false);
+  }).catch(function(e){
+    console.warn('KPI derivados:', e);
+    var c = kpiCacheGet('kpiDerivados');
+    if(c) kpiConteo('kpiDerivados', c.d, c.ts, true);
+    else kpiFallo('kpiDerivados');
+  });
+}
+
+/* Lector de CSV que respeta las comas y los saltos de línea dentro de comillas. Los
+   comentarios de las auditorías traen comas, así que partir por coma a secas parte mal
+   las filas y desplaza todas las columnas. */
+function csvAFilas(txt){
+  var filas = [], fila = [], campo = '', dentro = false;
+  txt = String(txt || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  for(var i = 0; i < txt.length; i++){
+    var c = txt[i];
+    if(dentro){
+      if(c === '"'){
+        if(txt[i + 1] === '"'){ campo += '"'; i++; } else dentro = false;
+      } else campo += c;
+    } else {
+      if(c === '"') dentro = true;
+      else if(c === ','){ fila.push(campo); campo = ''; }
+      else if(c === '\n'){ fila.push(campo); filas.push(fila); fila = []; campo = ''; }
+      else campo += c;
+    }
+  }
+  if(campo !== '' || fila.length){ fila.push(campo); filas.push(fila); }
+  return filas;
+}
+
+/* --- Partidas de tela sin aprobar ---
+   Activa quiere decir que el último reporte de PCP la sigue trayendo. Si además su
+   auditoría proyectada ya pasó y la aprobación sigue pendiente, es tela detenida.
+   El dato de apoyo es cuántas de esas tienen la fecha de hito encima: esas son las que
+   pueden frenar producción, no las que todavía tienen aire.
+   Este backend responde JSON directo, no JSONP como los demás. */
+function cargarKpiPartidas(){
+  var ca = kpiCacheGet('kpiPartidas');
+  if(ca) kpiConteo('kpiPartidas', ca.d, ca.ts, true);
+
+  return fetch(API_PARTIDAS + '?_=' + Date.now()).then(function(r){ return r.json(); }).then(function(res){
+    if(!res || !res.ok || !res.rows) throw new Error('sin datos');
+
+    var hoy = new Date(); hoy.setHours(0,0,0,0);
+    var limite = new Date(hoy.getTime() + 15 * 86400000);   /* hito dentro de 15 días */
+
+    function aFecha(txt){
+      txt = String(txt || '').trim();
+      if(!txt) return null;
+      var m = txt.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if(m) return new Date(+m[1], +m[2] - 1, +m[3]);
+      m = txt.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if(m) return new Date(+m[3], +m[2] - 1, +m[1]);
+      return null;
+    }
+
+    var total = 0, urgentes = 0, kilos = 0, masVieja = null;
+    res.rows.forEach(function(r){
+      if(String(r.Estado || '').trim().toUpperCase() !== 'ACTIVO') return;
+      if(String(r.EstadoAprobacion || '').trim().toUpperCase() !== 'PENDIENTE') return;
+      var fa = aFecha(r.FechAuditoriaProyectada);
+      if(!fa || fa >= hoy) return;
+      total++;
+      if(!masVieja || fa < masVieja) masVieja = fa;
+      var fh = aFecha(r.FecHito);
+      if(fh && fh <= limite) urgentes++;
+      var k = parseFloat(String(r.Kg || '0').replace(/[^0-9.]/g, ''));
+      if(!isNaN(k)) kilos += k;
+    });
+
+    var dias = masVieja ? Math.round((hoy - masVieja) / 86400000) : 0;
+    var d = {
+      n: total,
+      unidad: total === 1 ? ' partida' : ' partidas',
+      chip: total > 0 ? (Math.round(kilos).toLocaleString('es-PE') + ' kg de tela') : '',
+      detalle: total > 0
+        ? (urgentes + ' con el hito en 15 días o menos · la más atrasada lleva ' + dias + (dias === 1 ? ' día' : ' días'))
+        : 'Ninguna partida activa con la auditoría vencida'
+    };
+    kpiCacheSet('kpiPartidas', d);
+    kpiConteo('kpiPartidas', d, Date.now(), false);
+  }).catch(function(e){
+    console.warn('KPI partidas:', e);
+    var c = kpiCacheGet('kpiPartidas');
+    if(c) kpiConteo('kpiPartidas', c.d, c.ts, true);
+    else kpiFallo('kpiPartidas');
   });
 }
 
