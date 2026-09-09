@@ -2561,7 +2561,15 @@ function equipoActual(){
    falta de memoria —tomar una foto la deja al límite— la persona vuelve a entrar sin
    escribir la clave otra vez. Pasado ese rato se considera un cierre de verdad y se pide
    de nuevo, que es lo acordado para equipos compartidos. */
-var MINUTOS_GRACIA = 20;
+/* Cuánto vale el respaldo de sesión tras un cierre inesperado.
+   En el celular, Android descarta la app en segundo plano cuando necesita memoria: el
+   ícono sigue ahí, pero al volver la app arranca de cero. Con 20 minutos, a quien deja el
+   portal abierto y se va a auditar le pedía el usuario otra vez sin haber cerrado nada.
+   Una jornada completa resuelve eso.
+   En computadora se queda corto a propósito: son equipos compartidos y ahí sí conviene
+   que la sesión caduque pronto. "Salir" borra el respaldo en los dos casos. */
+var ES_MOVIL = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+var MINUTOS_GRACIA = ES_MOVIL ? 720 : 60;
 
 function guardarSesion(d){
   SESION = d;
@@ -2588,10 +2596,16 @@ function leerSesion(){
 
 /* Mientras la persona usa el portal se refresca la marca de tiempo, para que el rescate
    cuente desde la última actividad y no desde que inició sesión. */
-setInterval(function(){
+function refrescarRespaldo(){
   if(!SESION) return;
   try{ localStorage.setItem(CLAVE_SESION + '_resp', JSON.stringify({d:SESION, ts:Date.now()})); }catch(e){}
-}, 60000);
+}
+setInterval(refrescarRespaldo, 60000);
+/* El temporizador se detiene cuando la app pasa a segundo plano, así que la marca también
+   se refresca al volver a ella. */
+document.addEventListener('visibilitychange', function(){
+  if(!document.hidden) refrescarRespaldo();
+});
 function cerrarSesion(){
   var caja = document.getElementById('embedBox');
   if(caja) caja.querySelectorAll('.embedFrame').forEach(function(f){ f.parentNode.removeChild(f); });
