@@ -2903,20 +2903,35 @@ function intentarEntrar(){
   btn.disabled = true;
   btn.textContent = 'Comprobando…';
 
-  accesoJsonp({ accion:'login', usuario:usuario, clave:clave, equipo:equipoActual() })
-    .then(function(r){
-      if(!r || !r.ok){
-        mostrarErrorAcceso((r && r.error) ? r.error : 'No se pudo comprobar tu acceso.');
-        btn.disabled = false; btn.textContent = 'Entrar';
-        document.getElementById('accClave').value = '';
-        return;
-      }
-      guardarSesion(r);
-      entrarAlPortal();
-    })
-    .catch(function(){
-      mostrarErrorAcceso('No hay conexión con el sistema de accesos. Revisa tu internet e inténtalo otra vez.');
+  /* Dos intentos antes de darse por vencido. En planta la señal es justa y la primera
+     consulta del día es la más lenta, porque Google tiene que despertar el servicio: con
+     un solo intento de 15 segundos, mucha gente veía el error sin que nada estuviera mal.
+     El reintento solo ocurre cuando falla la red; si el servidor contesta que la clave
+     está mal, no se repite. */
+  var datos = { accion:'login', usuario:usuario, clave:clave, equipo:equipoActual() };
+
+  function resolver(r){
+    if(!r || !r.ok){
+      mostrarErrorAcceso((r && r.error) ? r.error : 'No se pudo comprobar tu acceso.');
       btn.disabled = false; btn.textContent = 'Entrar';
+      document.getElementById('accClave').value = '';
+      return;
+    }
+    guardarSesion(r);
+    entrarAlPortal();
+  }
+
+  function rendirse(){
+    mostrarErrorAcceso('No hay conexión con el sistema de accesos. Si estás en planta, ' +
+                       'acércate a una zona con mejor señal y vuelve a intentarlo.');
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+
+  accesoJsonp(datos, 15000)
+    .then(resolver)
+    .catch(function(){
+      btn.textContent = 'Reintentando…';
+      accesoJsonp(datos, 30000).then(resolver).catch(rendirse);
     });
 }
 
