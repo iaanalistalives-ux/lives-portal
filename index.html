@@ -151,6 +151,65 @@ body.embedOpen .wrap{padding-top:0;}
 .kpiSectionTitle{font-size:11px;font-weight:800;color:var(--stone);text-transform:uppercase;letter-spacing:.8px;text-align:center;margin-bottom:14px;}
 /* auto-fit: las tarjetas se reacomodan solas al agregar KPIs (2, 3, 4 por fila segun quepan) */
 .kpiRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;}
+/* Columna de referencia. Las alertas de dashboards que la persona no tiene asignados se
+   muestran igual, pero en pequeño y a un lado: sirven de contexto para leer las suyas, no
+   son un acceso. No se pueden abrir, y por eso no llevan cursor de mano ni enlace. */
+.kpiCols{display:grid;grid-template-columns:1fr;gap:18px;align-items:start;}
+@media(min-width:1100px){
+  .kpiCols.conLado{grid-template-columns:minmax(0,1fr) 260px;}
+}
+.kpiSide{display:none;flex-direction:column;gap:10px;}
+/* Columna de alertas de la pantalla de entrada. Para casi todos, estos números son
+   referencia y no su tablero: van pequeños a un costado, sin quitarle sitio a sus
+   herramientas. Quien tiene vista completa (TODO o ALERTAS) los ve arriba y grandes. */
+.miasAlertas{display:none;flex-direction:column;gap:10px;}
+#screen-mias .toolsLayout.conAlertas{grid-template-columns:210px minmax(0,1fr) 250px;}
+#screen-mias .toolsLayout.conAlertas .miasAlertas{display:flex;grid-row:1;}
+.miasAlertasTit{font-size:10px;font-weight:800;color:var(--stone);text-transform:uppercase;
+  letter-spacing:.7px;margin-bottom:2px;}
+.miasAlertas .kpiCard{padding:12px 14px;border-left-width:5px;border-radius:12px;cursor:default;
+  box-shadow:0 1px 5px rgba(14,59,54,.06);}
+.miasAlertas .kpiCard:hover{transform:none;box-shadow:0 1px 5px rgba(14,59,54,.06);}
+.miasAlertas .kpiCard::after{display:none;}
+.miasAlertas .kpiName{font-size:11.5px;}
+.miasAlertas .kico{font-size:13px;}
+.miasAlertas .kv{font-size:26px;}
+.miasAlertas .ku{font-size:12px;}
+.miasAlertas .kchip,.miasAlertas .kdelta{font-size:10.5px;}
+.miasAlertas .kbase,.miasAlertas .kpiFoot,.miasAlertas .kpiPill,.miasAlertas .kspark{display:none;}
+/* Sin ancho para tres columnas, las alertas se van debajo del contenido, en fila */
+@media(max-width:1279px){
+  #screen-mias .toolsLayout.conAlertas{grid-template-columns:210px minmax(0,1fr);}
+  #screen-mias .toolsLayout.conAlertas .miasAlertas{
+    grid-column:1 / -1;grid-row:auto;flex-direction:row;flex-wrap:wrap;}
+  .miasAlertas .kpiCard{flex:1 1 220px;}
+  .miasAlertasTit{flex:0 0 100%;}
+}
+@media(max-width:760px){
+  #screen-mias .toolsLayout.conAlertas{display:block;}
+  .miasAlertas .kpiCard{flex:1 1 100%;}
+}
+.kpiCols.conLado .kpiSide{display:flex;}
+.kpiSideTit{font-size:10px;font-weight:800;color:var(--stone);text-transform:uppercase;
+  letter-spacing:.7px;margin-bottom:2px;}
+.kpiSide .kpiCard{padding:12px 14px;border-left-width:5px;border-radius:12px;cursor:default;
+  box-shadow:0 1px 5px rgba(14,59,54,.06);}
+.kpiSide .kpiCard:hover{transform:none;box-shadow:0 1px 5px rgba(14,59,54,.06);}
+.kpiSide .kpiCard::after{display:none;}
+.kpiSide .kpiName{font-size:11.5px;}
+.kpiSide .kico{font-size:13px;}
+.kpiSide .kv{font-size:26px;}
+.kpiSide .ku{font-size:12px;}
+.kpiSide .kchip{font-size:10.5px;}
+.kpiSide .kdelta{font-size:10.5px;}
+.kpiSide .kbase,.kpiSide .kpiFoot,.kpiSide .kpiPill,.kpiSide .kspark{display:none;}
+/* Sin sitio para la columna, las pequeñas se ponen en fila debajo de las grandes */
+@media(max-width:1099px){
+  .kpiSide{display:flex;flex-direction:row;flex-wrap:wrap;gap:10px;}
+  .kpiCols.conLado .kpiSide{display:flex;}
+  .kpiSide .kpiCard{flex:1 1 220px;}
+  .kpiSideTit{flex:0 0 100%;}
+}
 @media(max-width:620px){.kpiRow{grid-template-columns:1fr;}}
 
 .kpiCard{--st:#5B6B66;--stSoft:rgba(91,107,102,.10);
@@ -674,6 +733,7 @@ body.conSesion .quienBtn{display:inline-flex;}
         <div class="sectitle" id="miasTitDash">📊 Dashboards · para consultar</div>
         <div class="miaGrid" id="miasDash"></div>
       </div>
+      <aside class="miasAlertas" id="miasAlertas"><div class="miasAlertasTit">Cómo vamos</div></aside>
     </div>
   </div>
 
@@ -698,6 +758,7 @@ body.conSesion .quienBtn{display:inline-flex;}
 
     <div class="kpiSection">
       <div class="kpiSectionTitle">Cómo vamos</div>
+      <div class="kpiCols">
       <div class="kpiRow">
 
         <div class="kpiCard" id="kpiSegundas" data-url="https://iaanalistalives-ux.github.io/segundas/segundas.html">
@@ -829,6 +890,11 @@ body.conSesion .quienBtn{display:inline-flex;}
 
 
       </div>
+
+      <aside class="kpiSide" id="kpiSide">
+        <div class="kpiSideTit">Referencia</div>
+      </aside>
+      </div>
     </div>
   </div>
 
@@ -881,6 +947,7 @@ body.conSesion .quienBtn{display:inline-flex;}
         <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-reportes-calidad/" role="button" tabindex="0"><div class="tt">Escaneos y Fotos · Antiguos</div><div class="ta">Abrir →</div></div>
       </div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-fichas-tecnicas/historial.html" role="button" tabindex="0"><div class="tt">Verificación de Medidas realizadas en Auditorías</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-registro-auditorias/programas/" role="button" tabindex="0"><div class="tt">Programas de Costura y Acabados</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -903,6 +970,7 @@ body.conSesion .quienBtn{display:inline-flex;}
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditorias-taller/" role="button" tabindex="0"><div class="tt">Escanear Documentos</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-registro-auditorias/registro.html" role="button" tabindex="0"><div class="tt">Digitación en Planta de Auditorías</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-registro-auditorias/ops.html" role="button" tabindex="0"><div class="tt">Subir Base OPs</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-registro-auditorias/programas/subir.html" role="button" tabindex="0"><div class="tt">Subir Programas de Costura y Acabados</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -2399,8 +2467,21 @@ function cargarKpiInspeccion(){
    si no, se quita la tarjeta y no se hace ninguna llamada.
    Se ejecuta al entrar, cuando ya se sabe quién es la persona. */
 function iniciarKpis(){
-  var sec = document.querySelector('.kpiSection');
-  var vivos = 0;
+  var sec  = document.querySelector('.kpiSection');
+  var cols = document.querySelector('.kpiCols');
+  var lado = document.getElementById('kpiSide');
+  var propios = 0, referencia = 0;
+
+  /* Quién ve las alertas en grande y en su sitio de siempre: quien tenga TODO (Christian
+     y Rodrigo) o el permiso ALERTAS, que se da desde el Sheet a quien haga falta. Para el
+     resto todas son referencia, aunque tengan el dashboard asignado. */
+  var vistaCompleta = !!(SESION && (SESION.permisos || []).some(function(p){
+    p = String(p || '').trim().toUpperCase();
+    return p === 'TODO' || p === 'ALERTAS';
+  }));
+
+  var destinoLado = document.getElementById('miasAlertas') || lado;
+
   [['kpiSegundas', cargarKpiSegundas, 'textil'],
    ['kpiSegInterno', cargarKpiSegInterno, 'calidad'],
    ['kpiTaller', cargarKpisAuditoria, 'calidad'],
@@ -2410,13 +2491,25 @@ function iniciarKpis(){
    ['kpiDerivados', cargarKpiDerivados, 'calidad']].forEach(function(par){
     var card = document.getElementById(par[0]);
     if(!card) return;
-    if(SESION && puedeVer(card.dataset.url, par[2])){
-      vivos++;
-      try{ par[1](); }catch(e){ console.warn('Indicador ' + par[0] + ':', e); }
+
+    /* Todas se calculan igual. Lo que cambia es dónde se muestran: quien tiene el
+       dashboard asignado la ve completa y puede abrirla; el resto la ve en pequeño,
+       a un lado, solo como referencia. */
+    if(vistaCompleta){
+      propios++;
+    } else if(destinoLado){
+      destinoLado.appendChild(card);
+      card.removeAttribute('data-url');   /* sin dirección no se puede abrir */
+      referencia++;
     }
-    else { card.style.display = 'none'; }
+    try{ par[1](); }catch(e){ console.warn('Indicador ' + par[0] + ':', e); }
   });
-  if(sec) sec.style.display = vivos ? '' : 'none';
+
+  var layout = document.getElementById('miasLayout');
+  if(layout) layout.classList.toggle('conAlertas', referencia > 0);
+  /* La sección grande solo existe para la vista completa; si todo se fue al costado,
+     desaparece para no dejar un título huérfano encima de las tarjetas. */
+  if(sec) sec.style.display = propios ? '' : 'none';
 }
 
 /* ============================================================
