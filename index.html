@@ -1211,7 +1211,7 @@ body.conSesion .quienBtn{display:inline-flex;}
     </div>
   </div>
 
-  <!-- Encajados · Formularios (solo formularios) -->
+  <!-- Encajados · Formularios -->
   <div class="screen" id="tools-encajados-form">
     <div class="toolsLayout">
       <button class="backbtn" data-back="areas">← Volver a áreas</button>
@@ -1220,6 +1220,21 @@ body.conSesion .quienBtn{display:inline-flex;}
     <div class="sectitle">Encajados</div>
     <div class="tgrid">
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-auditoria/encajados.html" role="button" tabindex="0"><div class="tt">Status Encajado</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/Avances-packing/carga_encajado_lives_conectado.html" role="button" tabindex="0"><div class="tt">Carga de Avance de Encajado</div><div class="ta">Abrir →</div></div>
+    </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Encajados · Dashboards -->
+  <div class="screen" id="tools-encajados-dash">
+    <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
+      <aside class="areaSidebar"></aside>
+      <div class="toolsContent">
+    <div class="sectitle">Encajados</div>
+    <div class="tgrid">
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/Avances-packing/" role="button" tabindex="0"><div class="tt">Avance de Encajado</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -1334,7 +1349,7 @@ const AREAS = [
   {id:'tienda',     label:'Tienda LIVES',           icon:'🛍️', accent:'#DC2626', rgb:'220,38,38',  types:['dash','form']},
   {id:'mejoras',    label:'Mejoras',                icon:'💡', accent:'#4E6B78', rgb:'78,107,120', types:['dash','form']},
   {id:'desarrollo', label:'Desarrollo',             icon:'🪡', accent:'#5B7C78', rgb:'91,124,120', types:['form']},
-  {id:'encajados',  label:'Encajados',              icon:'📦', accent:'#B45309', rgb:'180,83,9',   types:['form']},
+  {id:'encajados',  label:'Encajados',              icon:'📦', accent:'#B45309', rgb:'180,83,9',   types:['dash','form']},
   {id:'rrhh',       label:'Recursos Humanos',       icon:'👥', accent:'#DC2626', rgb:'220,38,38',  types:['dash']},
   {id:'textil',     label:'Calidad Textil',         icon:'🧶', accent:'#0B815E', rgb:'11,129,94',  types:['dash','form']}
 ];
