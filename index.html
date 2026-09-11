@@ -2149,6 +2149,10 @@ window.addEventListener('appinstalled', function(){
 document.querySelectorAll('.kpiCard').forEach(function(card){
   card.addEventListener('click', function(e){
     if(e.target.closest('[data-kpi-retry]')) return;
+    /* Las tarjetas de la columna de referencia se quedan sin dirección a propósito: son
+       para mirar, no para abrir. Sin esta comprobación el portal intentaba abrir una
+       dirección vacía y GitHub respondía con un 404. */
+    if(!card.dataset.url) return;
     var nombre = card.querySelector('.kpiName');
     abrirEnPortal(card.dataset.url, nombre ? nombre.textContent.trim() : 'Dashboard');
   });
