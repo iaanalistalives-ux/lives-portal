@@ -2516,8 +2516,21 @@ function cargarKpiInspeccion(){
 /* Los indicadores de Inicio solo se cargan para quien tenga permiso sobre ese dashboard:
    si no, se quita la tarjeta y no se hace ninguna llamada.
    Se ejecuta al entrar, cuando ya se sabe quién es la persona. */
+/* Interruptor de los indicadores de la pantalla de inicio.
+   Apagados a propósito: cada entrada de cada persona disparaba siete consultas, y la cuota
+   diaria de Apps Script se cuenta por cuenta de Google, no por script. Al agotarse, lo
+   primero que deja de funcionar es el acceso al portal. Para volver a encenderlos, poner
+   esto en true y subir el archivo: el resto del código sigue intacto. */
+var ALERTAS_ACTIVAS = false;
+
 function iniciarKpis(){
   var sec  = document.querySelector('.kpiSection');
+  if(!ALERTAS_ACTIVAS){
+    if(sec) sec.style.display = 'none';
+    var lay = document.getElementById('miasLayout');
+    if(lay) lay.classList.remove('conAlertas');
+    return;
+  }
   var cols = document.querySelector('.kpiCols');
   var lado = document.getElementById('kpiSide');
   var propios = 0, referencia = 0;
@@ -2958,7 +2971,12 @@ function mostrarErrorAcceso(txt){
 
 function intentarEntrar(){
   var btn = document.getElementById('accBtn');
-  var usuario = document.getElementById('accUsuario').value.trim();
+  /* El usuario viaja siempre en minúsculas. En el Sheet están escritos así, y una PC con
+     Bloq Mayús puesto o un autocompletado en mayúsculas hacía que no se encontrara a la
+     persona: el sistema de accesos fallaba por dentro y el portal lo mostraba como falta
+     de conexión, que despista por completo. La clave no se toca: eso lo resuelve el
+     Apps Script. */
+  var usuario = document.getElementById('accUsuario').value.trim().toLowerCase();
   var clave   = document.getElementById('accClave').value;
   document.getElementById('accesoError').classList.remove('ver');
 
