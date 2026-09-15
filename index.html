@@ -728,9 +728,9 @@ body.conSesion .quienBtn{display:inline-flex;}
           <div class="hsm" id="miasSub">Todo lo que tienes asignado, en un solo lugar.</div>
         </div>
         <div id="miasKpis"></div>
-        <div class="sectitle" id="miasTitForm">📝 Formularios · para registrar</div>
+        <div class="sectitle" id="miasTitForm">📝 Registrar</div>
         <div class="miaGrid" id="miasForm"></div>
-        <div class="sectitle" id="miasTitDash">📊 Dashboards · para consultar</div>
+        <div class="sectitle" id="miasTitDash">📊 Consultar</div>
         <div class="miaGrid" id="miasDash"></div>
       </div>
       <aside class="miasAlertas" id="miasAlertas"><div class="miasAlertasTit">Cómo vamos</div></aside>
@@ -746,13 +746,13 @@ body.conSesion .quienBtn{display:inline-flex;}
     <div class="typegrid">
       <div class="typecard dashT" data-type="dash">
         <span class="ti">📊</span>
-        <div class="tn">Dashboards</div>
-        <div class="td">Paneles y consultas</div>
+        <div class="tn">Consultar</div>
+        <div class="td">Resultados e indicadores</div>
       </div>
       <div class="typecard formT" data-type="form">
         <span class="ti">📝</span>
-        <div class="tn">Formularios</div>
-        <div class="td">Captura de datos</div>
+        <div class="tn">Registrar</div>
+        <div class="td">Anotar lo que se hizo</div>
       </div>
     </div>
 
@@ -903,8 +903,8 @@ body.conSesion .quienBtn{display:inline-flex;}
     <button class="backbtn" data-back="root">← Volver</button>
     <div class="hero"><div class="hbig" id="areasTitle"></div></div>
     <div class="tipoSwitch" id="areasSwitch">
-      <button type="button" data-sw="form">📝 Formularios</button>
-      <button type="button" data-sw="dash">📊 Dashboards</button>
+      <button type="button" data-sw="form">📝 Registrar</button>
+      <button type="button" data-sw="dash">📊 Consultar</button>
     </div>
     <div class="homegrid" id="areasGrid"></div>
   </div>
@@ -930,7 +930,7 @@ body.conSesion .quienBtn{display:inline-flex;}
       <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
-    <div class="sectitle">Dashboards de auditoría y calidad</div>
+    <div class="sectitle">Auditoría y calidad</div>
     <div class="tgrid">
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/lineas/dashboard-lineas.html" role="button" tabindex="0"><div class="tt">Resultados de Auditoría en Línea de Costura</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-dashboards-calidad/inspeccion/dashboard-inspeccion.html" role="button" tabindex="0"><div class="tt">Resultados de Auditoría de Servicio de Inspección</div><div class="ta">Abrir →</div></div>
@@ -1794,14 +1794,14 @@ function openEmbed(cardEl){
   var grupos;
   if(originScreen.id === 'screen-mias'){
     grupos = [
-      ['form', '📝 Formularios', tarjetasDe(document.getElementById('miasForm'))],
-      ['dash', '📊 Dashboards', tarjetasDe(document.getElementById('miasDash'))]
+      ['form', '📝 Registrar', tarjetasDe(document.getElementById('miasForm'))],
+      ['dash', '📊 Consultar', tarjetasDe(document.getElementById('miasDash'))]
     ];
   } else {
     var areaId = originScreen.id.split('-')[1];
     grupos = [
-      ['form', '📝 Formularios', tarjetasDe(document.getElementById('tools-' + areaId + '-form'))],
-      ['dash', '📊 Dashboards', tarjetasDe(document.getElementById('tools-' + areaId + '-dash'))]
+      ['form', '📝 Registrar', tarjetasDe(document.getElementById('tools-' + areaId + '-form'))],
+      ['dash', '📊 Consultar', tarjetasDe(document.getElementById('tools-' + areaId + '-dash'))]
     ];
   }
 
@@ -1839,8 +1839,8 @@ function openEmbed(cardEl){
     var otras = areasDe(currentType).filter(function(a){ return a.id !== areaActual; });
 
     if(otras.length){
-      var etq = (currentType === 'dash') ? '🗂️ Ir a otra área · Dashboards'
-                                         : '🗂️ Ir a otra área · Formularios';
+      var etq = (currentType === 'dash') ? '🗂️ Ir a otra área · Consultar'
+                                         : '🗂️ Ir a otra área · Registrar';
       var cuerpoOtras = grupoPlegable(sidebar, etq, 'otras_areas');
 
       otras.forEach(function(a){
@@ -1955,7 +1955,7 @@ function switchDeArea(area, type){
   var sw = document.createElement('div');
   sw.className = 'tipoSwitch';
   sw.classList.add('swArea');
-  [['form','📝 Formularios'], ['dash','📊 Dashboards']].forEach(function(g){
+  [['form','📝 Registrar'], ['dash','📊 Consultar']].forEach(function(g){
     if(ar.types.indexOf(g[0]) === -1) return;
     var b = document.createElement('button');
     b.type = 'button';
@@ -2031,7 +2031,7 @@ function renderSidebar(activeArea, type){
   ponerToggle(aside);
   var titleEl = document.createElement('div');
   titleEl.className = 'sbTitle';
-  titleEl.innerHTML = '<span>' + ((type === 'dash') ? 'Otras áreas · Dashboards' : 'Otras áreas · Formularios') +
+  titleEl.innerHTML = '<span>' + ((type === 'dash') ? 'Otras áreas · Consultar' : 'Otras áreas · Registrar') +
                       '</span><span class="sbChev">▼</span>';
   aside.appendChild(titleEl);
 
@@ -2065,7 +2065,7 @@ function renderSidebar(activeArea, type){
 
 function renderAreaList(type){
   currentType = type;
-  document.getElementById('areasTitle').textContent = (type === 'dash') ? 'Dashboards — elige un área' : 'Formularios — elige un área';
+  document.getElementById('areasTitle').textContent = (type === 'dash') ? 'Consultar — elige un área' : 'Registrar — elige un área';
 
   /* El conmutador solo aparece si la persona tiene áreas de los dos tipos: para quien solo
      tenga dashboards sería un botón que no lleva a ninguna parte. */
