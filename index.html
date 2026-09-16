@@ -2586,6 +2586,91 @@ function iniciarKpis(){
    ============================================================ */
 
 var API_ACCESOS = 'https://script.google.com/macros/s/AKfycbyNameiItOUVsBXJU1MO0u9Bj-uz9Ey-IiZtd6YyWK0Kj_UMII8iHgj5_KfdvTv3wbv/exec';
+
+/* ============================================================
+   INICIO DE SESIÓN CON SUPABASE (desde el 16/09/2026)
+   ------------------------------------------------------------
+   La persona escribe su usuario y su clave de siempre. Se comprueban contra
+   Supabase, que guarda las claves cifradas: ya no viajan a un Sheet ni se
+   pueden leer. Los permisos salen de Supabase y cada quien recibe solo los
+   suyos.
+
+   Transición: mientras SBP_RESPALDO_GAS sea true, si Supabase no reconoce
+   a la persona o no responde, se usa el sistema de accesos de siempre
+   (Apps Script). Cuando todos entren bien por Supabase, se pone en false.
+   ============================================================ */
+var SBP_URL = 'https://xxfufpddgoyhbotjmaiy.supabase.co';
+var SBP_KEY = 'sb_publishable_1g-n6UT70EUlNAo8Lyc04w_jKR4LpXZ';
+/* Deben ser idénticos a SB_ACC_DOMINIO y SB_ACC_PREFIJO del Apps Script. */
+var SBP_DOMINIO = '@usuarios.lives.example.com';
+var SBP_PREFIJO = 'Lives#';
+var SBP_RESPALDO_GAS = true;
+
+function sbpPedir(ruta, cuerpo, token, ms){
+  var control = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var reloj = setTimeout(function(){ if(control) control.abort(); }, ms || 15000);
+  var cab = { 'Content-Type': 'application/json', apikey: SBP_KEY };
+  if(token) cab.Authorization = 'Bearer ' + token;
+  return fetch(SBP_URL + ruta, { method: 'POST', headers: cab, body: JSON.stringify(cuerpo || {}),
+                                 signal: control ? control.signal : undefined })
+    .then(function(r){
+      clearTimeout(reloj);
+      return r.text().then(function(t){
+        var j = null; try{ j = t ? JSON.parse(t) : null; }catch(e){}
+        return { status: r.status, ok: r.ok, json: j };
+      });
+    }, function(e){ clearTimeout(reloj); throw e; });
+}
+
+/* Devuelve lo mismo que el Apps Script: {ok, usuario, nombre, cargo, inicio,
+   permisos, token} o {ok:false, error}. Si Supabase no responde, lanza error. */
+function sbpEntrar(usuario, clave, equipo){
+  /* Igual que el sistema actual: la clave no distingue mayúsculas ni espacios
+     a los lados. Se guarda así en Supabase y se envía así. */
+  var claveNorm = String(clave || '').trim().toLowerCase();
+  return sbpPedir('/auth/v1/token?grant_type=password',
+                  { email: usuario + SBP_DOMINIO, password: SBP_PREFIJO + claveNorm })
+    .then(function(r){
+      if(r.status >= 500) throw new Error('Supabase ' + r.status);
+      if(!r.ok){
+        /* Igual que hoy: el mensaje nunca dice si el usuario existe. El motivo
+           real queda solo en el registro, y lo decide la base de datos. */
+        sbpPedir('/rest/v1/rpc/registrar_ingreso_fallido',
+                 { p_usuario: usuario, p_equipo: equipo }).catch(function(){});
+        var j = r.json || {};
+        var bloqueado = /banned/i.test(String(j.error_code || j.code || '') + ' ' + String(j.msg || j.message || j.error_description || ''));
+        return { ok: false,
+                 error: bloqueado ? 'Tu acceso está desactivado. Habla con el área de Datos e IA.'
+                                  : 'Usuario o clave incorrectos.' };
+      }
+      var t = r.json || {};
+      return sbpPedir('/rest/v1/rpc/mi_sesion', { p_equipo: equipo }, t.access_token)
+        .then(function(s){
+          if(!s.ok || !s.json) throw new Error('mi_sesion ' + s.status);
+          var d = s.json;
+          if(!d.ok) return d;
+          d.token = 'supabase';
+          d.sb = { access: t.access_token, refresh: t.refresh_token,
+                   exp: Date.now() + (Number(t.expires_in) || 3600) * 1000 };
+          return d;
+        });
+    });
+}
+
+/* Token vigente de la sesión; lo renueva si está por vencer. */
+function sbpToken(){
+  if(!SESION || !SESION.sb) return Promise.reject(new Error('sin sesión de Supabase'));
+  if(SESION.sb.exp - Date.now() > 60000) return Promise.resolve(SESION.sb.access);
+  return sbpPedir('/auth/v1/token?grant_type=refresh_token', { refresh_token: SESION.sb.refresh })
+    .then(function(r){
+      if(!r.ok || !r.json || !r.json.access_token) throw new Error('no se pudo renovar la sesión');
+      SESION.sb = { access: r.json.access_token, refresh: r.json.refresh_token,
+                    exp: Date.now() + (Number(r.json.expires_in) || 3600) * 1000 };
+      guardarSesion(SESION);
+      return SESION.sb.access;
+    });
+}
+
 var CLAVE_SESION = 'lives_portal_sesion';
 
 var SESION = null;
@@ -2672,6 +2757,13 @@ document.addEventListener('visibilitychange', function(){
   if(!document.hidden) refrescarRespaldo();
 });
 function cerrarSesion(){
+  /* Cierra también la sesión en Supabase: el token deja de servir. */
+  try{
+    if(SESION && SESION.sb && SESION.sb.access){
+      fetch(SBP_URL + '/auth/v1/logout', { method: 'POST', keepalive: true,
+            headers: { apikey: SBP_KEY, Authorization: 'Bearer ' + SESION.sb.access } }).catch(function(){});
+    }
+  }catch(e){}
   var caja = document.getElementById('embedBox');
   if(caja) caja.querySelectorAll('.embedFrame').forEach(function(f){ f.parentNode.removeChild(f); });
   try{ sessionStorage.removeItem(CLAVE_SESION); }catch(e){}
@@ -2961,6 +3053,13 @@ function entrarAlPortal(){
 /* Deja constancia de qué abrió cada quien. Si falla, no se interrumpe nada. */
 function registrarApertura(nombre, url){
   if(!SESION || !SESION.token) return;
+  if(SESION.sb){
+    sbpToken().then(function(tk){
+      return sbpPedir('/rest/v1/rpc/registrar_apertura',
+                      { p_herramienta: nombre, p_url: url, p_equipo: equipoActual() }, tk, 10000);
+    }).catch(function(){});
+    return;
+  }
   accesoJsonp({ accion:'abrir', token:SESION.token, herramienta:nombre, url:url, equipo:equipoActual() }, 10000)
     .catch(function(){});
 }
@@ -3011,11 +3110,26 @@ function intentarEntrar(){
     btn.disabled = false; btn.textContent = 'Entrar';
   }
 
-  accesoJsonp(datos, 15000)
-    .then(resolver)
-    .catch(function(){
-      btn.textContent = 'Reintentando…';
-      accesoJsonp(datos, 30000).then(resolver).catch(rendirse);
+  function porAppsScript(){
+    accesoJsonp(datos, 15000)
+      .then(resolver)
+      .catch(function(){
+        btn.textContent = 'Reintentando…';
+        accesoJsonp(datos, 30000).then(resolver).catch(rendirse);
+      });
+  }
+  /* Primero Supabase. Durante la transición, si no reconoce a la persona o no
+     responde, se usa el sistema de accesos de siempre. */
+  sbpEntrar(usuario, clave, datos.equipo)
+    .then(function(r){
+      if(r && r.ok){ resolver(r); return; }
+      if(SBP_RESPALDO_GAS){ porAppsScript(); return; }
+      resolver(r);
+    })
+    .catch(function(e){
+      console.warn('Supabase no respondió al iniciar sesión:', e);
+      if(SBP_RESPALDO_GAS){ porAppsScript(); return; }
+      rendirse();
     });
 }
 
