@@ -2657,6 +2657,16 @@ function sbpEntrar(usuario, clave, equipo){
     });
 }
 
+/* Versión de sesión: si en Supabase se ejecuta cerrar_todas_las_sesiones(),
+   el número sube y toda sesión guardada con un número anterior se cierra la
+   próxima vez que se abra el portal. */
+function sbpVersion(ms){
+  return sbpPedir('/rest/v1/rpc/version_sesion', {}, null, ms || 5000).then(function(r){
+    if(!r.ok || typeof r.json !== 'number') throw new Error('version_sesion ' + r.status);
+    return r.json;
+  });
+}
+
 /* Token vigente de la sesión; lo renueva si está por vencer. */
 function sbpToken(){
   if(!SESION || !SESION.sb) return Promise.reject(new Error('sin sesión de Supabase'));
@@ -3100,8 +3110,10 @@ function intentarEntrar(){
       document.getElementById('accClave').value = '';
       return;
     }
-    guardarSesion(r);
-    entrarAlPortal();
+    /* Se anota con qué versión de sesión entró. Si no se puede consultar, queda
+       en null y se completa la próxima vez que abra el portal. */
+    sbpVersion(4000).then(function(v){ r.vsesion = v; }, function(){ r.vsesion = null; })
+      .then(function(){ guardarSesion(r); entrarAlPortal(); });
   }
 
   function rendirse(){
@@ -4090,7 +4102,16 @@ function cargarKpiAcabados(){
    ============================================================ */
 (function(){
   var s = leerSesion();
-  if(s){ SESION = s; entrarAlPortal(); }
+  if(s){
+    SESION = s; entrarAlPortal();
+    /* Revisión en segundo plano: si la sesión es de una versión anterior (o de
+       antes de que existiera esta revisión), se cierra y se pide entrar de nuevo.
+       Sin señal no se hace nada: nadie queda afuera por falta de conexión. */
+    sbpVersion(8000).then(function(v){
+      if(s.vsesion === undefined || (s.vsesion !== null && s.vsesion !== v)){ cerrarSesion(); return; }
+      if(s.vsesion === null){ s.vsesion = v; guardarSesion(s); }
+    }).catch(function(){});
+  }
   else { document.body.classList.add('sinSesion'); }
 })();
 </script>
