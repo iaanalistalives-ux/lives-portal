@@ -2605,6 +2605,9 @@ var SBP_KEY = 'sb_publishable_1g-n6UT70EUlNAo8Lyc04w_jKR4LpXZ';
 /* Deben ser idénticos a SB_ACC_DOMINIO y SB_ACC_PREFIJO del Apps Script. */
 var SBP_DOMINIO = '@usuarios.lives.example.com';
 var SBP_PREFIJO = 'Lives#';
+/* 18/09/2026: SIGUE ENCENDIDO en esta versión puente (v3b). Se apaga el lunes con la v3. Desde el SQL 21 las herramientas solo leen con la llave de
+   Supabase; una sesión abierta por el sistema anterior entraba al portal pero no podía
+   ver datos. Para volver a encenderlo, cambiar a true. */
 var SBP_RESPALDO_GAS = true;
 
 function sbpPedir(ruta, cuerpo, token, ms){
@@ -2668,18 +2671,60 @@ function sbpVersion(ms){
   });
 }
 
+/* Desde el 18/09 las herramientas abiertas en el portal usan la misma sesión y la
+   renuevan ellas mismas cuando les toca. Supabase entrega una llave nueva en cada
+   renovación y cierra la sesión entera si alguien vuelve a usar una ya renovada. Por eso
+   el portal, antes de renovar o de guardar, toma la llave más nueva que haya dejado
+   cualquier herramienta, y respeta el candado mientras otra está renovando. */
+function sbpMasFresca(d){
+  if(!d) return d;
+  function mejor(x){
+    if(x && x.usuario === d.usuario && x.sb && (!d.sb || x.sb.exp > d.sb.exp)) d.sb = x.sb;
+  }
+  try{ mejor(JSON.parse(sessionStorage.getItem(CLAVE_SESION) || 'null')); }catch(e){}
+  try{ var r = JSON.parse(localStorage.getItem(CLAVE_SESION + '_resp') || 'null'); if(r) mejor(r.d); }catch(e){}
+  return d;
+}
+var SBP_CANDADO = 'lives_sb_renovando';
+var _sbpRenovando = null;
+
 /* Token vigente de la sesión; lo renueva si está por vencer. */
 function sbpToken(){
   if(!SESION || !SESION.sb) return Promise.reject(new Error('sin sesión de Supabase'));
+  sbpMasFresca(SESION);
   if(SESION.sb.exp - Date.now() > 60000) return Promise.resolve(SESION.sb.access);
-  return sbpPedir('/auth/v1/token?grant_type=refresh_token', { refresh_token: SESION.sb.refresh })
-    .then(function(r){
-      if(!r.ok || !r.json || !r.json.access_token) throw new Error('no se pudo renovar la sesión');
-      SESION.sb = { access: r.json.access_token, refresh: r.json.refresh_token,
-                    exp: Date.now() + (Number(r.json.expires_in) || 3600) * 1000 };
-      guardarSesion(SESION);
-      return SESION.sb.access;
-    });
+  if(_sbpRenovando) return _sbpRenovando;
+  var usada = SESION.sb.refresh;
+  _sbpRenovando = (function intento(n){
+    var c = null;
+    try{ c = JSON.parse(localStorage.getItem(SBP_CANDADO) || 'null'); }catch(e){}
+    if(c && c.hasta > Date.now() && c.quien !== 'portal' && n < 4){
+      return new Promise(function(ok){ setTimeout(ok, 1500); }).then(function(){
+        sbpMasFresca(SESION);
+        if(SESION.sb.refresh !== usada && SESION.sb.exp - Date.now() > 60000) return SESION.sb.access;
+        return intento(n + 1);
+      });
+    }
+    try{ localStorage.setItem(SBP_CANDADO, JSON.stringify({ quien:'portal', hasta: Date.now() + 10000 })); }catch(e){}
+    return sbpPedir('/auth/v1/token?grant_type=refresh_token', { refresh_token: usada })
+      .then(function(r){
+        if(!r.ok || !r.json || !r.json.access_token){
+          sbpMasFresca(SESION);
+          if(SESION.sb.refresh !== usada && SESION.sb.exp - Date.now() > 60000) return SESION.sb.access;
+          throw new Error('no se pudo renovar la sesión');
+        }
+        SESION.sb = { access: r.json.access_token, refresh: r.json.refresh_token,
+                      exp: Date.now() + (Number(r.json.expires_in) || 3600) * 1000 };
+        guardarSesion(SESION);
+        return SESION.sb.access;
+      });
+  })(0);
+  var fin = function(){
+    _sbpRenovando = null;
+    try{ var c2 = JSON.parse(localStorage.getItem(SBP_CANDADO) || 'null'); if(c2 && c2.quien === 'portal') localStorage.removeItem(SBP_CANDADO); }catch(e){}
+  };
+  _sbpRenovando.then(fin, fin);
+  return _sbpRenovando;
 }
 
 var CLAVE_SESION = 'lives_portal_sesion';
@@ -2759,6 +2804,8 @@ function leerSesion(){
    cuente desde la última actividad y no desde que inició sesión. */
 function refrescarRespaldo(){
   if(!SESION) return;
+  sbpMasFresca(SESION);   /* no pisar una llave que una herramienta ya renovó */
+  try{ sessionStorage.setItem(CLAVE_SESION, JSON.stringify(SESION)); }catch(e){}
   try{ localStorage.setItem(CLAVE_SESION + '_resp', JSON.stringify({d:SESION, ts:Date.now()})); }catch(e){}
 }
 setInterval(refrescarRespaldo, 60000);
@@ -4103,6 +4150,9 @@ function cargarKpiAcabados(){
    ============================================================ */
 (function(){
   var s = leerSesion();
+  /* Sin respaldo, una sesión abierta por el sistema anterior (sin llave de Supabase) ya
+     no sirve para leer datos: se pide entrar de nuevo, esta vez por Supabase. */
+  if(s && !s.sb && !SBP_RESPALDO_GAS){ cerrarSesion(); return; }
   if(s){
     SESION = s; entrarAlPortal();
     /* Revisión en segundo plano: si la sesión es de una versión anterior (o de
