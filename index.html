@@ -2605,10 +2605,10 @@ var SBP_KEY = 'sb_publishable_1g-n6UT70EUlNAo8Lyc04w_jKR4LpXZ';
 /* Deben ser idénticos a SB_ACC_DOMINIO y SB_ACC_PREFIJO del Apps Script. */
 var SBP_DOMINIO = '@usuarios.lives.example.com';
 var SBP_PREFIJO = 'Lives#';
-/* 18/09/2026: SIGUE ENCENDIDO en esta versión puente (v3b). Se apaga el lunes con la v3. Desde el SQL 21 las herramientas solo leen con la llave de
+/* 18/09/2026: apagado. Desde el SQL 21 las herramientas solo leen con la llave de
    Supabase; una sesión abierta por el sistema anterior entraba al portal pero no podía
    ver datos. Para volver a encenderlo, cambiar a true. */
-var SBP_RESPALDO_GAS = true;
+var SBP_RESPALDO_GAS = false;
 
 function sbpPedir(ruta, cuerpo, token, ms){
   var control = (typeof AbortController !== 'undefined') ? new AbortController() : null;
