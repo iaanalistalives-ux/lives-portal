@@ -1242,6 +1242,21 @@ body.conSesion .quienBtn{display:inline-flex;}
     </div>
   </div>
 
+  <!-- IA · Consultar: a diferencia del resto del área IA, estas tarjetas las ve cualquier
+       usuario con sesión del portal (lista PUBLICAS_IA en puedeVer) -->
+  <div class="screen" id="tools-ia-dash">
+    <div class="toolsLayout">
+      <button class="backbtn" data-back="areas">← Volver a áreas</button>
+      <aside class="areaSidebar"></aside>
+      <div class="toolsContent">
+    <div class="sectitle">Consultas</div>
+    <div class="tgrid">
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-registro-auditorias/consulta-ops.html" role="button" tabindex="0"><div class="tt">Consulta de la Base de OPs</div><div class="ta">Abrir →</div></div>
+    </div>
+      </div>
+    </div>
+  </div>
+
   <!-- IA · Registrar (área personal de Christian: solo la ve el usuario ctalepcio, ver puedeVer) -->
   <div class="screen" id="tools-ia-form">
     <div class="toolsLayout">
@@ -1401,7 +1416,7 @@ const AREAS = [
   {id:'encajados',  label:'Encajados',              icon:'📦', accent:'#B45309', rgb:'180,83,9',   types:['dash','form']},
   {id:'rrhh',       label:'Recursos Humanos',       icon:'👥', accent:'#DC2626', rgb:'220,38,38',  types:['dash']},
   {id:'textil',     label:'Calidad Textil',         icon:'🧶', accent:'#0B815E', rgb:'11,129,94',  types:['dash','form']},
-  {id:'ia',         label:'IA',                     icon:'🤖', accent:'#0E3B36', rgb:'14,59,54',   types:['form']}
+  {id:'ia',         label:'IA',                     icon:'🤖', accent:'#0E3B36', rgb:'14,59,54',   types:['dash','form']}
 ];
 
 var currentType = null;
@@ -2849,14 +2864,23 @@ function cerrarSesion(){
 /* ---------- Filtro: qué tarjetas puede ver ---------- */
 
 /* Área IA: es solo de Christian. No la abre ningún permiso (ni TODO, ni AREA:ia, ni la
-   dirección exacta): únicamente el usuario ctalepcio. */
+   dirección exacta): únicamente el usuario ctalepcio.
+   Excepción: las direcciones de PUBLICAS_IA las ve cualquier usuario con sesión del
+   portal, sin tener que dárselas una por una. */
 var DUENO_IA = 'ctalepcio';
+var PUBLICAS_IA = [
+  'https://iaanalistalives-ux.github.io/lives-registro-auditorias/consulta-ops.html'
+];
 function esDuenoIA(){
   return !!(SESION && String(SESION.usuario || '').trim().toLowerCase() === DUENO_IA);
 }
 function puedeVer(url, area){
   if(!SESION || !SESION.permisos) return false;
-  if(String(area) === 'ia') return esDuenoIA();
+  if(String(area) === 'ia'){
+    var limIa = String(url).split('#')[0].replace(/\/$/, '');
+    if(PUBLICAS_IA.indexOf(limIa) !== -1) return true;
+    return esDuenoIA();
+  }
   var lim = String(url).split('#')[0].replace(/\/$/, '');
   for(var i = 0; i < SESION.permisos.length; i++){
     var p = String(SESION.permisos[i]).trim();
