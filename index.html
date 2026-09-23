@@ -679,7 +679,6 @@ body.conSesion .quienBtn{display:inline-flex;}
     <button class="pinBtn inicioBtn" id="inicioBtn" type="button" title="Volver al inicio">⌂ <span class="txt">Inicio</span></button>
     <button class="pinBtn refreshBtn" id="refrescarBtn" type="button" title="Volver a cargar"><span class="gira">↻</span> <span class="txt">Actualizar</span></button>
     <button class="quienBtn" id="quienBtn" type="button" title="Cerrar sesión"><span id="quienNombre"></span> · Salir</button>
-    <a class="pinBtn" id="miTableroBtn" style="display:none" href="https://iaanalistalives-ux.github.io/tablero-proyectos/" target="_blank" rel="noopener">📊 Mi Tablero</a>
     <button class="installBtn hidden" id="installBtn" type="button">
       <svg viewBox="0 0 24 24"><path d="M12 3v10.6l3.3-3.3 1.4 1.4L12 17l-4.7-5.3 1.4-1.4 3.3 3.3V3h0zM5 19h14v2H5v-2z"/></svg>
       Instalar app
@@ -1242,8 +1241,10 @@ body.conSesion .quienBtn{display:inline-flex;}
     </div>
   </div>
 
-  <!-- IA · Consultar: a diferencia del resto del área IA, estas tarjetas las ve cualquier
-       usuario con sesión del portal (lista PUBLICAS_IA en puedeVer) -->
+  <!-- Bases de Datos (id interno 'ia') · Consultar: la Consulta de la Base de OPs la ve
+       cualquier usuario con sesión (PUBLICAS_IA); el Tablero de Proyectos IA solo lo ven
+       ctalepcio y rcamogliano (SOLO_DIRECCION_IA). Ver puedeVer. -->
+  <!-- Registrar: Catálogos también está en SOLO_DIRECCION_IA (Rodrigo consulta). -->
   <div class="screen" id="tools-ia-dash">
     <div class="toolsLayout">
       <button class="backbtn" data-back="areas">← Volver a áreas</button>
@@ -1252,12 +1253,13 @@ body.conSesion .quienBtn{display:inline-flex;}
     <div class="sectitle">Consultas</div>
     <div class="tgrid">
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-registro-auditorias/consulta-ops.html" role="button" tabindex="0"><div class="tt">Consulta de la Base de OPs</div><div class="ta">Abrir →</div></div>
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/tablero-proyectos/" role="button" tabindex="0"><div class="tt">Tablero de Proyectos IA</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
   </div>
 
-  <!-- IA · Registrar (área personal de Christian: solo la ve el usuario ctalepcio, ver puedeVer) -->
+  <!-- Bases de Datos (id interno 'ia') · Registrar (área personal de Christian: solo la ve el usuario ctalepcio, ver puedeVer) -->
   <div class="screen" id="tools-ia-form">
     <div class="toolsLayout">
       <button class="backbtn" data-back="areas">← Volver a áreas</button>
@@ -1416,7 +1418,7 @@ const AREAS = [
   {id:'encajados',  label:'Encajados',              icon:'📦', accent:'#B45309', rgb:'180,83,9',   types:['dash','form']},
   {id:'rrhh',       label:'Recursos Humanos',       icon:'👥', accent:'#DC2626', rgb:'220,38,38',  types:['dash']},
   {id:'textil',     label:'Calidad Textil',         icon:'🧶', accent:'#0B815E', rgb:'11,129,94',  types:['dash','form']},
-  {id:'ia',         label:'IA',                     icon:'🤖', accent:'#0E3B36', rgb:'14,59,54',   types:['dash','form']}
+  {id:'ia',         label:'Bases de Datos',         icon:'🤖', accent:'#0E3B36', rgb:'14,59,54',   types:['dash','form']}
 ];
 
 var currentType = null;
@@ -2863,7 +2865,8 @@ function cerrarSesion(){
 
 /* ---------- Filtro: qué tarjetas puede ver ---------- */
 
-/* Área IA: es solo de Christian. No la abre ningún permiso (ni TODO, ni AREA:ia, ni la
+/* Área "Bases de Datos" (id interno ia, se dejó igual para no romper AREA:ia ni las
+   pantallas tools-ia-*): es solo de Christian. No la abre ningún permiso (ni TODO, ni AREA:ia, ni la
    dirección exacta): únicamente el usuario ctalepcio.
    Excepción: las direcciones de PUBLICAS_IA las ve cualquier usuario con sesión del
    portal, sin tener que dárselas una por una. */
@@ -2871,6 +2874,16 @@ var DUENO_IA = 'ctalepcio';
 var PUBLICAS_IA = [
   'https://iaanalistalives-ux.github.io/lives-registro-auditorias/consulta-ops.html'
 ];
+/* Tarjetas del área que ven solo Christian y Rodrigo. Ningún permiso las abre para nadie
+   más (ni TODO, ni AREA:ia, ni la dirección exacta). */
+var SOLO_DIRECCION_IA = [
+  'https://iaanalistalives-ux.github.io/tablero-proyectos',
+  'https://iaanalistalives-ux.github.io/lives-registro-auditorias/catalogos.html'
+];
+var DIRECCION_IA = ['ctalepcio', 'rcamogliano'];
+function esDireccionIA(){
+  return !!(SESION && DIRECCION_IA.indexOf(String(SESION.usuario || '').trim().toLowerCase()) !== -1);
+}
 function esDuenoIA(){
   return !!(SESION && String(SESION.usuario || '').trim().toLowerCase() === DUENO_IA);
 }
@@ -2879,6 +2892,7 @@ function puedeVer(url, area){
   if(String(area) === 'ia'){
     var limIa = String(url).split('#')[0].replace(/\/$/, '');
     if(PUBLICAS_IA.indexOf(limIa) !== -1) return true;
+    if(SOLO_DIRECCION_IA.indexOf(limIa) !== -1) return esDireccionIA();
     return esDuenoIA();
   }
   var lim = String(url).split('#')[0].replace(/\/$/, '');
@@ -3067,24 +3081,6 @@ function pintarMias(lista){
 
 /* ---------- Arranque ---------- */
 
-/* "Mi Tablero" no forma parte del portal: es una herramienta aparte. Solo la ve quien tenga
-   su dirección escrita explícitamente en Permisos. Un permiso TODO no basta, así que el
-   acceso completo al portal no la arrastra. */
-function mostrarMiTablero(){
-  var btn = document.getElementById('miTableroBtn');
-  if(!btn) return;
-  var suyo = false;
-  var destino = btn.href.split('#')[0].replace(/\/$/, '');
-  if(SESION && SESION.permisos){
-    SESION.permisos.forEach(function(p){
-      var v = String(p).trim();
-      if(!v || /^AREA:/i.test(v) || v.toUpperCase() === 'TODO' || v === '*') return;
-      if(v.split('#')[0].replace(/\/$/, '') === destino) suyo = true;
-    });
-  }
-  btn.style.display = suyo ? '' : 'none';
-}
-
 /* El botón de abrir en otra pestaña se habilita con el permiso PESTANA en el Sheet.
    Un permiso TODO no lo incluye: se pide expresamente, persona por persona. */
 function permisoPestana(){
@@ -3107,7 +3103,6 @@ function entrarAlPortal(){
   var lista = aplicarPermisos();
   /* Los indicadores son un extra: si alguno falla, la persona igual debe poder entrar */
   try{ iniciarKpis(); }catch(e){ console.warn('Indicadores de Inicio:', e); }
-  mostrarMiTablero();
   var bt = document.getElementById('embedExternalLink');
   if(bt) bt.classList.toggle('permitido', permisoPestana());
   document.body.classList.remove('sinSesion');
