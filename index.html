@@ -1074,6 +1074,8 @@ body.conSesion .quienBtn{display:inline-flex;}
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-movilidades/solicitud_movilidad.html" role="button" tabindex="0"><div class="tt">Solicitud de Movilidades</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-movilidades/sara_programacion.html" role="button" tabindex="0"><div class="tt">Programación de Movilidades</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-movilidades/chofer_entregas.html" role="button" tabindex="0"><div class="tt">Registro de Entregas</div><div class="ta">Abrir →</div></div>
+      <!-- Solo el equipo de Logística (AREA:logistica, sin Elmo) y los administradores; TODO no la abre. Ver SOLO_EQUIPO_AREA. -->
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-movilidades/catalogos.html" role="button" tabindex="0"><div class="tt">Catálogos de Movilidades</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
     </div>
@@ -2887,8 +2889,38 @@ function esDireccionIA(){
 function esDuenoIA(){
   return !!(SESION && String(SESION.usuario || '').trim().toLowerCase() === DUENO_IA);
 }
+/* Administradores del portal: Christian y Rodrigo. No operan, pero ven todas las
+   tarjetas restringidas por equipo. */
+var ADMINS_PORTAL = ['ctalepcio', 'rcamogliano'];
+function esAdminPortal(){
+  return !!(SESION && ADMINS_PORTAL.indexOf(String(SESION.usuario || '').trim().toLowerCase()) !== -1);
+}
+/* Tarjetas que solo ve el equipo de su área: hace falta el permiso AREA:<área> escrito
+   tal cual. TODO no las abre y la dirección exacta tampoco. Los administradores sí las ven.
+   "excluir": usuarios del equipo que no deben verla aunque tengan el permiso del área.
+   Hoy: Catálogos de Movilidades, para Logística (Sara Trujillo y su equipo, sin Elmo). */
+var SOLO_EQUIPO_AREA = {
+  'https://iaanalistalives-ux.github.io/lives-movilidades/catalogos.html':
+    { area: 'logistica', excluir: ['eherrera'] }
+};
+function tieneAreaExacta(area){
+  if(!SESION || !SESION.permisos) return false;
+  for(var i = 0; i < SESION.permisos.length; i++){
+    var p = String(SESION.permisos[i]).trim();
+    if(/^AREA:/i.test(p) && p.slice(5).trim().toLowerCase() === String(area).toLowerCase()) return true;
+  }
+  return false;
+}
 function puedeVer(url, area){
   if(!SESION || !SESION.permisos) return false;
+  var limEq = String(url).split('#')[0].replace(/\/$/, '');
+  if(SOLO_EQUIPO_AREA.hasOwnProperty(limEq)){
+    if(esAdminPortal()) return true;
+    var regla = SOLO_EQUIPO_AREA[limEq];
+    var yo = String(SESION.usuario || '').trim().toLowerCase();
+    if((regla.excluir || []).indexOf(yo) !== -1) return false;
+    return tieneAreaExacta(regla.area);
+  }
   if(String(area) === 'ia'){
     var limIa = String(url).split('#')[0].replace(/\/$/, '');
     if(PUBLICAS_IA.indexOf(limIa) !== -1) return true;
