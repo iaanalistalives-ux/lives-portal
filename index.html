@@ -1040,6 +1040,8 @@ body.conSesion .quienBtn{display:inline-flex;}
     <div class="sectitle">Acabados</div>
     <div class="tgrid">
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario-acabados/formulario_acabados.html" role="button" tabindex="0"><div class="tt">Registro de Eficiencias e Incentivos Acabados</div><div class="ta">Abrir →</div></div>
+      <!-- Solo Lady Castro (lcastro) y los administradores. Ver SOLO_USUARIOS. -->
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario-acabados/panel_acabados.html" role="button" tabindex="0"><div class="tt">Panel de Acabados</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario_corte/" role="button" tabindex="0"><div class="tt">Registro de Eficiencias e Incentivos Corte</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/Potenciales/carga.html" role="button" tabindex="0"><div class="tt">Carga Semanal de Potenciales</div><div class="ta">Abrir →</div></div>
     </div>
@@ -2903,6 +2905,11 @@ var SOLO_EQUIPO_AREA = {
   'https://iaanalistalives-ux.github.io/lives-movilidades/catalogos.html':
     { area: 'logistica', excluir: ['eherrera'] }
 };
+/* Tarjetas que solo ven personas con nombre propio (más los administradores). Ningún
+   permiso las abre para nadie más: ni TODO, ni AREA:, ni la dirección exacta. */
+var SOLO_USUARIOS = {
+  'https://iaanalistalives-ux.github.io/formulario-acabados/panel_acabados.html': ['lcastro']
+};
 function tieneAreaExacta(area){
   if(!SESION || !SESION.permisos) return false;
   for(var i = 0; i < SESION.permisos.length; i++){
@@ -2914,6 +2921,10 @@ function tieneAreaExacta(area){
 function puedeVer(url, area){
   if(!SESION || !SESION.permisos) return false;
   var limEq = String(url).split('#')[0].replace(/\/$/, '');
+  if(SOLO_USUARIOS.hasOwnProperty(limEq)){
+    if(esAdminPortal()) return true;
+    return SOLO_USUARIOS[limEq].indexOf(String(SESION.usuario || '').trim().toLowerCase()) !== -1;
+  }
   if(SOLO_EQUIPO_AREA.hasOwnProperty(limEq)){
     if(esAdminPortal()) return true;
     var regla = SOLO_EQUIPO_AREA[limEq];
