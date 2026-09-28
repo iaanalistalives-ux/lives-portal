@@ -2653,7 +2653,8 @@ function iniciarKpis(){
    herramienta entra sin pasar por aquí.
    ============================================================ */
 
-var API_ACCESOS = 'https://script.google.com/macros/s/AKfycbyNameiItOUVsBXJU1MO0u9Bj-uz9Ey-IiZtd6YyWK0Kj_UMII8iHgj5_KfdvTv3wbv/exec';
+/* 28/09/2026: el Apps Script de accesos se retiró. Usuarios y permisos viven solo en Supabase
+   y se administran desde Bases de Datos → Usuarios y permisos. Su dirección se quitó del código. */
 
 /* ============================================================
    INICIO DE SESIÓN CON SUPABASE (desde el 16/09/2026)
@@ -2663,19 +2664,13 @@ var API_ACCESOS = 'https://script.google.com/macros/s/AKfycbyNameiItOUVsBXJU1MO0
    pueden leer. Los permisos salen de Supabase y cada quien recibe solo los
    suyos.
 
-   Transición: mientras SBP_RESPALDO_GAS sea true, si Supabase no reconoce
-   a la persona o no responde, se usa el sistema de accesos de siempre
-   (Apps Script). Cuando todos entren bien por Supabase, se pone en false.
+   Desde el 28/09/2026 no hay respaldo: si Supabase no responde, se avisa y se reintenta.
    ============================================================ */
 var SBP_URL = 'https://xxfufpddgoyhbotjmaiy.supabase.co';
 var SBP_KEY = 'sb_publishable_1g-n6UT70EUlNAo8Lyc04w_jKR4LpXZ';
-/* Deben ser idénticos a SB_ACC_DOMINIO y SB_ACC_PREFIJO del Apps Script. */
+/* Deben ser idénticos a los de la función portal-admin y del bloque lives-sesion. */
 var SBP_DOMINIO = '@usuarios.lives.example.com';
 var SBP_PREFIJO = 'Lives#';
-/* 18/09/2026: apagado. Desde el SQL 21 las herramientas solo leen con la llave de
-   Supabase; una sesión abierta por el sistema anterior entraba al portal pero no podía
-   ver datos. Para volver a encenderlo, cambiar a true. */
-var SBP_RESPALDO_GAS = false;
 
 function sbpPedir(ruta, cuerpo, token, ms){
   var control = (typeof AbortController !== 'undefined') ? new AbortController() : null;
@@ -2797,27 +2792,6 @@ function sbpToken(){
 var CLAVE_SESION = 'lives_portal_sesion';
 
 var SESION = null;
-
-var _accN = 0;
-function accesoJsonp(params, ms){
-  return new Promise(function(resolve, reject){
-    var cb = 'accCb' + (++_accN);
-    var sc = document.createElement('script');
-    var to = setTimeout(function(){ limpiar(); reject(new Error('timeout')); }, ms || 15000);
-    function limpiar(){
-      clearTimeout(to);
-      try{ delete window[cb]; }catch(e){ window[cb] = undefined; }
-      if(sc.parentNode) sc.parentNode.removeChild(sc);
-    }
-    window[cb] = function(d){ limpiar(); resolve(d); };
-    sc.onerror = function(){ limpiar(); reject(new Error('sin conexión')); };
-    var qs = Object.keys(params).map(function(k){
-      return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-    }).join('&');
-    sc.src = API_ACCESOS + '?' + qs + '&callback=' + cb;
-    document.body.appendChild(sc);
-  });
-}
 
 function equipoActual(){
   var n = navigator.userAgent || '';
@@ -3224,10 +3198,7 @@ function registrarApertura(nombre, url){
       return sbpPedir('/rest/v1/rpc/registrar_apertura',
                       { p_herramienta: nombre, p_url: url, p_equipo: equipoActual() }, tk, 10000);
     }).catch(function(){});
-    return;
   }
-  accesoJsonp({ accion:'abrir', token:SESION.token, herramienta:nombre, url:url, equipo:equipoActual() }, 10000)
-    .catch(function(){});
 }
 
 function mostrarErrorAcceso(txt){
@@ -3278,26 +3249,13 @@ function intentarEntrar(){
     btn.disabled = false; btn.textContent = 'Entrar';
   }
 
-  function porAppsScript(){
-    accesoJsonp(datos, 15000)
-      .then(resolver)
-      .catch(function(){
-        btn.textContent = 'Reintentando…';
-        accesoJsonp(datos, 30000).then(resolver).catch(rendirse);
-      });
-  }
-  /* Primero Supabase. Durante la transición, si no reconoce a la persona o no
-     responde, se usa el sistema de accesos de siempre. */
+  /* Solo Supabase. Si no responde, se reintenta una vez antes de avisar. */
   sbpEntrar(usuario, clave, datos.equipo)
-    .then(function(r){
-      if(r && r.ok){ resolver(r); return; }
-      if(SBP_RESPALDO_GAS){ porAppsScript(); return; }
-      resolver(r);
-    })
+    .then(resolver)
     .catch(function(e){
-      console.warn('Supabase no respondió al iniciar sesión:', e);
-      if(SBP_RESPALDO_GAS){ porAppsScript(); return; }
-      rendirse();
+      console.warn('Supabase no respondió al iniciar sesión, se reintenta:', e);
+      btn.textContent = 'Reintentando…';
+      sbpEntrar(usuario, clave, datos.equipo).then(resolver).catch(rendirse);
     });
 }
 
@@ -4260,7 +4218,7 @@ function cargarKpiAcabados(){
   var s = leerSesion();
   /* Sin respaldo, una sesión abierta por el sistema anterior (sin llave de Supabase) ya
      no sirve para leer datos: se pide entrar de nuevo, esta vez por Supabase. */
-  if(s && !s.sb && !SBP_RESPALDO_GAS){ cerrarSesion(); return; }
+  if(s && !s.sb){ cerrarSesion(); return; }
   if(s){
     SESION = s; entrarAlPortal();
     /* Revisión en segundo plano: si la sesión es de una versión anterior (o de
