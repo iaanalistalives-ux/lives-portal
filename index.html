@@ -1043,6 +1043,8 @@ body.conSesion .quienBtn{display:inline-flex;}
       <!-- Solo Lady Castro (lcastro) y los administradores. Ver SOLO_USUARIOS. -->
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario-acabados/panel_acabados.html" role="button" tabindex="0"><div class="tt">Panel de Acabados</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario_corte/" role="button" tabindex="0"><div class="tt">Registro de Eficiencias e Incentivos Corte</div><div class="ta">Abrir →</div></div>
+      <!-- Solo Estefani Barrantes (ebarrantes) y los administradores. Ver reglasPortal. -->
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/formulario_corte/panel_corte.html" role="button" tabindex="0"><div class="tt">Panel de Corte</div><div class="ta">Abrir →</div></div>
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/Potenciales/carga.html" role="button" tabindex="0"><div class="tt">Carga Semanal de Potenciales</div><div class="ta">Abrir →</div></div>
     </div>
       </div>
@@ -1269,6 +1271,12 @@ body.conSesion .quienBtn{display:inline-flex;}
       <button class="backbtn" data-back="areas">← Volver a áreas</button>
       <aside class="areaSidebar"></aside>
       <div class="toolsContent">
+    <div class="sectitle">Administración del portal</div>
+    <div class="tgrid">
+      <!-- Solo administradores (ctalepcio, rcamogliano). Ver reglasPortal. -->
+      <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-portal/admin.html" role="button" tabindex="0"><div class="tt">Usuarios y permisos</div><div class="ta">Abrir →</div></div>
+    </div>
+
     <div class="sectitle">Administración de Calidad Manufactura</div>
     <div class="tgrid">
       <div class="tcard" data-url="https://iaanalistalives-ux.github.io/lives-registro-auditorias/catalogos.html" role="button" tabindex="0"><div class="tt">Catálogos de Calidad Manufactura</div><div class="ta">Abrir →</div></div>
@@ -1407,6 +1415,28 @@ body.conSesion .quienBtn{display:inline-flex;}
 })();
 </script>
 
+<script type="application/json" id="reglasPortal">
+{
+  "_nota": "Quién ve qué tarjetas especiales. Lo lee el portal y también la pantalla Usuarios y permisos (admin.html). Editar solo aquí.",
+  "admins": ["ctalepcio", "rcamogliano"],
+  "duenoBasesDatos": "ctalepcio",
+  "publicasBasesDatos": [
+    "https://iaanalistalives-ux.github.io/lives-registro-auditorias/consulta-ops.html"
+  ],
+  "soloAdminsBasesDatos": [
+    "https://iaanalistalives-ux.github.io/tablero-proyectos",
+    "https://iaanalistalives-ux.github.io/lives-registro-auditorias/catalogos.html",
+    "https://iaanalistalives-ux.github.io/lives-portal/admin.html"
+  ],
+  "soloEquipoArea": {
+    "https://iaanalistalives-ux.github.io/lives-movilidades/catalogos.html": { "area": "logistica", "excluir": ["eherrera"] }
+  },
+  "soloUsuarios": {
+    "https://iaanalistalives-ux.github.io/formulario-acabados/panel_acabados.html": ["lcastro"],
+    "https://iaanalistalives-ux.github.io/formulario_corte/panel_corte.html": ["ebarrantes"]
+  }
+}
+</script>
 <script>
 /* Catálogo de áreas: qué tipos tiene cada una (para filtrar la lista de áreas) */
 const AREAS = [
@@ -2869,47 +2899,38 @@ function cerrarSesion(){
 
 /* ---------- Filtro: qué tarjetas puede ver ---------- */
 
-/* Área "Bases de Datos" (id interno ia, se dejó igual para no romper AREA:ia ni las
-   pantallas tools-ia-*): es solo de Christian. No la abre ningún permiso (ni TODO, ni AREA:ia, ni la
-   dirección exacta): únicamente el usuario ctalepcio.
-   Excepción: las direcciones de PUBLICAS_IA las ve cualquier usuario con sesión del
-   portal, sin tener que dárselas una por una. */
-var DUENO_IA = 'ctalepcio';
-var PUBLICAS_IA = [
-  'https://iaanalistalives-ux.github.io/lives-registro-auditorias/consulta-ops.html'
-];
-/* Tarjetas del área que ven solo Christian y Rodrigo. Ningún permiso las abre para nadie
-   más (ni TODO, ni AREA:ia, ni la dirección exacta). */
-var SOLO_DIRECCION_IA = [
-  'https://iaanalistalives-ux.github.io/tablero-proyectos',
-  'https://iaanalistalives-ux.github.io/lives-registro-auditorias/catalogos.html'
-];
-var DIRECCION_IA = ['ctalepcio', 'rcamogliano'];
+
+/* Reglas de tarjetas especiales: viven en el bloque JSON "reglasPortal" (arriba, en el
+   HTML), para que la pantalla Usuarios y permisos lea exactamente las mismas.
+   - Área "Bases de Datos" (id interno ia): solo la ve duenoBasesDatos (Christian). Ningún
+     permiso la abre (ni TODO, ni AREA:ia, ni la dirección exacta).
+     · publicasBasesDatos: las ve cualquier usuario con sesión.
+     · soloAdminsBasesDatos: solo los administradores (Christian y Rodrigo).
+   - admins: no operan, pero ven todas las tarjetas restringidas por equipo o persona.
+   - soloEquipoArea: hace falta AREA:<área> escrito tal cual (TODO no la abre); "excluir"
+     deja fuera a alguien del equipo.
+   - soloUsuarios: solo esas personas (más los administradores). */
+var REGLAS_PORTAL = (function(){
+  try{ return JSON.parse(document.getElementById('reglasPortal').textContent); }
+  catch(e){ return { admins:['ctalepcio','rcamogliano'], duenoBasesDatos:'ctalepcio',
+                     publicasBasesDatos:[], soloAdminsBasesDatos:[], soloEquipoArea:{}, soloUsuarios:{} }; }
+})();
+var DUENO_IA = REGLAS_PORTAL.duenoBasesDatos;
+var PUBLICAS_IA = REGLAS_PORTAL.publicasBasesDatos || [];
+var SOLO_DIRECCION_IA = REGLAS_PORTAL.soloAdminsBasesDatos || [];
+var ADMINS_PORTAL = REGLAS_PORTAL.admins || [];
+var DIRECCION_IA = ADMINS_PORTAL;
+var SOLO_EQUIPO_AREA = REGLAS_PORTAL.soloEquipoArea || {};
+var SOLO_USUARIOS = REGLAS_PORTAL.soloUsuarios || {};
 function esDireccionIA(){
   return !!(SESION && DIRECCION_IA.indexOf(String(SESION.usuario || '').trim().toLowerCase()) !== -1);
 }
 function esDuenoIA(){
   return !!(SESION && String(SESION.usuario || '').trim().toLowerCase() === DUENO_IA);
 }
-/* Administradores del portal: Christian y Rodrigo. No operan, pero ven todas las
-   tarjetas restringidas por equipo. */
-var ADMINS_PORTAL = ['ctalepcio', 'rcamogliano'];
 function esAdminPortal(){
   return !!(SESION && ADMINS_PORTAL.indexOf(String(SESION.usuario || '').trim().toLowerCase()) !== -1);
 }
-/* Tarjetas que solo ve el equipo de su área: hace falta el permiso AREA:<área> escrito
-   tal cual. TODO no las abre y la dirección exacta tampoco. Los administradores sí las ven.
-   "excluir": usuarios del equipo que no deben verla aunque tengan el permiso del área.
-   Hoy: Catálogos de Movilidades, para Logística (Sara Trujillo y su equipo, sin Elmo). */
-var SOLO_EQUIPO_AREA = {
-  'https://iaanalistalives-ux.github.io/lives-movilidades/catalogos.html':
-    { area: 'logistica', excluir: ['eherrera'] }
-};
-/* Tarjetas que solo ven personas con nombre propio (más los administradores). Ningún
-   permiso las abre para nadie más: ni TODO, ni AREA:, ni la dirección exacta. */
-var SOLO_USUARIOS = {
-  'https://iaanalistalives-ux.github.io/formulario-acabados/panel_acabados.html': ['lcastro']
-};
 function tieneAreaExacta(area){
   if(!SESION || !SESION.permisos) return false;
   for(var i = 0; i < SESION.permisos.length; i++){
@@ -2918,7 +2939,7 @@ function tieneAreaExacta(area){
   }
   return false;
 }
-function puedeVer(url, area){
+function puedeVer(url, area, tipo){
   if(!SESION || !SESION.permisos) return false;
   var limEq = String(url).split('#')[0].replace(/\/$/, '');
   if(SOLO_USUARIOS.hasOwnProperty(limEq)){
@@ -2944,6 +2965,8 @@ function puedeVer(url, area){
     if(!p) continue;
     /* TODO = acceso completo al portal, sin listar nada */
     if(p.toUpperCase() === 'TODO' || p === '*') return true;
+    /* DASHBOARDS = todas las pantallas de Consultar de todas las áreas, ningún formulario */
+    if(p.toUpperCase() === 'DASHBOARDS'){ if(tipo === 'dash') return true; continue; }
     if(/^AREA:/i.test(p)){
       if(p.slice(5).trim().toLowerCase() === String(area).toLowerCase()) return true;
       continue;
@@ -2967,7 +2990,7 @@ function aplicarPermisos(){
       /* Las tarjetas que agrupan no tienen direccion propia: se resuelven mas abajo,
          segun cuantas de las suyas quedaron visibles. */
       if(card.classList.contains('tgrupo')) return;
-      var ok = puedeVer(card.dataset.url, area);
+      var ok = puedeVer(card.dataset.url, area, tipo);
       card.style.display = ok ? '' : 'none';
       if(ok){
         vivas++;
