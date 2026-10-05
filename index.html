@@ -628,6 +628,66 @@ body.conSesion .quienBtn{display:inline-flex;}
   #pantallaAcceso{min-height:auto;padding:20px 12px 40px;}
   .accesoCuerpo{padding:20px 18px 16px;}
 }
+
+/* 04/10/2026: barra superior más delgada en computadora, para ganar alto de pantalla.
+   Con una herramienta abierta se adelgaza un poco más y el marco usa todo el alto que queda. */
+@media(min-width:1025px){
+  .header{min-height:66px;padding:0 20px;gap:16px;}
+  .header img{height:38px;}
+  .divider{height:32px;}
+  .htitle{font-size:18px;}
+  .hsub{font-size:12px;}
+  .hcrumb{font-size:13.5px;margin-top:1px;}
+  .pinBtn{padding:6px 13px;}
+  .installBtn{padding:7px 14px;}
+  body.embedOpen .header{min-height:54px;}
+  body.embedOpen .header img{height:32px;}
+  body.embedOpen .divider{height:26px;}
+  body.embedOpen .htitle{font-size:16px;}
+  body.embedOpen .wrap{padding-bottom:12px;}
+  body.embedOpen #screen-embed .toolsLayout{margin-top:10px;}
+  body.embedOpen .embedFrame{height:calc(100vh - 54px - 10px - 14px);min-height:480px;}
+}
+
+/* 04/10/2026 · Panel lateral más compacto, interruptor Registrar/Consultar en la columna
+   izquierda y botón de ocultar panel con ícono estándar. */
+/* Columna izquierda en tres filas: Volver, interruptor, panel. El contenido ocupa todo. */
+.toolsLayout{grid-template-rows:auto auto 1fr;row-gap:0;align-content:start;}
+.toolsLayout .backbtn{margin-bottom:10px;}
+.toolsLayout .sbSwitch{grid-column:1;grid-row:2;}
+.toolsLayout .areaSidebar{grid-row:3;top:0;}  /* el top:16px viejo empujaba el panel hacia abajo: era el hueco */
+.toolsLayout .toolsContent{grid-row:1 / span 3;}
+#screen-mias .areaSidebar{grid-row:1 / span 3;}
+.sbSwitch{display:flex;background:#fff;border:1px solid var(--warm);border-radius:10px;padding:3px;gap:3px;
+  margin:0 0 10px;box-shadow:0 1px 2px rgba(14,59,54,.05);}
+.sbSwitch button{flex:1 1 0;min-width:0;border:none;background:transparent;border-radius:7px;padding:6px 4px;
+  font-family:inherit;font-size:12.5px;font-weight:700;color:var(--stone);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;transition:.15s;}
+.sbSwitch button:hover{color:var(--sage);background:var(--warm-light);}
+.sbSwitch button.on{background:var(--sage);color:#fff;}
+body.panelChico .sbSwitch{flex-direction:column;}
+body.panelChico .sbSwitch .swTxt{display:none;}
+@media(min-width:761px){ .areaSidebar .sbTipoOculto{display:none !important;} }
+@media(max-width:760px){
+  /* en el celular, con una herramienta abierta, la franja muestra todo: sin interruptor */
+  body.embedOpen #screen-embed .sbSwitch{display:none;}
+  .sbSwitch{margin:0 0 8px;}
+}
+/* Botón de ocultar panel: ícono de panel lateral, sin caja, como en las apps conocidas */
+.sbToggle{top:8px;right:8px;width:28px;height:28px;border:none;background:transparent;color:#8FB3AC;border-radius:7px;}
+.sbToggle:hover{background:rgba(255,255,255,.12);color:#fff;border:none;}
+.sbToggle svg{width:18px;height:18px;display:block;}
+/* Elementos del panel pegados al texto: menos relleno y menos espacio entre filas */
+@media(min-width:761px){
+  .areaSidebar{padding:10px 8px;}
+  .areaSidebar .sbTitle{margin:4px 36px 6px 6px;font-size:10px;}
+  .areaSidebar .sbGroup{margin:8px 6px 3px;}
+  .areaSidebar .sbItem{padding:5px 8px;gap:7px;margin-bottom:1px;border-radius:7px;line-height:1.25;font-size:13px;}
+  .areaSidebar .sbItem .sbIcon{font-size:14px;}
+  .areaSidebar .sbVolver{margin-top:6px;padding-top:8px;}
+  body.panelChico .areaSidebar{padding:8px 6px;}
+  body.panelChico .areaSidebar .sbItem{padding:7px 0;}
+}
 </style>
 
 <!-- ===== PWA: app instalable ===== -->
@@ -1883,10 +1943,38 @@ function openEmbed(cardEl){
 
   var conContenido = grupos.filter(function(g){ return g[2].length; });
 
+  /* 04/10: con los dos tipos, en vez de dos grupos plegables el interruptor de arriba
+     muestra uno a la vez. Arranca en el tipo de la herramienta abierta. */
+  var tipoAbierto = currentType;
+  conContenido.forEach(function(g){
+    if(g[2].some(function(n){ return n.dataset.url === url; })) tipoAbierto = g[0];
+  });
+  var cajas = {};
+  function verTipo(t){
+    Object.keys(cajas).forEach(function(k){ cajas[k].classList.toggle('sbTipoOculto', k !== t); });
+    var swE = sidebar.parentNode.querySelector('.sbSwitch');
+    if(swE) [].forEach.call(swE.querySelectorAll('button'), function(b, i){
+      var tipos = conContenido.map(function(g){ return g[0]; });
+      b.classList.toggle('on', tipos[i] === t);
+    });
+  }
+  ponerSwitchLateral(sidebar.parentNode, conContenido.map(function(g){ return g[0]; }), tipoAbierto,
+                     function(t){ verTipo(t); });
+  /* el interruptor del embed no navega: solo cambia la lista, así que se marca a mano */
+  var swEmbed = sidebar.parentNode.querySelector('.sbSwitch');
+  if(swEmbed) [].forEach.call(swEmbed.querySelectorAll('button'), function(b, i){
+    var tipos = conContenido.map(function(g){ return g[0]; });
+    b.onclick = function(){ verTipo(tipos[i]); };
+  });
+
   conContenido.forEach(function(g){
     var destino = sidebar;
-    if(conContenido.length > 1){          /* el encabezado solo si hay de los dos tipos */
-      destino = grupoPlegable(sidebar, g[1], 'tipo_' + g[0]);
+    if(conContenido.length > 1){
+      destino = document.createElement('div');
+      destino.className = 'sbBody';
+      destino.dataset.tipo = g[0];
+      sidebar.appendChild(destino);
+      cajas[g[0]] = destino;
     }
     g[2].forEach(function(sib){
       var et = sib.querySelector('.tt') || sib.querySelector('.mt');
@@ -1902,6 +1990,8 @@ function openEmbed(cardEl){
       destino.appendChild(item);
     });
   });
+
+  if(conContenido.length > 1) verTipo(tipoAbierto);
 
   var backLink = document.createElement('div');
   backLink.className = 'sbItem sbArea sbVolver';
@@ -2026,21 +2116,35 @@ function switchDeArea(area, type){
   if(viejo) viejo.parentNode.removeChild(viejo);
 
   var ar = AREAS.filter(function(a){ return a.id === area; })[0];
-  if(!ar || ar.types.length < 2) return;
+  /* 04/10: el interruptor vive en la columna izquierda, entre Volver y el panel */
+  ponerSwitchLateral(pant.querySelector('.toolsLayout'), ar ? ar.types : [], type,
+                     function(t){ goToTools(area, t); });
+}
 
+/* Interruptor Registrar / Consultar en la columna izquierda, entre Volver y el panel.
+   tipos: los que hay; activo: el marcado; alElegir(tipo). Si hay uno solo, no se pone. */
+function ponerSwitchLateral(layout, tipos, activo, alElegir){
+  if(!layout) return;
+  var viejo = layout.querySelector('.sbSwitch');
+  if(viejo) viejo.parentNode.removeChild(viejo);
+  if(!tipos || tipos.length < 2) return;
   var sw = document.createElement('div');
-  sw.className = 'tipoSwitch';
-  sw.classList.add('swArea');
-  [['form','📝 Registrar'], ['dash','📊 Consultar']].forEach(function(g){
-    if(ar.types.indexOf(g[0]) === -1) return;
+  sw.className = 'sbSwitch';
+  [['form','📝','Registrar'], ['dash','📊','Consultar']].forEach(function(g){
+    if(tipos.indexOf(g[0]) === -1) return;
     var b = document.createElement('button');
     b.type = 'button';
-    b.textContent = g[1];
-    if(g[0] === type) b.className = 'on';
-    b.addEventListener('click', function(){ if(g[0] !== type) goToTools(area, g[0]); });
+    b.title = g[2];
+    b.innerHTML = '<span>' + g[1] + '</span><span class="swTxt">' + g[2] + '</span>';
+    if(g[0] === activo) b.className = 'on';
+    b.addEventListener('click', function(){
+      if(g[0] === activo) return;
+      alElegir(g[0]);
+    });
     sw.appendChild(b);
   });
-  cont.insertBefore(sw, cont.firstChild);
+  var aside = layout.querySelector('.areaSidebar');
+  layout.insertBefore(sw, aside || null);
 }
 
 /* Botón para encoger el panel a solo íconos y volver a abrirlo. La elección se guarda,
@@ -2055,8 +2159,10 @@ function aplicarPanel(){
   var chico = panelChico();
   document.body.classList.toggle('panelChico', chico);
   document.querySelectorAll('.sbToggle').forEach(function(b){
-    b.textContent = chico ? '»' : '«';
-    b.title = chico ? 'Mostrar los nombres' : 'Mostrar solo íconos';
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+                  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+                  '<rect x="3" y="4" width="18" height="16" rx="2.5"/><line x1="9" y1="4" x2="9" y2="20"/></svg>';
+    b.title = chico ? 'Mostrar el panel' : 'Ocultar el panel';
     b.setAttribute('aria-label', b.title);
   });
 }
