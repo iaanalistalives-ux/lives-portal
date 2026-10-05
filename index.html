@@ -713,7 +713,7 @@ body.panelChico .sbSwitch .swTxt{display:none;}
    - cerrado: solo íconos (body.panelChico).
    - al pasar el mouse (por defecto): solo íconos y, al pasar el mouse, se abre POR ENCIMA
      de la herramienta, sin empujarla (body.sbHover). Solo en computadora. */
-.leftCol{grid-column:1;grid-row:1 / span 3;position:relative;min-width:0;}
+.leftCol{grid-column:1;grid-row:1 / span 3;position:relative;min-width:0;z-index:36;}
 .leftColIn{display:flex;flex-direction:column;}
 @media(max-width:760px){ .leftCol,.leftColIn{display:contents;} }
 @media(min-width:761px){
@@ -744,22 +744,22 @@ body.panelChico .sbModo{justify-content:center;}
 @media(min-width:1025px){
   body.sbHover .toolsLayout{grid-template-columns:64px 1fr;}
   body.sbHover .leftColIn{position:absolute;top:0;left:0;width:64px;z-index:40;
-    transition:width .15s ease .12s, box-shadow .15s ease .12s;}
-  body.sbHover .leftCol:hover .leftColIn,
-  body.sbHover .leftCol.fijo .leftColIn{width:250px;box-shadow:12px 0 24px -12px rgba(14,59,54,.35);
+    transition:width .15s ease, box-shadow .15s ease;}
+  body.sbHover .leftCol.hov .leftColIn,
+  body.sbHover .leftCol.fijo .leftColIn{width:300px;box-shadow:12px 0 24px -12px rgba(14,59,54,.35);
     background:var(--warm-light);border-radius:0 14px 14px 0;padding-right:8px;}
   /* aspecto de solo íconos mientras está cerrado */
-  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar{padding:8px 6px;}
-  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbTitle,
-  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbGroup{display:none;}
-  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbItem{justify-content:center;padding:7px 0;gap:0;}
-  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbItem span:not(.sbIcon){display:none;}
-  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbItem .sbIcon{font-size:17px;}
-  body.sbHover .leftCol:not(:hover):not(.fijo) .backbtn{padding:9px 0;font-size:0;}
-  body.sbHover .leftCol:not(:hover):not(.fijo) .backbtn::before{content:'←';font-size:15px;}
-  body.sbHover .leftCol:not(:hover):not(.fijo) .sbSwitch{flex-direction:column;}
-  body.sbHover .leftCol:not(:hover):not(.fijo) .sbSwitch .swTxt{display:none;}
-  body.sbHover .leftCol:not(:hover):not(.fijo) .sbModo{justify-content:center;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar{padding:8px 6px;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbTitle,
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbGroup{display:none;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbItem{justify-content:center;padding:7px 0;gap:0;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbItem span:not(.sbIcon){display:none;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbItem .sbIcon{font-size:17px;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .backbtn{padding:9px 0;font-size:0;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .backbtn::before{content:'←';font-size:15px;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .sbSwitch{flex-direction:column;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .sbSwitch .swTxt{display:none;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .sbModo{justify-content:center;}
   body.sbHover .leftCol .sbItem span:not(.sbIcon){white-space:normal;}
 }
 /* Con el panel en íconos: los encabezados de grupo se vuelven una línea fina, para que se
@@ -768,7 +768,7 @@ body.panelChico .sbModo{justify-content:center;}
 @media(min-width:1025px){
   body.sbHover .toolsLayout,body.panelChico .toolsLayout{column-gap:14px;}
   body.panelChico .areaSidebar .sbGroup,
-  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbGroup{display:block;height:1px;overflow:hidden;
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbGroup{display:block;height:1px;overflow:hidden;
     font-size:0;padding:0;margin:7px 6px;background:rgba(255,255,255,.18);}
 }
 
@@ -801,6 +801,69 @@ body.panelChico .sbModo{justify-content:center;}
 #movHoja .mhItem .ic{font-size:20px;flex:none;width:26px;text-align:center;}
 #movHoja .mhItem.on{background:#E7F4EF;color:var(--sage);}
 #movHoja .mhItem .aqui{margin-left:auto;font-size:11px;font-weight:800;color:var(--sage);text-transform:uppercase;}
+
+/* 04/10/2026 · Panel estático al abrir y cerrar (como Supabase): los íconos no se mueven
+   ni cambian de tamaño, cada fila mide lo mismo abierta o cerrada, los nombres van en una
+   sola línea y el interruptor no cambia de alto. Solo aparece o desaparece el texto. */
+@media(min-width:1025px){
+  body.sbHover .leftCol .areaSidebar,
+  body.panelChico .leftCol .areaSidebar,
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar,
+  body.panelChico .leftCol .areaSidebar{padding:8px 6px;}
+  body.sbHover .leftCol .areaSidebar .sbItem,
+  body.panelChico .leftCol .areaSidebar .sbItem,
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbItem,
+  body.panelChico .leftCol .areaSidebar .sbItem{justify-content:flex-start;height:34px;padding:0 8px 0 15px;gap:10px;
+    margin-bottom:1px;white-space:nowrap;overflow:hidden;line-height:34px;}
+  body.sbHover .leftCol .areaSidebar .sbItem .sbIcon,
+  body.panelChico .leftCol .areaSidebar .sbItem .sbIcon,
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbItem .sbIcon,
+  body.panelChico .leftCol .areaSidebar .sbItem .sbIcon{font-size:16px;width:20px;flex:0 0 20px;text-align:center;line-height:1;}
+  body.sbHover .leftCol .areaSidebar .sbItem span:not(.sbIcon),
+  body.panelChico .leftCol .areaSidebar .sbItem span:not(.sbIcon){display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbItem span:not(.sbIcon),
+  body.panelChico .leftCol .areaSidebar .sbItem span:not(.sbIcon){display:none;}
+  body.sbHover .leftCol .areaSidebar .sbTitle,
+  body.panelChico .leftCol .areaSidebar .sbTitle,
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbTitle,
+  body.panelChico .leftCol .areaSidebar .sbTitle{display:flex;height:20px;margin:0 6px 4px;align-items:center;white-space:nowrap;overflow:hidden;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbTitle,
+  body.panelChico .leftCol .areaSidebar .sbTitle{color:transparent;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbTitle .sbChev,
+  body.panelChico .leftCol .areaSidebar .sbTitle .sbChev{visibility:hidden;}
+  body.sbHover .leftCol .areaSidebar .sbGroup,
+  body.panelChico .leftCol .areaSidebar .sbGroup,
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbGroup,
+  body.panelChico .leftCol .areaSidebar .sbGroup{display:flex;height:22px;margin:4px 6px;padding:0;align-items:center;
+    white-space:nowrap;overflow:hidden;font-size:10px;background:none;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbGroup,
+  body.panelChico .leftCol .areaSidebar .sbGroup{color:transparent;
+    background:linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)) center / 100% 1px no-repeat;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .areaSidebar .sbGroup .sbChev,
+  body.panelChico .leftCol .areaSidebar .sbGroup .sbChev{visibility:hidden;}
+  body.sbHover .leftCol .backbtn,
+  body.panelChico .leftCol .backbtn,
+  body.sbHover .leftCol:not(.hov):not(.fijo) .backbtn,
+  body.panelChico .leftCol .backbtn{height:34px;padding:0 10px;display:flex;align-items:center;justify-content:center;
+    white-space:nowrap;overflow:hidden;}
+  body.sbHover .leftCol .sbSwitch,
+  body.panelChico .leftCol .sbSwitch,
+  body.sbHover .leftCol:not(.hov):not(.fijo) .sbSwitch,
+  body.panelChico .leftCol .sbSwitch{flex-direction:row;height:40px;}
+  body.sbHover .leftCol .sbSwitch button,
+  body.panelChico .leftCol .sbSwitch button,
+  body.sbHover .leftCol:not(.hov):not(.fijo) .sbSwitch button,
+  body.panelChico .leftCol .sbSwitch button{padding:0 4px;}
+  body.sbHover .leftCol:not(.hov):not(.fijo) .sbSwitch .swTxt,
+  body.panelChico .leftCol .sbSwitch .swTxt{display:none;}
+  body.sbHover .leftCol .sbModo,
+  body.panelChico .leftCol .sbModo,
+  body.sbHover .leftCol:not(.hov):not(.fijo) .sbModo,
+  body.panelChico .leftCol .sbModo{justify-content:flex-start;padding-left:8px;}
+}
+
+#sbCapa{display:none;position:fixed;inset:0;z-index:35;background:transparent;}
+#sbCapa.ver{display:block;}
 </style>
 
 <!-- ===== PWA: app instalable ===== -->
@@ -2361,6 +2424,36 @@ var CLAVE_MODO  = 'lives_panel_modo';         /* 'abierto' | 'cerrado' | 'hover'
       if(ch !== cont) inn.appendChild(ch);
     });
     L.insertBefore(col, cont || null);
+  });
+})();
+
+/* Abrir al pasar el mouse: se controla con una clase y no con :hover, para que el panel se
+   cierre siempre al entrar a la herramienta (el marco de la herramienta a veces deja el
+   :hover "pegado"). Pequeña espera al entrar para no abrirlo por pasar rozando. */
+(function hoverPanel(){
+  /* Mientras el panel está abierto, una capa transparente cubre la herramienta: así, al
+     salir del panel hacia la herramienta, el portal sí se entera y lo cierra. */
+  var capa = document.createElement('div');
+  capa.id = 'sbCapa';
+  document.body.appendChild(capa);
+  function cerrar(){
+    document.querySelectorAll('.leftCol.hov').forEach(function(c){ if(!c.classList.contains('fijo')) c.classList.remove('hov'); });
+    if(!document.querySelector('.leftCol.hov')) capa.classList.remove('ver');
+  }
+  capa.addEventListener('mousemove', cerrar);
+  capa.addEventListener('mousedown', cerrar);
+  document.querySelectorAll('.leftCol').forEach(function(col){
+    var t = null;
+    col.addEventListener('mouseenter', function(){
+      if(!document.body.classList.contains('sbHover') || window.innerWidth < 1025) return;
+      clearTimeout(t);
+      t = setTimeout(function(){ col.classList.add('hov'); capa.classList.add('ver'); }, 120);
+    });
+    col.addEventListener('mouseleave', function(){ clearTimeout(t); cerrar(); });
+  });
+  /* al hacer clic dentro de la herramienta, la ventana pierde el foco: también se cierra */
+  window.addEventListener('blur', function(){
+    document.querySelectorAll('.leftCol.hov').forEach(function(c){ c.classList.remove('hov'); });
   });
 })();
 
