@@ -688,6 +688,24 @@ body.panelChico .sbSwitch .swTxt{display:none;}
   body.panelChico .areaSidebar{padding:8px 6px;}
   body.panelChico .areaSidebar .sbItem{padding:7px 0;}
 }
+
+/* 04/10/2026 · Sin espacio muerto bajo la barra superior: la primera fila queda a 10 px,
+   la misma separación que hay entre Volver, el interruptor y el panel. */
+@media(min-width:761px){
+  .wrap{padding-top:10px;}
+  .screen[id^="tools-"] .toolsLayout,
+  #screen-mias .toolsLayout{margin-top:0;}
+  body.embedOpen .wrap{padding-top:0;}
+  body.embedOpen #screen-embed .toolsLayout{margin-top:10px;}
+}
+/* El espacio ganado arriba se lo lleva el panel de áreas: llega hasta 10 px del borde de abajo
+   (cabecera 66 + 10 + Volver 33 + 10 + interruptor 35 + 10 + 10 abajo = 174). */
+@media(min-width:1025px){
+  .screen[id^="tools-"] .areaSidebar{min-height:calc(100vh - 174px);max-height:calc(100vh - 174px);}
+  /* con una herramienta abierta, el panel termina a la misma altura que la herramienta
+     (cabecera 54 + 10 + Volver 33 + 10 + interruptor 35 + 10 + 10 abajo = 162) */
+  body.embedOpen #screen-embed .areaSidebar{min-height:calc(100vh - 162px);max-height:calc(100vh - 162px);}
+}
 </style>
 
 <!-- ===== PWA: app instalable ===== -->
