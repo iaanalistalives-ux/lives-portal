@@ -706,6 +706,101 @@ body.panelChico .sbSwitch .swTxt{display:none;}
      (cabecera 54 + 10 + Volver 33 + 10 + interruptor 35 + 10 + 10 abajo = 162) */
   body.embedOpen #screen-embed .areaSidebar{min-height:calc(100vh - 162px);max-height:calc(100vh - 162px);}
 }
+
+/* 04/10/2026 · Panel lateral al estilo Supabase.
+   La columna izquierda (Volver + interruptor + panel) vive en .leftCol. Tres modos:
+   - abierto: como siempre, con nombres.
+   - cerrado: solo íconos (body.panelChico).
+   - al pasar el mouse (por defecto): solo íconos y, al pasar el mouse, se abre POR ENCIMA
+     de la herramienta, sin empujarla (body.sbHover). Solo en computadora. */
+.leftCol{grid-column:1;grid-row:1 / span 3;position:relative;min-width:0;}
+.leftColIn{display:flex;flex-direction:column;}
+@media(max-width:760px){ .leftCol,.leftColIn{display:contents;} }
+@media(min-width:761px){
+  .areaSidebar{display:flex;flex-direction:column;}
+  .areaSidebar > .sbBody{flex:0 0 auto;}
+}
+/* control de modo, abajo del panel */
+.sbModo{order:99;margin-top:auto;position:sticky;bottom:-10px;padding:8px 2px 2px;background:var(--petrol);
+  display:flex;justify-content:flex-start;}
+.sbModoBtn{width:30px;height:30px;border:none;background:transparent;color:#8FB3AC;border-radius:7px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;padding:0;}
+.sbModoBtn:hover,.sbModo.abierto .sbModoBtn{background:rgba(255,255,255,.12);color:#fff;}
+.sbModoBtn svg{width:18px;height:18px;display:block;}
+.sbModoMenu{display:none;position:absolute;left:4px;bottom:40px;z-index:60;background:#fff;border-radius:10px;
+  box-shadow:0 8px 24px rgba(14,59,54,.22);padding:6px;min-width:200px;}
+.sbModo.abierto .sbModoMenu{display:block;}
+.sbModoMenu .mt{font-size:10.5px;font-weight:800;color:var(--stone);text-transform:uppercase;letter-spacing:.5px;padding:6px 10px 4px;}
+.sbModoMenu button{display:flex;align-items:center;gap:8px;width:100%;border:none;background:transparent;text-align:left;
+  font-family:inherit;font-size:13px;color:#333;padding:7px 10px;border-radius:7px;cursor:pointer;}
+.sbModoMenu button:hover{background:var(--warm-light);}
+.sbModoMenu button .pt{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--stone);flex:none;}
+.sbModoMenu button.on .pt{background:var(--sage);border-color:var(--sage);}
+.sbModoMenu button.on{font-weight:700;color:var(--sage);}
+@media(max-width:760px){ .sbModo{display:none;} }
+.sbToggle{display:none !important;}
+body.panelChico .sbModo{justify-content:center;}
+
+@media(min-width:1025px){
+  body.sbHover .toolsLayout{grid-template-columns:64px 1fr;}
+  body.sbHover .leftColIn{position:absolute;top:0;left:0;width:64px;z-index:40;
+    transition:width .15s ease .12s, box-shadow .15s ease .12s;}
+  body.sbHover .leftCol:hover .leftColIn,
+  body.sbHover .leftCol.fijo .leftColIn{width:250px;box-shadow:12px 0 24px -12px rgba(14,59,54,.35);
+    background:var(--warm-light);border-radius:0 14px 14px 0;padding-right:8px;}
+  /* aspecto de solo íconos mientras está cerrado */
+  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar{padding:8px 6px;}
+  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbTitle,
+  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbGroup{display:none;}
+  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbItem{justify-content:center;padding:7px 0;gap:0;}
+  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbItem span:not(.sbIcon){display:none;}
+  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbItem .sbIcon{font-size:17px;}
+  body.sbHover .leftCol:not(:hover):not(.fijo) .backbtn{padding:9px 0;font-size:0;}
+  body.sbHover .leftCol:not(:hover):not(.fijo) .backbtn::before{content:'←';font-size:15px;}
+  body.sbHover .leftCol:not(:hover):not(.fijo) .sbSwitch{flex-direction:column;}
+  body.sbHover .leftCol:not(:hover):not(.fijo) .sbSwitch .swTxt{display:none;}
+  body.sbHover .leftCol:not(:hover):not(.fijo) .sbModo{justify-content:center;}
+  body.sbHover .leftCol .sbItem span:not(.sbIcon){white-space:normal;}
+}
+/* Con el panel en íconos: los encabezados de grupo se vuelven una línea fina, para que se
+   distinga dónde terminan las herramientas y empiezan las otras áreas; y menos separación
+   con la herramienta. */
+@media(min-width:1025px){
+  body.sbHover .toolsLayout,body.panelChico .toolsLayout{column-gap:14px;}
+  body.panelChico .areaSidebar .sbGroup,
+  body.sbHover .leftCol:not(:hover):not(.fijo) .areaSidebar .sbGroup{display:block;height:1px;overflow:hidden;
+    font-size:0;padding:0;margin:7px 6px;background:rgba(255,255,255,.18);}
+}
+
+/* 04/10/2026 · Celular y tablet con una herramienta abierta: dos botones en vez de la
+   franja deslizable, y la lista sale en una hoja desde abajo. */
+.movBar{display:none;}
+@media(max-width:1024px){
+  body.embedOpen #screen-embed .toolsLayout{display:block !important;margin-top:8px !important;}
+  body.embedOpen #screen-embed .leftCol{display:none !important;}
+  body.embedOpen #screen-embed .movBar{display:flex;gap:8px;margin:0 0 8px;}
+  .movBar button{font-family:inherit;font-weight:700;font-size:14px;border-radius:10px;min-height:42px;cursor:pointer;}
+  .movBar .movAtras{flex:0 0 46px;background:var(--petrol);color:#fff;border:none;font-size:18px;}
+  .movBar .movTipo{flex:1 1 0;min-width:0;background:#fff;color:var(--petrol);border:1.5px solid var(--warm);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .movBar .movTipo.on{background:var(--sage);border-color:var(--sage);color:#fff;}
+  .movBar .cnt{font-size:11px;font-weight:800;opacity:.75;}
+  body.embedOpen .embedFrame{height:calc(100vh - 150px);min-height:380px;}
+}
+@media(max-width:760px){ body.embedOpen .embedFrame{height:calc(100vh - 160px);} }
+#movHoja{display:none;position:fixed;inset:0;z-index:2000;}
+#movHoja.ver{display:block;}
+#movHoja .mhFondo{position:absolute;inset:0;background:rgba(14,59,54,.45);}
+#movHoja .mhCaja{position:absolute;left:0;right:0;bottom:0;max-height:75vh;overflow-y:auto;background:#fff;
+  border-radius:16px 16px 0 0;padding:8px 12px 18px;box-shadow:0 -6px 24px rgba(14,59,54,.25);}
+#movHoja .mhAsa{width:44px;height:5px;border-radius:3px;background:var(--warm);margin:4px auto 10px;}
+#movHoja .mhTit{font-size:13px;font-weight:800;color:var(--stone);text-transform:uppercase;letter-spacing:.5px;margin:0 6px 8px;}
+#movHoja .mhItem{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:none;background:transparent;
+  font-family:inherit;font-size:15px;font-weight:700;color:#1a1a1a;padding:12px 10px;border-radius:10px;min-height:48px;cursor:pointer;}
+#movHoja .mhItem + .mhItem{border-top:1px solid var(--warm-light);}
+#movHoja .mhItem .ic{font-size:20px;flex:none;width:26px;text-align:center;}
+#movHoja .mhItem.on{background:#E7F4EF;color:var(--sage);}
+#movHoja .mhItem .aqui{margin-left:auto;font-size:11px;font-weight:800;color:var(--sage);text-transform:uppercase;}
 </style>
 
 <!-- ===== PWA: app instalable ===== -->
@@ -1752,7 +1847,9 @@ function rescatarEmergentes(win){
 function maxMarcos(){
   var chico = window.innerWidth <= 760;
   var pocaMemoria = (navigator.deviceMemory && navigator.deviceMemory <= 4);
-  return (chico || pocaMemoria) ? 1 : 4;
+  /* 04/10: en celular se guardan 2 (la actual y la anterior) para poder ir y volver entre
+     Registrar y Consultar sin perder lo escrito */
+  return (chico || pocaMemoria) ? 2 : 4;
 }
 
 function marcoActivo(){
@@ -1909,6 +2006,63 @@ function compactarEmbebido(frame){
   }catch(e){ /* si algún día una herramienta vive en otro dominio, se deja tal cual */ }
 }
 
+/* ---- Celular y tablet: en vez de la franja que se desliza, dos botones (Registrar y
+   Consultar). Cada uno abre la lista de herramientas de ese tipo; al elegir una se abre
+   y la anterior queda cargada atrás, así no se pierde lo que se estaba haciendo. ---- */
+var _movGrupos = [], _movUrl = '';
+function pintarMovBar(grupos, url, tipoAbierto){
+  _movGrupos = grupos; _movUrl = url;
+  var L = document.querySelector('#screen-embed .toolsLayout');
+  if(!L) return;
+  var bar = document.getElementById('movBar');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = 'movBar'; bar.className = 'movBar';
+    L.insertBefore(bar, L.firstChild);
+  }
+  var h = '<button type="button" class="movAtras" aria-label="Volver">←</button>';
+  grupos.forEach(function(g){
+    h += '<button type="button" class="movTipo' + (g[0] === tipoAbierto ? ' on' : '') + '" data-tipo="' + g[0] + '">' +
+         (g[0] === 'dash' ? '📊 Consultar' : '📝 Registrar') + ' <span class="cnt">' + g[2].length + '</span> ▾</button>';
+  });
+  bar.innerHTML = h;
+  bar.querySelector('.movAtras').onclick = function(){
+    var b = document.querySelector('#screen-embed [data-embed-back]'); if(b) b.click();
+  };
+  [].forEach.call(bar.querySelectorAll('.movTipo'), function(b){
+    b.onclick = function(){ abrirHoja(b.dataset.tipo); };
+  });
+}
+function abrirHoja(tipo){
+  var g = _movGrupos.filter(function(x){ return x[0] === tipo; })[0];
+  if(!g) return;
+  var hoja = document.getElementById('movHoja');
+  if(!hoja){
+    hoja = document.createElement('div');
+    hoja.id = 'movHoja';
+    hoja.innerHTML = '<div class="mhFondo"></div><div class="mhCaja"><div class="mhAsa"></div>' +
+                     '<div class="mhTit"></div><div class="mhLista"></div></div>';
+    document.body.appendChild(hoja);
+    hoja.querySelector('.mhFondo').onclick = cerrarHoja;
+  }
+  hoja.querySelector('.mhTit').textContent = (tipo === 'dash') ? '📊 Consultar' : '📝 Registrar';
+  var lista = hoja.querySelector('.mhLista');
+  lista.innerHTML = '';
+  g[2].forEach(function(card){
+    var et = card.querySelector('.tt') || card.querySelector('.mt');
+    var nom = et ? et.textContent : card.dataset.url;
+    var it = document.createElement('button');
+    it.type = 'button';
+    it.className = 'mhItem' + (card.dataset.url === _movUrl ? ' on' : '');
+    it.innerHTML = '<span class="ic">' + iconoHerr(nom, tipo) + '</span><span>' + nom + '</span>' +
+                   (card.dataset.url === _movUrl ? '<span class="aqui">abierta</span>' : '');
+    it.onclick = function(){ cerrarHoja(); currentType = tipo; openEmbed(card); };
+    lista.appendChild(it);
+  });
+  hoja.classList.add('ver');
+}
+function cerrarHoja(){ var h = document.getElementById('movHoja'); if(h) h.classList.remove('ver'); }
+
 function openEmbed(cardEl){
   var url = cardEl.dataset.url;
   var et = cardEl.querySelector('.tt') || cardEl.querySelector('.mt');
@@ -1999,7 +2153,7 @@ function openEmbed(cardEl){
       var sibTitle = et ? et.textContent : sib.dataset.url;
       var item = document.createElement('div');
       item.className = 'sbItem' + (sib.dataset.url === url ? ' active' : '');
-      item.innerHTML = '<span class="sbIcon">' + (g[0] === 'dash' ? '📊' : '📝') + '</span><span>' + sibTitle + '</span>';
+      item.innerHTML = '<span class="sbIcon">' + iconoHerr(sibTitle, g[0]) + '</span><span>' + sibTitle + '</span>';
       item.title = sibTitle;
       item.addEventListener('click', function(){
         currentType = g[0];
@@ -2010,6 +2164,7 @@ function openEmbed(cardEl){
   });
 
   if(conContenido.length > 1) verTipo(tipoAbierto);
+  pintarMovBar(conContenido, url, tipoAbierto);
 
   var backLink = document.createElement('div');
   backLink.className = 'sbItem sbArea sbVolver';
@@ -2139,6 +2294,28 @@ function switchDeArea(area, type){
                      function(t){ goToTools(area, t); });
 }
 
+/* Ícono según lo que hace la herramienta (por su nombre). Igual en todas las áreas: una
+   herramienta de fotos lleva 📷 sea de Calidad o de Desarrollo. Primero los temas, al final
+   los verbos genéricos; si nada coincide, 📊 o 📝 según el tipo. */
+var ICONOS_HERR = [
+  [/usuario/, '👥'], [/control de datos/, '🧮'], [/contramuestra/, '🧺'], [/catalogo/, '🗂️'], [/foto|escaneo/, '📷'], [/arte|avio/, '🏷️'],
+  [/ficha/, '📐'], [/medida|medir/, '📏'], [/tono/, '🎨'],
+  [/defecto/, '🔎'], [/rechazo/, '⛔'], [/segunda/, '♻️'], [/auditor/, '🔍'], [/avance/, '📶'],
+  [/eficiencia|incentivo/, '⏱️'], [/potencial/, '🏭'], [/movilidad|entrega/, '🚚'],
+  [/despacho/, '🚢'], [/partida/, '🧵'], [/torre de control/, '🗼'], [/flujo/, '🔄'],
+  [/tintoreria/, '🧪'], [/programa/, '🗓️'], [/wip|muestra/, '👕'], [/tela/, '🧶'],
+  [/venta|tienda/, '🛍️'], [/mejora/, '💡'], [/limpieza/, '🧹'],
+  [/personal/, '👤'], [/\bops\b|base/, '🗃️'], [/tablero/, '📋'],
+  [/panel/, '🎛️'], [/solicitud/, '📨'], [/encajado/, '📦'], [/status|estatus/, '✏️'],
+  [/reporte/, '📄'], [/digitacion/, '⌨️'], [/subir|cargar|carga/, '📤'],
+  [/registro|ingreso/, '✍️'], [/resultado/, '📈']
+];
+function iconoHerr(nombre, tipo){
+  var t = String(nombre || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  for(var i = 0; i < ICONOS_HERR.length; i++) if(ICONOS_HERR[i][0].test(t)) return ICONOS_HERR[i][1];
+  return tipo === 'dash' ? '📊' : '📝';
+}
+
 /* Interruptor Registrar / Consultar en la columna izquierda, entre Volver y el panel.
    tipos: los que hay; activo: el marcado; alElegir(tipo). Si hay uno solo, no se pone. */
 function ponerSwitchLateral(layout, tipos, activo, alElegir){
@@ -2162,39 +2339,91 @@ function ponerSwitchLateral(layout, tipos, activo, alElegir){
     sw.appendChild(b);
   });
   var aside = layout.querySelector('.areaSidebar');
-  layout.insertBefore(sw, aside || null);
+  if(aside) aside.parentNode.insertBefore(sw, aside);
+  else layout.appendChild(sw);
 }
 
 /* Botón para encoger el panel a solo íconos y volver a abrirlo. La elección se guarda,
    así que se mantiene al cambiar de área o de herramienta. */
-var CLAVE_PANEL = 'lives_panel_chico';
+var CLAVE_PANEL = 'lives_panel_chico';        /* versión anterior: '1' = cerrado */
+var CLAVE_MODO  = 'lives_panel_modo';         /* 'abierto' | 'cerrado' | 'hover' */
 
-function panelChico(){
-  try{ return localStorage.getItem(CLAVE_PANEL) === '1'; }catch(e){ return false; }
+/* Envuelve la columna izquierda de cada pantalla (Volver + interruptor + panel) en una sola
+   caja, para que en modo "al pasar el mouse" se abra entera por encima de la herramienta. */
+(function envolverColumnas(){
+  document.querySelectorAll('.toolsLayout').forEach(function(L){
+    if(L.querySelector('.leftCol')) return;
+    var col = document.createElement('div'); col.className = 'leftCol';
+    var inn = document.createElement('div'); inn.className = 'leftColIn';
+    col.appendChild(inn);
+    var cont = L.querySelector('.toolsContent');
+    [].slice.call(L.children).forEach(function(ch){
+      if(ch !== cont) inn.appendChild(ch);
+    });
+    L.insertBefore(col, cont || null);
+  });
+})();
+
+function modoPanel(){
+  try{
+    var m = localStorage.getItem(CLAVE_MODO);
+    if(m === 'abierto' || m === 'cerrado' || m === 'hover') return m;
+    if(localStorage.getItem(CLAVE_PANEL) === '1') return 'cerrado';
+  }catch(e){}
+  return 'hover';
 }
+function panelChico(){ return modoPanel() === 'cerrado'; }
 
 function aplicarPanel(){
-  var chico = panelChico();
-  document.body.classList.toggle('panelChico', chico);
-  document.querySelectorAll('.sbToggle').forEach(function(b){
-    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
-                  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-                  '<rect x="3" y="4" width="18" height="16" rx="2.5"/><line x1="9" y1="4" x2="9" y2="20"/></svg>';
-    b.title = chico ? 'Mostrar el panel' : 'Ocultar el panel';
-    b.setAttribute('aria-label', b.title);
+  var m = modoPanel();
+  document.body.classList.toggle('panelChico', m === 'cerrado');
+  document.body.classList.toggle('sbHover', m === 'hover');
+  document.querySelectorAll('.sbModoMenu button').forEach(function(b){
+    b.classList.toggle('on', b.dataset.modo === m);
   });
 }
 
-function ponerToggle(sidebar){
-  if(sidebar.querySelector('.sbToggle')) return;
-  var b = document.createElement('button');
-  b.className = 'sbToggle';
-  b.type = 'button';
-  b.addEventListener('click', function(){
-    try{ localStorage.setItem(CLAVE_PANEL, panelChico() ? '0' : '1'); }catch(e){}
-    aplicarPanel();
+function cerrarMenusModo(){
+  document.querySelectorAll('.sbModo.abierto').forEach(function(x){
+    x.classList.remove('abierto');
+    var col = x.closest('.leftCol'); if(col) col.classList.remove('fijo');
   });
-  sidebar.insertBefore(b, sidebar.firstChild);
+}
+document.addEventListener('click', function(e){ if(!e.target.closest('.sbModo')) cerrarMenusModo(); });
+
+/* Control de modo al pie del panel, como en Supabase */
+function ponerToggle(sidebar){
+  if(sidebar.querySelector('.sbModo')) return;
+  var w = document.createElement('div');
+  w.className = 'sbModo';
+  w.innerHTML =
+    '<button type="button" class="sbModoBtn" title="Panel lateral" aria-label="Panel lateral">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" ' +
+      'stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/>' +
+      '<line x1="9" y1="4" x2="9" y2="20"/></svg></button>' +
+    '<div class="sbModoMenu" role="menu"><div class="mt">Panel lateral</div>' +
+      '<button type="button" data-modo="abierto"><span class="pt"></span>Abierto</button>' +
+      '<button type="button" data-modo="cerrado"><span class="pt"></span>Cerrado</button>' +
+      '<button type="button" data-modo="hover"><span class="pt"></span>Abrir al pasar el mouse</button>' +
+    '</div>';
+  w.querySelector('.sbModoBtn').addEventListener('click', function(e){
+    e.stopPropagation();
+    var abrir = !w.classList.contains('abierto');
+    cerrarMenusModo();
+    if(abrir){
+      w.classList.add('abierto');
+      var col = w.closest('.leftCol'); if(col) col.classList.add('fijo');
+    }
+  });
+  [].forEach.call(w.querySelectorAll('.sbModoMenu button'), function(b){
+    b.addEventListener('click', function(e){
+      e.stopPropagation();
+      try{ localStorage.setItem(CLAVE_MODO, b.dataset.modo); }catch(err){}
+      cerrarMenusModo();
+      aplicarPanel();
+    });
+  });
+  sidebar.appendChild(w);
 }
 
 /* Crea un encabezado que pliega y despliega su bloque. Recuerda la elección por grupo. */
@@ -3188,7 +3417,7 @@ function pintarPanelMias(){
       var item = document.createElement('div');
       item.className = 'sbItem';
       item.title = nombre;
-      item.innerHTML = '<span class="sbIcon">' + (g[0] === 'dash' ? '📊' : '📝') +
+      item.innerHTML = '<span class="sbIcon">' + iconoHerr(nombre, g[0]) +
                        '</span><span>' + nombre + '</span>';
       item.addEventListener('click', function(){ openEmbed(card); });
       sb.appendChild(item);
