@@ -4685,6 +4685,77 @@ function cargarKpiAcabados(){
 })();
 </script>
 
+<!-- ===== lives-mudanza v2 · 2026-10-07 · aviso obligatorio: el portal se mudó al portal nuevo de LIVES (app.lives.com.pe).
+     Sale a todos al abrir este portal, tapa toda la pantalla y no se puede cerrar: el único botón lleva al portal nuevo.
+     Excepción: Christian (ctalepcio) y Rodrigo (rcamogliano), si ya tienen su sesión guardada en este equipo, siguen
+     usando este portal para pruebas; en un equipo nuevo, Christian entra con .../lives-portal/?pruebas Las herramientas abiertas por link directo (choferes, solicitud de movilidad, etc.)
+     no se tocan: este bloque vive solo en la página del portal.
+     Quién da el usuario: Calidad Manufactura → Luz Rayme; las demás áreas → Christian Talepcio. Si el equipo tiene guardada
+     la sesión del portal se muestra solo el contacto de su área; si no, se muestran los dos.
+     Para quitar el aviso: borrar este bloque completo. ===== -->
+<style id="lsMudCss">
+#lsMud{position:fixed;inset:0;z-index:2147483600;background:rgba(14,59,54,.92);display:flex;align-items:center;justify-content:center;
+  padding:16px;font-family:Calibri,Arial,sans-serif}
+#lsMud .caja{background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:520px;width:100%;overflow:hidden;border-top:4px solid #10B981}
+#lsMud .cab{background:#0E3B36;padding:14px 20px;display:flex;align-items:center;gap:12px}
+#lsMud .cab img{height:28px}
+#lsMud .cab b{color:#fff;font-size:17px}
+#lsMud .cue{padding:20px 22px 22px;color:#1a1a1a}
+#lsMud h2{margin:0 0 10px;font-size:21px;color:#0E3B36}
+#lsMud p{margin:0 0 12px;font-size:15.5px;line-height:1.5}
+#lsMud ul{margin:0 0 18px;padding-left:20px;font-size:15.5px;line-height:1.5}
+#lsMud li{margin-bottom:8px}
+#lsMud a.ir{display:block;text-align:center;background:#0F7A5A;color:#fff;text-decoration:none;font-weight:700;font-size:17px;
+  border-radius:10px;padding:14px 18px;min-height:48px}
+#lsMud a.ir:hover{background:#0B6349}
+#lsMud .dir{text-align:center;color:#5F726C;font-size:13px;margin-top:10px}
+</style>
+<script id="lsMudJs">(function(){try{
+  var DESTINO = 'https://app.lives.com.pe';
+  var EXENTOS = ['ctalepcio','rcamogliano'];
+  /* Calidad Manufactura (según cargo en el portal, 07/10/2026): piden su usuario a Luz Rayme. */
+  var CALIDAD_MANUFACTURA = ['agarcilazo','amado','anavarrete','aruiz','asosa','avargas','bmontalvan','brimache','cdavila','cullilen','ecangalaya','ediaz','eflores','ehuamani','epumacayo','fespinoza','gcubillas','gpalomino','gucanan','jcampos','jchavarria','jcorrales','jpariona','lchavez','lramon','mastudillo','mbellodas','mcabanillas','mchumpitazi','mhiginio','myeren','nobregon','rloyola','rsantiago','sormeno','svega','vsalas','ypelaez','yquispe','zfarro'];
+  function usuarioGuardado(){
+    var s = null;
+    try{ s = localStorage.getItem('lives_portal_sesion') || sessionStorage.getItem('lives_portal_sesion'); }catch(e){}
+    try{ var j = JSON.parse(s || 'null'); return j && j.usuario ? String(j.usuario).toLowerCase() : ''; }catch(e){ return ''; }
+  }
+  if (EXENTOS.indexOf(usuarioGuardado()) !== -1) return;
+  if (/[?&]pruebas/.test(location.search)) return;   /* acceso de Christian para pruebas en un equipo nuevo */
+  function contacto(){
+    var u = usuarioGuardado();
+    if (u && CALIDAD_MANUFACTURA.indexOf(u) !== -1) return '<li>Si no tienes usuario, pídeselo a <b>Luz Rayme</b>.</li>';
+    if (u) return '<li>Si no tienes usuario, pídeselo a <b>Christian Talepcio</b>.</li>';
+    return '<li>Si no tienes usuario: <b>Calidad Manufactura</b>, pídeselo a <b>Luz Rayme</b>; las demás áreas, a <b>Christian Talepcio</b>.</li>';
+  }
+  function mostrar(){
+    if (document.getElementById('lsMud')) return;
+    var logo = document.querySelector('img[alt*="LIVES" i]');
+    var d = document.createElement('div');
+    d.id = 'lsMud'; d.setAttribute('role','alertdialog'); d.setAttribute('aria-modal','true'); d.setAttribute('aria-labelledby','lsMudT');
+    d.innerHTML =
+      '<div class="caja"><div class="cab">' + (logo && logo.src ? '<img alt="LIVES" src="' + logo.src + '">' : '<b>LIVES</b>') + '</div>' +
+      '<div class="cue"><h2 id="lsMudT">El portal LIVES se mudó</h2>' +
+      '<p>Desde ahora todas las herramientas se usan en el <b>portal nuevo de LIVES</b>.</p>' +
+      '<ul><li>Si tienes usuario del <b>sistema de gestión ERP</b>, entra con ese mismo usuario y contraseña.</li>' +
+      contacto() + '</ul>' +
+      '<a class="ir" href="' + DESTINO + '" target="_top" rel="noopener">Ir al portal nuevo</a>' +
+      '<div class="dir">app.lives.com.pe</div></div></div>';
+    document.body.appendChild(d);
+    document.documentElement.style.overflow = 'hidden';
+    var a = d.querySelector('a.ir'); if (a) a.focus();
+  }
+  /* No se puede cerrar: Escape no hace nada y el foco no sale del aviso. */
+  document.addEventListener('keydown', function(e){
+    if (!document.getElementById('lsMud')) return;
+    if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); }
+    if (e.key === 'Tab'){ e.preventDefault(); var a = document.querySelector('#lsMud a.ir'); if (a) a.focus(); }
+  }, true);
+  /* Si algún código del portal lo quita, vuelve a aparecer. */
+  if (document.body) mostrar(); else document.addEventListener('DOMContentLoaded', mostrar);
+  setInterval(mostrar, 1500);
+}catch(e){}})();</script>
+<!-- ===== fin lives-mudanza v2 ===== -->
 <!-- ===== lives-actualizar v1 · 2026-10-06 · aviso de versión nueva (común a todas las herramientas).
      Revisa cada 3 minutos (y al volver a la pestaña) si el archivo publicado cambió. Si cambió,
      muestra "Hay una versión nueva · Actualizar". Nunca recarga sola: la persona decide, así no
