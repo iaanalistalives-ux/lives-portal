@@ -1016,5 +1016,58 @@ window.addEventListener('beforeunload', function(e){ if(hayCambios()){ e.prevent
   }).catch(function(e){ aviso('error', mensajeError(e)); });
 })();
 </script>
+
+<!-- ===== lives-actualizar v1 · 2026-10-06 · aviso de versión nueva (común a todas las herramientas).
+     Revisa cada 3 minutos (y al volver a la pestaña) si el archivo publicado cambió. Si cambió,
+     muestra "Hay una versión nueva · Actualizar". Nunca recarga sola: la persona decide, así no
+     pierde lo que está llenando. Solo pide el encabezado del archivo (HEAD), no lo descarga. ===== -->
+<style id="lsActCss">
+#lsAct{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:2147483000;display:none;
+  align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 32px);
+  background:#0E3B36;color:#fff;border:2px solid #10B981;border-radius:12px;padding:10px 14px;
+  box-shadow:0 8px 24px rgba(14,59,54,.30);font-family:Calibri,Arial,sans-serif;font-size:14px;line-height:1.35}
+#lsAct b{font-weight:700}
+#lsAct button{font-family:inherit;font-size:14px;font-weight:700;border-radius:8px;padding:8px 14px;cursor:pointer;min-height:38px}
+#lsActSi{background:#10B981;color:#0E3B36;border:none}
+#lsActNo{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.55)}
+@media print{#lsAct{display:none!important}}
+</style>
+<script id="lsActJs">(function(){
+  'use strict';
+  if (window.__lsAct) return; window.__lsAct = true;
+  if (!/^https?:$/.test(location.protocol)) return;
+  var url = location.origin + location.pathname, base = null, hasta = 0, mostrado = false;
+  function firma(){
+    return fetch(url, { method: 'HEAD', cache: 'no-store' }).then(function(r){
+      if (!r.ok) return null;
+      return r.headers.get('etag') || r.headers.get('last-modified') || null;
+    }, function(){ return null; });
+  }
+  function aviso(){
+    if (mostrado || Date.now() < hasta) return;
+    var d = document.getElementById('lsAct');
+    if (!d){
+      d = document.createElement('div'); d.id = 'lsAct'; d.setAttribute('role', 'status');
+      d.innerHTML = '<span><b>Hay una versión nueva de esta herramienta.</b> Guarda lo que estés haciendo y toca Actualizar.</span>' +
+                    '<button id="lsActSi" type="button">Actualizar</button><button id="lsActNo" type="button">Después</button>';
+      document.body.appendChild(d);
+      document.getElementById('lsActSi').onclick = function(){ location.reload(); };
+      document.getElementById('lsActNo').onclick = function(){ d.style.display = 'none'; mostrado = false; hasta = Date.now() + 10 * 60000; };
+    }
+    d.style.display = 'flex'; mostrado = true;
+  }
+  function revisar(){
+    if (document.hidden) return;
+    firma().then(function(f){
+      if (!f) return;
+      if (base === null){ base = f; return; }
+      if (f !== base) aviso();
+    });
+  }
+  revisar();
+  setInterval(revisar, 3 * 60000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) revisar(); });
+})();</script>
+<!-- ===== fin lives-actualizar v1 ===== -->
 </body>
 </html>
