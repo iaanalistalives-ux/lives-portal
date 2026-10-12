@@ -3592,6 +3592,9 @@ function irAlInicio(){
 }
 
 function entrarAlPortal(){
+  /* 12/10/2026: portal cerrado para todos. Nunca se abren las herramientas aquí;
+     solo queda el aviso para ir al portal nuevo (app.lives.com.pe). */
+  if (window.LS_PORTAL_CERRADO !== false) return;
   var lista = aplicarPermisos();
   /* Los indicadores son un extra: si alguno falla, la persona igual debe poder entrar */
   try{ iniciarKpis(); }catch(e){ console.warn('Indicadores de Inicio:', e); }
@@ -4685,10 +4688,11 @@ function cargarKpiAcabados(){
 })();
 </script>
 
-<!-- ===== lives-mudanza v2 · 2026-10-07 · aviso obligatorio: el portal se mudó al portal nuevo de LIVES (app.lives.com.pe).
+<!-- ===== lives-mudanza v3 · 2026-10-12 · aviso obligatorio: el portal se mudó al portal nuevo de LIVES (app.lives.com.pe).
      Sale a todos al abrir este portal, tapa toda la pantalla y no se puede cerrar: el único botón lleva al portal nuevo.
-     Excepción: Christian (ctalepcio) y Rodrigo (rcamogliano), si ya tienen su sesión guardada en este equipo, siguen
-     usando este portal para pruebas; en un equipo nuevo, Christian entra con .../lives-portal/?pruebas Las herramientas abiertas por link directo (choferes, solicitud de movilidad, etc.)
+     Desde el 12/10/2026 (v3) no hay excepciones: ni Christian ni Rodrigo ni ?pruebas. El portal ya no abre
+     herramientas aunque haya sesión guardada, y la base rechaza toda entrada con clave (mi_sesion).
+     Las herramientas abiertas por link directo (choferes, solicitud de movilidad, etc.)
      no se tocan: este bloque vive solo en la página del portal.
      Quién da el usuario: Calidad Manufactura → Luz Rayme; las demás áreas → Christian Talepcio. Si el equipo tiene guardada
      la sesión del portal se muestra solo el contacto de su área; si no, se muestran los dos.
@@ -4712,7 +4716,6 @@ function cargarKpiAcabados(){
 </style>
 <script id="lsMudJs">(function(){try{
   var DESTINO = 'https://app.lives.com.pe';
-  var EXENTOS = ['ctalepcio','rcamogliano'];
   /* Calidad Manufactura (según cargo en el portal, 07/10/2026): piden su usuario a Luz Rayme. */
   var CALIDAD_MANUFACTURA = ['agarcilazo','amado','anavarrete','aruiz','asosa','avargas','bmontalvan','brimache','cdavila','cullilen','ecangalaya','ediaz','eflores','ehuamani','epumacayo','fespinoza','gcubillas','gpalomino','gucanan','jcampos','jchavarria','jcorrales','jpariona','lchavez','lramon','mastudillo','mbellodas','mcabanillas','mchumpitazi','mhiginio','myeren','nobregon','rloyola','rsantiago','sormeno','svega','vsalas','ypelaez','yquispe','zfarro'];
   function usuarioGuardado(){
@@ -4720,8 +4723,6 @@ function cargarKpiAcabados(){
     try{ s = localStorage.getItem('lives_portal_sesion') || sessionStorage.getItem('lives_portal_sesion'); }catch(e){}
     try{ var j = JSON.parse(s || 'null'); return j && j.usuario ? String(j.usuario).toLowerCase() : ''; }catch(e){ return ''; }
   }
-  if (EXENTOS.indexOf(usuarioGuardado()) !== -1) return;
-  if (/[?&]pruebas/.test(location.search)) return;   /* acceso de Christian para pruebas en un equipo nuevo */
   function contacto(){
     var u = usuarioGuardado();
     if (u && CALIDAD_MANUFACTURA.indexOf(u) !== -1) return '<li>Si no tienes usuario, pídeselo a <b>Luz Rayme</b>.</li>';
@@ -4755,7 +4756,7 @@ function cargarKpiAcabados(){
   if (document.body) mostrar(); else document.addEventListener('DOMContentLoaded', mostrar);
   setInterval(mostrar, 1500);
 }catch(e){}})();</script>
-<!-- ===== fin lives-mudanza v2 ===== -->
+<!-- ===== fin lives-mudanza v3 ===== -->
 <!-- ===== lives-actualizar v1 · 2026-10-06 · aviso de versión nueva (común a todas las herramientas).
      Revisa cada 3 minutos (y al volver a la pestaña) si el archivo publicado cambió. Si cambió,
      muestra "Hay una versión nueva · Actualizar". Nunca recarga sola: la persona decide, así no
