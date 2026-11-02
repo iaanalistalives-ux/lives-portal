@@ -4806,7 +4806,7 @@ function cargarKpiAcabados(){
   ['pointerdown','keydown','input','wheel','touchstart'].forEach(function(ev){ document.addEventListener(ev, function(e){ if (e.isTrusted && !(e.target && e.target.closest && e.target.closest('#lsAct'))) ultimoUso = Date.now(); }, true); });
   function ocupado(){
     if (Date.now() - ultimoUso < 3 * 60000) return true;
-    for (var i = 0; i < tocados.length; i++){ var el = tocados[i]; try { if (!el.isConnected) continue; var v = el.isContentEditable ? el.textContent : valorDe(el); if (v !== el.__lsIni && String(v).trim() !== '') return true; } catch(x){} }
+    for (var i = 0; i < tocados.length; i++){ var el = tocados[i]; try { if (!el.isConnected) continue; if (el.closest && el.closest('[data-ls-fijo]')) continue; var v = el.isContentEditable ? el.textContent : valorDe(el); if (v !== el.__lsIni && String(v).trim() !== '') return true; } catch(x){} }
     try { if (typeof window.lsTrabajoPendiente === 'function' && window.lsTrabajoPendiente()) return true; } catch(x){}
     try { if (Function('return typeof CART!=="undefined"&&Array.isArray(CART)&&CART.length>0')()) return true; } catch(x){}
     return false;
@@ -4879,7 +4879,15 @@ function cargarKpiAcabados(){
     if (document.hidden || pendiente) return;
     firma().then(function(f){
       if (!f) return;
-      if (base === null){ base = f; return; }
+      if (base === null){
+        /* v2.3: la base es la copia con la que se abrió esta pantalla (la guardada por el navegador), no la última publicada.
+           v2.4 (02/11/2026): solo si esa copia es reciente (<11 min, lo que dura la caché de GitHub). Una copia más vieja nunca fue la que se mostró (el portal de Sistemas abre la pantalla sin usar la caché) y hacía salir el aviso en cada apertura. */
+        fetch(location.href, { cache: 'force-cache' }).then(function(r){ var dt = Date.parse(r.headers.get('date') || ''); return (r.ok && dt && Date.now() - dt < 11 * 60000) ? r.text() : null; }).then(function(t){ return t === null ? f : huella(t); }, function(){ return f; }).then(function(b){
+          base = b;
+          if (b !== f){ _cand = f; setTimeout(function(){ _et = null; revisar(); }, 45000); }
+        });
+        return;
+      }
       if (f === base){ _cand = null; return; }
       if (_cand !== f){ _cand = f; setTimeout(function(){ _et = null; revisar(); }, 45000); return; }   /* se confirma con una segunda lectura */
       pendiente = true; aviso();
