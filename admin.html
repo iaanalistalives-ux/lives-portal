@@ -764,7 +764,9 @@ input[type=search]{flex:1;min-width:180px;color:#333;}
     rpc('admin_registra_cambiar', { p_usuario:u, p_clave:c, p_activo:on }).then(function(r){
       if (!r || !r.ok) throw new Error((r && r.error) || 'No se guardó.');
       var p = D.personas.filter(function(x){ return x.usuario === u; })[0];
-      if (p){ p.si = p.si.filter(function(k){ return k !== c; }); if (r.estado === 'si') p.si.push(c); }
+      /* La base devuelve la lista completa de la persona: en Encogimiento hay un solo rol por persona,
+         así que al dar uno se apaga el anterior. */
+      if (p){ if (Array.isArray(r.si)) p.si = r.si; else { p.si = p.si.filter(function(k){ return k !== c; }); if (r.estado === 'si') p.si.push(c); } }
       toast((r.estado === 'si' ? 'Ahora registra en ' : 'Ya no registra en ') + HERR[c]);
       pintar();
     }).catch(function(e){
