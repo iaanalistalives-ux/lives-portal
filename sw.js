@@ -15,7 +15,7 @@
    VERSION de abajo (v2 -> v3) y vuelve a subir.
    ============================================================ */
 
-const VERSION    = 'lives-portal-v4';
+const VERSION    = 'lives-portal-v5';
 const CACHE_HTML = VERSION + '-html';
 const CACHE_EST  = VERSION + '-estaticos';
 
