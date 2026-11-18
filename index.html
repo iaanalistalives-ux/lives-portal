@@ -3594,7 +3594,9 @@ function irAlInicio(){
 function entrarAlPortal(){
   /* 12/10/2026: portal cerrado para todos. Nunca se abren las herramientas aquí;
      solo queda el aviso para ir al portal nuevo (app.lives.com.pe). */
-  if (window.LS_PORTAL_CERRADO !== false) return;
+  /* 18/11/2026: única excepción, Christian (ctalepcio). La base (mi_sesion) solo le acepta la clave a él. */
+  if (window.LS_PORTAL_CERRADO !== false &&
+      !(SESION && String(SESION.usuario || '').toLowerCase() === 'ctalepcio')) return;
   var lista = aplicarPermisos();
   /* Los indicadores son un extra: si alguno falla, la persona igual debe poder entrar */
   try{ iniciarKpis(); }catch(e){ console.warn('Indicadores de Inicio:', e); }
@@ -4690,8 +4692,8 @@ function cargarKpiAcabados(){
 
 <!-- ===== lives-mudanza v3 · 2026-10-12 · aviso obligatorio: el portal se mudó al portal nuevo de LIVES (app.lives.com.pe).
      Sale a todos al abrir este portal, tapa toda la pantalla y no se puede cerrar: el único botón lleva al portal nuevo.
-     Desde el 12/10/2026 (v3) no hay excepciones: ni Christian ni Rodrigo ni ?pruebas. El portal ya no abre
-     herramientas aunque haya sesión guardada, y la base rechaza toda entrada con clave (mi_sesion).
+     Desde el 12/10/2026 (v3) el portal no abre herramientas aunque haya sesión guardada, y la base rechaza
+     toda entrada con clave (mi_sesion). Desde el 18/11/2026 hay una sola excepción: Christian (ctalepcio).
      Las herramientas abiertas por link directo (choferes, solicitud de movilidad, etc.)
      no se tocan: este bloque vive solo en la página del portal.
      Quién da el usuario: Calidad Manufactura → Luz Rayme; las demás áreas → Christian Talepcio. Si el equipo tiene guardada
@@ -4723,6 +4725,10 @@ function cargarKpiAcabados(){
     try{ s = localStorage.getItem('lives_portal_sesion') || sessionStorage.getItem('lives_portal_sesion'); }catch(e){}
     try{ var j = JSON.parse(s || 'null'); return j && j.usuario ? String(j.usuario).toLowerCase() : ''; }catch(e){ return ''; }
   }
+  /* 18/11/2026: única excepción, Christian (ctalepcio). Con su sesión guardada en este equipo no sale el aviso;
+     en un equipo nuevo entra con .../lives-portal/?pruebas (muestra el formulario; la base solo le acepta la clave a él). */
+  if (usuarioGuardado() === 'ctalepcio') return;
+  if (/[?&]pruebas/.test(location.search)) return;
   function contacto(){
     var u = usuarioGuardado();
     if (u && CALIDAD_MANUFACTURA.indexOf(u) !== -1) return '<li>Si no tienes usuario, pídeselo a <b>Luz Rayme</b>.</li>';
