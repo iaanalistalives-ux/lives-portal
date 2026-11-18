@@ -4,6 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LIVES Portal</title>
+<!-- ===== lives-mudanza-directo v1 · 2026-11-18 · quien abre el portal antiguo pasa directo al portal nuevo (app.lives.com.pe),
+     sin aviso. Única excepción: Christian (ctalepcio), si este equipo guarda su sesión o el link trae ?pruebas.
+     Si el paso al portal nuevo no ocurre en 4 segundos, la página vuelve a verse y queda el aviso de mudanza de abajo. ===== -->
+<script id="lsMudIrJs">(function(){try{
+  if (/[?&]pruebas/.test(location.search)) { window.LS_MUD_EXENTO = true; return; }
+  function quien(txt, resp){
+    try{ var j = JSON.parse(txt || 'null'); if (resp && j) j = j.d; return j && j.usuario ? String(j.usuario).toLowerCase() : ''; }catch(e){ return ''; }
+  }
+  var k = 'lives_portal_sesion', yo = false;
+  try{ yo = quien(sessionStorage.getItem(k)) === 'ctalepcio'; }catch(e){}
+  try{ yo = yo || quien(localStorage.getItem(k)) === 'ctalepcio' || quien(localStorage.getItem(k + '_resp'), true) === 'ctalepcio'; }catch(e){}
+  if (yo) { window.LS_MUD_EXENTO = true; return; }
+  var raiz = document.documentElement;
+  raiz.style.visibility = 'hidden';
+  setTimeout(function(){ raiz.style.visibility = ''; }, 4000);
+  location.replace('https://app.lives.com.pe');
+}catch(e){}})();</script>
+<!-- ===== fin lives-mudanza-directo v1 ===== -->
 <style>
 :root{
   --petrol:#0E3B36;
@@ -4719,6 +4737,9 @@ function cargarKpiAcabados(){
   }
   /* 18/11/2026: única excepción, Christian (ctalepcio). Con su sesión guardada en este equipo no sale el aviso;
      en un equipo nuevo entra con .../lives-portal/?pruebas (muestra el formulario; la base solo le acepta la clave a él). */
+  /* 18/11/2026: los demás ya no ven este aviso: pasan directo al portal nuevo (bloque lives-mudanza-directo, en el <head>).
+     El aviso queda solo como reserva, por si ese paso no ocurre. */
+  if (window.LS_MUD_EXENTO === true) return;
   if (usuarioGuardado() === 'ctalepcio') return;
   if (/[?&]pruebas/.test(location.search)) return;
   function contacto(){
