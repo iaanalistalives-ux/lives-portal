@@ -5,18 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LIVES Portal</title>
 <!-- ===== lives-mudanza-directo v1 · 2026-11-18 · quien abre el portal antiguo pasa directo al portal nuevo (app.lives.com.pe),
-     sin aviso. Única excepción: Christian (ctalepcio), si este equipo guarda su sesión o el link trae ?usuario=ctalepcio o ?pruebas.
+     sin aviso. Única excepción: Christian (ctalepcio), si este equipo guarda su sesión o el link trae ?pruebas.
      Si el paso al portal nuevo no ocurre en 4 segundos, la página vuelve a verse y queda el aviso de mudanza de abajo. ===== -->
 <script id="lsMudIrJs">(function(){try{
-  /* Link de Christian: ...?usuario=ctalepcio (deja su usuario escrito; la clave la escribe él) o ...?pruebas */
-  if (/[?&]usuario=ctalepcio(&|$)/i.test(location.search)) {
-    window.LS_MUD_EXENTO = true;
-    document.addEventListener('DOMContentLoaded', function(){
-      try{ var c = document.getElementById('accUsuario'); if (c && !c.value) { c.value = 'ctalepcio';
-           var k2 = document.getElementById('accClave'); if (k2) k2.focus(); } }catch(e){}
-    });
-    return;
-  }
   if (/[?&]pruebas/.test(location.search)) { window.LS_MUD_EXENTO = true; return; }
   function quien(txt, resp){
     try{ var j = JSON.parse(txt || 'null'); if (resp && j) j = j.d; return j && j.usuario ? String(j.usuario).toLowerCase() : ''; }catch(e){ return ''; }
